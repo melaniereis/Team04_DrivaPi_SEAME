@@ -16,8 +16,8 @@ verification_method: "Unit Testing, Code Coverage"
 parents:
   - id: SRD-SpeedSensor
 children:
-  - id: LLTC-SpeedUnitTests
-  - id: LLTC-SpeedCoverage
+  - id: LLTC-Speed-UnitTests
+  - id: LLTC-Speed-Coverage
 
 reviewers:
   - name: "Bernardo Esteves"
@@ -27,10 +27,10 @@ reviewed: '2026-01-05 - Approved by Firmware Lead <bernardo.esteves@seame.pt>'
 
 references:
   - type: "file"
-    path: "Threadx/Core/Src/speed_sensor.c"
+    path: "Core/Src/speed_sensor.c"
     description: "Implementation of speed logic"
   - type: "file"
-    path: "Threadx/Core/Test/speed_sensor/test_speed_sensor.c"
+    path: "tests/unit/speed_sensor/test/test_speed_sensor.c"
     description: "Unit Test Source Code"
 
 active: true
