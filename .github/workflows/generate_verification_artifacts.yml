@@ -1,37 +1,19 @@
-name: Generate verification artifacts (tests / coverage / cppcheck)
+name: Generate TSF artifacts (Ceedling + CodeQL)
 
 on:
   workflow_call:
     inputs:
-      src_dirs:
-        type: string
-        description: "Source directories to include for static analysis / coverage"
-        required: false
-        default: "src"
-      junit_output:
-        type: string
-        description: "Path to write JUnit xml"
-        required: false
-        default: "artifacts/verification/tests/LLTC-998-junit.xml"
-      coverage_output:
-        type: string
-        description: "Path to write coverage xml"
-        required: false
-        default: "artifacts/verification/coverage/coverage-SWD-998.xml"
-      cppcheck_output:
-        type: string
-        description: "Path to write cppcheck xml"
-        required: false
-        default: "artifacts/verification/static-analysis/cppcheck-SWD-998.xml"
       build_dir:
         type: string
-        description: "Build directory"
-        required: false
         default: "build"
 
 jobs:
-  generate-artifacts:
+  verification:
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
 
     steps:
       - name: Checkout repository
