@@ -25,7 +25,7 @@ references:
   # - type: "file"
   #   path: tests/unit/test_temperature.cpp  # Test implementation
   # - type: "file"
-  #   path: artifacts/verification/tests/LLTC-042-junit.xml  # Test results
+  #   path: TSF/verification/tests/LLTC-042-junit.xml  # Test results
 
 # Optional: Automated Validation (RECOMMENDED for LLTC - objective scoring)
 evidence:

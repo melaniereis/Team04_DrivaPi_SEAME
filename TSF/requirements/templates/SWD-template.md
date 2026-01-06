@@ -29,7 +29,7 @@ references:
   # - type: "file"
   #   path: src/sensors/temperature.cpp  # Implementation
   # - type: "file"
-  #   path: artifacts/verification/static-analysis/cppcheck-SWD-042.xml  # Analysis
+  #   path: TSF/verification/static-analysis/cppcheck-SWD-042.xml  # Analysis
   # - type: "url"
   #   path: https://github.com/SEAME-pt/Team04_DrivaPi/pull/XX  # PR review
 
