@@ -1,17 +1,21 @@
-#include "app_threadx.h"
 #include "dc_motor.h"
-#include "pca9685.h"
-#include "main.h"
-#include "dc_motor_test.h"
-#include <string.h>
-#include <stdio.h>
 
+/**
+ * @brief
+ *
+ * @param v
+ * @return uint16_t
+ */
 static inline uint16_t clamp_u16(int32_t v) {
     if (v < 0) return 0;
     if (v >= (int32_t)PCA9685_COUNTS) return (uint16_t)(PCA9685_COUNTS - 1u);
     return (uint16_t)v;
 }
 
+/**
+ * @brief
+ *
+ */
 void Motor_Stop(void) {
     PCA9685_SetPWM(&MOTOR_I2C, PCA9685_ADDR_MOTOR, MOTOR_L_A, 0, 0);
     PCA9685_SetPWM(&MOTOR_I2C, PCA9685_ADDR_MOTOR, MOTOR_L_B, 0, 0);
@@ -22,6 +26,11 @@ void Motor_Stop(void) {
     PCA9685_SetPWM(&MOTOR_I2C, PCA9685_ADDR_MOTOR, MOTOR_R_PWM, 0, 0);
 }
 
+/**
+ * @brief
+ *
+ * @param speed
+ */
 void Motor_Forward(double speed) {
     uint16_t max = 4095;
     uint16_t pwm_val = (uint16_t)(speed * max);
@@ -36,6 +45,11 @@ void Motor_Forward(double speed) {
   PCA9685_SetPWM(&MOTOR_I2C, PCA9685_ADDR_MOTOR, MOTOR_R_PWM, 0, pwm_val);
 }
 
+/**
+ * @brief
+ *
+ * @param speed
+ */
 void Motor_Backward(double speed) {
     uint16_t max = 4095;
     uint16_t pwm_val = (uint16_t)(speed * max);
@@ -51,6 +65,11 @@ void Motor_Backward(double speed) {
   PCA9685_SetPWM(&MOTOR_I2C, PCA9685_ADDR_MOTOR, MOTOR_R_PWM, 0, pwm_val);
 }
 
+/**
+ * @brief
+ *
+ * @param speed
+ */
 void Motor_Left(double speed) {
     const uint16_t max = (uint16_t)(PCA9685_COUNTS - 1u);
     uint16_t pwm_val = clamp_u16((int32_t)(speed * (double)max + 0.5));
@@ -64,6 +83,11 @@ void Motor_Left(double speed) {
     PCA9685_SetPWM(&MOTOR_I2C, PCA9685_ADDR_MOTOR, MOTOR_R_PWM, 0, pwm_val);
 }
 
+/**
+ * @brief
+ *
+ * @param speed
+ */
 void Motor_Right(double speed) {
     const uint16_t max = (uint16_t)(PCA9685_COUNTS - 1u);
     uint16_t pwm_val = clamp_u16((int32_t)(speed * (double)max + 0.5));
@@ -77,6 +101,11 @@ void Motor_Right(double speed) {
     PCA9685_SetPWM(&MOTOR_I2C, PCA9685_ADDR_MOTOR, MOTOR_R_PWM, 0, pwm_val);
 }
 
+/**
+ * @brief
+ *
+ * @param value
+ */
 void Motor_SetMotor(double value) {
     const uint16_t max = (uint16_t)(PCA9685_COUNTS - 1u);
     uint16_t pwm_val = clamp_u16((int32_t)(fabs(value) * (double)max + 0.5));
@@ -95,7 +124,8 @@ void Motor_SetMotor(double value) {
         PCA9685_SetPWM(&MOTOR_I2C, PCA9685_ADDR_MOTOR, MOTOR_R_A, 0, 0);
         PCA9685_SetPWM(&MOTOR_I2C, PCA9685_ADDR_MOTOR, MOTOR_R_B, 0, max);
         PCA9685_SetPWM(&MOTOR_I2C, PCA9685_ADDR_MOTOR, MOTOR_R_PWM, 0, pwm_val);
-    } else {
+    }
+	else {
         // Backward
         PCA9685_SetPWM(&MOTOR_I2C, PCA9685_ADDR_MOTOR, MOTOR_L_A, 0, 0);
         PCA9685_SetPWM(&MOTOR_I2C, PCA9685_ADDR_MOTOR, MOTOR_L_B, 0, max);
@@ -107,6 +137,12 @@ void Motor_SetMotor(double value) {
     }
 }
 
+/**
+ * @brief
+ *
+ * @param left_counts
+ * @param right_counts
+ */
 void Motor_SetPWM(int32_t left_counts, int32_t right_counts)
 {
     const uint16_t max = (uint16_t)(PCA9685_COUNTS - 1u);
@@ -146,7 +182,12 @@ void Motor_SetPWM(int32_t left_counts, int32_t right_counts)
     }
 }
 
-
+/**
+ * @brief
+ *
+ * @param initial_input
+ * @return VOID
+ */
 VOID dc_motor(ULONG initial_input)
 {
 	t_can_message 	msg;

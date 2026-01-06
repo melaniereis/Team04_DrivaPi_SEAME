@@ -15,6 +15,12 @@ extern "C" {
 #endif
 
 #include "main.h"
+#include "pca9685.h"
+#include "main.h"
+#include "dc_motor_test.h"
+#include "app_threadx.h"
+#include <string.h>
+#include <stdio.h>
 #include <stdint.h>
 
 

@@ -1,6 +1,20 @@
 #include "app_threadx.h"
+
+/**
+ * @brief
+ *
+ * @param msg
+ * @return int
+ */
 int can_send(t_can_message* msg);
 
+/**
+ * @brief
+ *
+ * @param buffer
+ * @param number
+ * @param precision
+ */
 void FloatToUint8(uint8_t* buffer, float number, int precision) {
     float val = (number < 0) ? -number : number;
     int intPart = (int)val;
@@ -9,6 +23,12 @@ void FloatToUint8(uint8_t* buffer, float number, int precision) {
     sprintf((char*)buffer, "%d.%0*d", intPart, precision, decPart);
 }
 
+/**
+ * @brief
+ *
+ * @param msg
+ * @param speed
+ */
 void make_speed_status_msg(t_can_message *msg, float speed)
 {
     msg->id = 0x100;
@@ -19,6 +39,12 @@ void make_speed_status_msg(t_can_message *msg, float speed)
     can_send(msg);
 }
 
+/**
+ * @brief
+ *
+ * @param msg
+ * @return int
+ */
 int can_send(t_can_message* msg)
 {
     FDCAN_TxHeaderTypeDef TxHeader;
@@ -44,6 +70,12 @@ int can_send(t_can_message* msg)
     return 0;
 }
 
+/**
+ * @brief 
+ *
+ * @param initial_input
+ * @return VOID
+ */
 VOID canTX(ULONG initial_input)
 {
     t_can_message msg;

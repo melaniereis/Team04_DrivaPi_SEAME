@@ -1,5 +1,11 @@
 #include "app_threadx.h"
 
+/**
+ * @brief
+ *
+ * @param msg
+ * @return uint8_t
+ */
 uint8_t can_receive(t_can_message *msg)
 {
     FDCAN_RxHeaderTypeDef rxHeader;
@@ -12,12 +18,18 @@ uint8_t can_receive(t_can_message *msg)
             msg->id = rxHeader.Identifier;
             msg->len = (rxHeader.DataLength <= 8) ? rxHeader.DataLength : 8;
             memcpy(msg->data, rxData, msg->len);
-            return 1; // message received
+            return 1; // Message received
         }
     }
-    return 0;   
+    return 0;
 }
 
+/**
+ * @brief
+ *
+ * @param initial_input
+ * @return VOID
+ */
 VOID canRX(ULONG initial_input)
 {
     t_can_message msg;

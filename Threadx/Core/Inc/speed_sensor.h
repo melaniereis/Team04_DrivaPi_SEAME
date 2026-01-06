@@ -179,7 +179,16 @@ void Error_Handler(void);
 #define WRLS_WKUP_W_GPIO_Port GPIOF
 
 /* USER CODE BEGIN Private defines */
+#include "main.h"
+#include "app_threadx.h"
+#include <stdio.h>
+#define WHEEL_PERIMETER_M   0.212f
+#define PULSES_PER_REV      30.0f
+#define TIMER_PERIOD        65535
 
+#ifndef TX_TIMER_TICKS_PER_SECOND
+#define TX_TIMER_TICKS_PER_SECOND 1000
+#endif
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

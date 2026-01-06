@@ -1,18 +1,20 @@
-/* Test harness for DC motor (test-only)
- */
-
-#include "app_threadx.h"
-#include "main.h"
-#include "dc_motor.h"
 #include "dc_motor_test.h"
-#include <stdio.h>
-#include <string.h>
 
+/**
+ * @brief
+ *
+ * @param s
+ */
 static void UART_Print(const char *s)
 {
     HAL_UART_Transmit(&huart1, (uint8_t*)s, strlen(s), HAL_MAX_DELAY);
 }
 
+/**
+ * @brief
+ *
+ * @param speed
+ */
 void Motor_Test_High(double speed) {
 
     UART_Print("-> FORWARD (1.5s)...\r\n");

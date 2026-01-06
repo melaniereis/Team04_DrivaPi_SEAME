@@ -16,6 +16,8 @@ extern "C" {
 
 #include "main.h"
 #include "pca9685.h"
+#include "app_threadx.h"
+#include "pca9685.h"
 #include <stdint.h>
 
 /* Default servo configuration (override as needed) */

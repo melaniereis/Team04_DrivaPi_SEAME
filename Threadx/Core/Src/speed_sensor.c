@@ -1,31 +1,20 @@
-#include "app_threadx.h"
 #include "speed_sensor.h"
-#include "main.h"
-#include <stdio.h>
-
 
 extern TIM_HandleTypeDef htim1;
 extern UART_HandleTypeDef huart1;
 
-
-#define WHEEL_PERIMETER_M   0.212f
-#define PULSES_PER_REV      30.0f
-#define TIMER_PERIOD        65535
-
-
-#ifndef TX_TIMER_TICKS_PER_SECOND
-#define TX_TIMER_TICKS_PER_SECOND 1000
-#endif
-
+/**
+ * @brief
+ *
+ * @return float
+ */
 float read_speed_sensor(void)
 {
     static ULONG last_time_ticks = 0;
     static uint32_t last_count = 0;
     static uint8_t is_first_run = 1;
 
-
     ULONG current_time_ticks = tx_time_get();
-
 
     uint32_t current_count = htim1.Instance->CNT;
 
@@ -47,18 +36,13 @@ float read_speed_sensor(void)
 
     uint32_t pulses = 0;
     if (current_count >= last_count)
-    {
         pulses = current_count - last_count;
-    }
     else
-    {
         pulses = (TIMER_PERIOD - last_count) + current_count + 1;
-    }
 
 
     last_count = current_count;
     last_time_ticks = current_time_ticks;
-
 
     float rotations = (float)pulses / PULSES_PER_REV;
     float distance_m = rotations * WHEEL_PERIMETER_M;
@@ -67,12 +51,17 @@ float read_speed_sensor(void)
     return speed_mps;
 }
 
+/**
+ * @brief
+ *
+ * @param initial_input
+ * @return VOID
+ */
 VOID speed_sensor(ULONG initial_input)
 {
     char msg[64];
 
     HAL_TIM_Base_Stop(&htim1);
-
 
     __HAL_RCC_TIM1_CLK_ENABLE();
 
@@ -80,7 +69,6 @@ VOID speed_sensor(ULONG initial_input)
 
     while (1)
     {
-
         uint32_t cr1_reg = htim1.Instance->CR1;
         uint32_t cnt_reg = htim1.Instance->CNT;
 
