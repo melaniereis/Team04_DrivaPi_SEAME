@@ -2,7 +2,7 @@ name: TSF Validation (PR)
 
 on:
   workflow_run:
-    workflows: ["Run Tests & Generate TSF Evidence"]
+    workflows: ["Unit Tests & TSF Artifacts"]
 
 jobs:
   tsf-validation:
