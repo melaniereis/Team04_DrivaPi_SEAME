@@ -22,7 +22,7 @@ references:
   - type: "file"
     path: "artifacts/verification/coverage/coverage.xml"
 
-# Optional: Automated Validation (RECOMMENDED for LLTC - objective scoring)
+# Automated Validation
 evidence:
   type: coverage_threshold_validator
   references:
