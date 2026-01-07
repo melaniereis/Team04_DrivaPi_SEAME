@@ -1,10 +1,8 @@
 name: TSF Validation (PR)
 
 on:
-  workflow_run:
-    workflows: ["Unit Tests & TSF Artifacts"]
-    types:
-      - completed
+  push:
+  pull_request:
 
 jobs:
   tsf-validation:
