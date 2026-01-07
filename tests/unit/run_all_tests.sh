@@ -19,12 +19,12 @@ set -u
 set -o pipefail
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+readonly PROJECT_ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 readonly MOTOR_SERVO_DIR="${SCRIPT_DIR}/motor_servo"
 readonly SPEED_SENSOR_DIR="${SCRIPT_DIR}/speed_sensor"
 
 MASTER_COVERAGE_DIR="${COVERAGE_DIR:-${SCRIPT_DIR}/coverage}"
-readonly ARTIFACTS_DIR="${PROJECT_ROOT}/artifacts/verification"
+readonly ARTIFACTS_DIR="${PROJECT_ROOT_DIR}/artifacts/verification"
 
 mkdir -p "${MASTER_COVERAGE_DIR}"
 mkdir -p "${ARTIFACTS_DIR}/tests"
@@ -183,7 +183,7 @@ fi
 if[[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
     log_section "Generating TSF Artifacts"
     
-    cd "${PROJECT_ROOT}"
+    cd "${PROJECT_ROOT_DIR}"
     log_info "Generating Cobertura XML..."
     
     gcovr --root . \
