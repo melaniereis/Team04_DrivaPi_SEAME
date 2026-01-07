@@ -1,14 +1,23 @@
 name: TSF Validation (PR)
 
 on:
-  workflow_run:
-    workflows: ["Unit Tests & TSF Artifacts"]
-    types:
-      - completed
+  pull_request:
+  push:
 
+jobs:
+  unit_tests:
+    outputs:
+      workflow_run_id: ${{ steps.get_run_id.outputs.run_id }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get Workflow Run ID
+        id: get_run_id
+        run: echo "run_id=${{ github.run_id }}" >> $GITHUB_OUTPUT
 jobs:
   tsf-validation:
     runs-on: ubuntu-latest
+    depends-on: unit_tests
     
     permissions:
       contents: write
