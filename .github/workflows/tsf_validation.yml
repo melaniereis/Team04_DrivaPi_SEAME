@@ -3,22 +3,12 @@ name: TSF Validation (PR)
 on:
   pull_request:
   push:
-    branches: [ main, master]
   pull_request_review:
     types: [submitted]
 
 jobs:
-  generate-verification-artifacts:
-    uses: ./.github/workflows/generate_verification_artifacts.yml
-    with:
-      src_dirs: 'src'
-      junit_output: 'artifacts/verification/tests/LLTC-998-junit.xml'
-      coverage_output: 'artifacts/verification/coverage/coverage-SWD-998.xml'
-      cppcheck_output: 'artifacts/verification/static-analysis/cppcheck-SWD-998.xml'
-      build_dir: 'build'
-
   tsf-validation:
-    needs: generate-verification-artifacts
+    needs: unit-tests
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -66,17 +56,6 @@ jobs:
 
       - name: Mark TSF items and links as reviewed
         run: |
-          trudag manage set-link SWD-998 LLTC-998
-          trudag manage set-link SWD-998 LLTC-997
-          trudag manage set-link SWD-998 LLTC-996
-          trudag manage set-link SRD-998 SWD-998
-          trudag manage set-link URD-998 SRD-998
-          trudag manage set-item SWD-998
-          trudag manage set-item LLTC-998
-          trudag manage set-item LLTC-997
-          trudag manage set-item LLTC-996
-          trudag manage set-item SRD-998
-          trudag manage set-item URD-998
 
       - name: Run trudag lint
         id: lint
