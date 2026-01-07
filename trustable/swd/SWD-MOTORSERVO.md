@@ -30,7 +30,7 @@ references:
 #    path: "Threadx/Core/Src/dc_motor.c"
 #    description: "Motor Implementation"
   - type: "file"
-    path: "docs/standards/iso26262/asil-justification-swd-SERVOMOTOR.md"
+    path: "docs/standards/iso26262/asil-justification-swd-MotorServo.md"
     description: "ASIL A Justification"
 
 active: true
