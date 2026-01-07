@@ -1,5 +1,39 @@
 ---
-level: 1.1
-normative: true
----
+id: LLTC-MOTORSERVOCoverage
+header: "Actuator Code Coverage"
+text: |
+  "Combined unit tests must achieve >90% Branch Coverage for `dc_motor.c` and `servo_motor.c` to satisfy ASIL A requirements."
 
+# TSF Type: Evidence/Premise (A Claim, but not a Request)
+
+verification_method: "Code Coverage (LCOV)"
+
+# Links: Connects to the SWD it provides evidence for
+parents:
+  - id: SWD-MOTORSERVO
+
+reviewers:
+  - name: "Miguel Cardoso"
+    email: "miguel.cardoso@seame.pt"
+reviewed: '2026-01-07 - Approved by Miguel Cardoso <miguel.cardoso@seame.pt>'
+
+# Evidence Linking (use 'references:', NOT deprecated 'artifact:')
+references:
+  - type: "file"
+    path: "artifacts/verification/coverage/coverage.xml"
+
+# Optional: Automated Validation (RECOMMENDED for LLTC - objective scoring)
+evidence:
+  type: coverage_threshold_validator
+  references:
+    - type: "file"
+      path: "artifacts/verification/coverage/coverage.xml"
+  configuration:
+    min_line_rate: 90
+
+active: true
+derived: false
+normative: true
+level: 4.0
+---
+This evidence ensures that the test suite actually exercises the critical paths of the actuation logic (including error handling branches).
