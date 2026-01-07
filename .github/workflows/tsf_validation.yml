@@ -1,15 +1,15 @@
 name: TSF Validation (PR)
 
 on:
-  pull_request:
-  push:
-  pull_request_review:
-    types: [submitted]
+  workflow_run:
+    workflows: ["Run Tests & TSF Evidence"]
+    types:
+      - completed
 
 jobs:
   tsf-validation:
-    needs: unit-tests
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     permissions:
       contents: write
       pull-requests: write
