@@ -23,12 +23,12 @@ reviewers:
 reviewed: '2026-01-07 - Approved by Miguel Cardoso'
 
 references:
-  - type: "file"
-    path: "Threadx/Core/Src/servo_motor.c"
-    description: "Servo Implementation"
-  - type: "file"
-    path: "Threadx/Core/Src/dc_motor.c"
-    description: "Motor Implementation"
+#  - type: "file"
+#    path: "Threadx/Core/Src/servo_motor.c"
+#    description: "Servo Implementation"
+#  - type: "file"
+#    path: "Threadx/Core/Src/dc_motor.c"
+#    description: "Motor Implementation"
   - type: "file"
     path: "docs/standards/iso26262/asil-justification-swd-SERVOMOTOR.md"
     description: "ASIL A Justification"
