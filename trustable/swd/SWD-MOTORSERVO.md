@@ -1,5 +1,5 @@
 ---
-id: SWD-SERVOMOTOR
+id: SWD-MOTORSERVO
 header: "Actuator Driver Logic Implementation"
 text: |
   "The 'dc_motor' and 'servo_motor' software components shall implement input validation, range clamping, and safe PWM calculation to prevent invalid hardware states."
@@ -9,12 +9,12 @@ ASIL: "A"
 verification_method: "Unit Testing, Code Coverage, Static Analysis"
 
 parents:
-  - id: SRD-SERVOMOTOR
+  - id: SRD-MOTORSERVO
 
 children:
-  - id: LLTC-SERVOMOTORUnitTests
-  - id: LLTC-SERVOMOTORCoverage
-  - id: LLTC-SERVOMOTORStaticAnalysis
+  - id: LLTC-MOTORSERVOUnitTests
+  - id: LLTC-MOTORSERVOCoverage
+  - id: LLTC-MOTORSERVOStaticAnalysis
 
 reviewers:
   - name: "Miguel Cardoso"
