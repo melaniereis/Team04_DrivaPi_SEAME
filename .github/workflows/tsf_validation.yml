@@ -10,6 +10,7 @@ jobs:
   tsf-validation:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    
     permissions:
       contents: write
       pull-requests: write
@@ -18,10 +19,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Download verification artifacts
-        uses: actions/download-artifact@v7
+      - name: Download Verification Artifacts
+        uses: actions/download-artifact@v4
         with:
           name: verification-artifacts
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           path: artifacts/verification
 
       - name: Set up Python 3.11
@@ -56,7 +59,12 @@ jobs:
 
       - name: Mark TSF items and links as reviewed
         run: |
-        # --- Speed Sensor (to be added) ---
+          # --- Speed Sensor (To be added) ---
+
+          # --- SERVOMOTOR (To be added) ---
+          # 1. Register Items
+
+          # 2. Register Links (Traceability)
 
       - name: Run trudag lint
         id: lint
@@ -115,11 +123,11 @@ jobs:
           retention-days: 30
 
       - name: Comment PR with validation results
-        if: github.event_name == 'pull_request'
         uses: peter-evans/create-or-update-comment@v5
+        if: ${{ github.event.workflow_run.pull_requests[0] }}
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.pull_request.number }}
+          issue-number: ${{ github.event.workflow_run.pull_requests[0].number }}
           body: |
             ## 🔍 TSF Validation Results
 
@@ -130,3 +138,6 @@ jobs:
             | **trudag publish** | ${{ steps.publish.outputs.publish_ok == 'true' && '✅ PASSED' || '❌ FAILED' }} |
 
             ### 📋 Lint Output (first 500 chars)
+            ```
+            ${{ steps.summary.outputs.lint_summary }}
+            ```
