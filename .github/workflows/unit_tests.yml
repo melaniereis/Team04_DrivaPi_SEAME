@@ -89,8 +89,8 @@ jobs:
             let speedSensorCount = 0;
             let testSummary = '';
             
-            if (fs.existsSync('${{ env.BUILD_DIR }}/test_output.log')) {
-              const logContent = fs.readFileSync('${{ env.BUILD_DIR }}/test_output.log', 'utf8');
+            if (fs.existsSync('test_output.log')) {
+              const logContent = fs.readFileSync('test_output.log', 'utf8');
               
               // Extract test counts from [TEST_COUNT] markers
               const motorServoCountMatch = logContent.match(/\[TEST_COUNT\] Motor Servo:\s*(\d+)\s*tests/i);
