@@ -19,12 +19,16 @@ set -u
 set -o pipefail
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 readonly MOTOR_SERVO_DIR="${SCRIPT_DIR}/motor_servo"
 readonly SPEED_SENSOR_DIR="${SCRIPT_DIR}/speed_sensor"
 
 MASTER_COVERAGE_DIR="${COVERAGE_DIR:-${SCRIPT_DIR}/coverage}"
+readonly ARTIFACTS_DIR="${PROJECT_ROOT}/artifacts/verification"
 
 mkdir -p "${MASTER_COVERAGE_DIR}"
+mkdir -p "${ARTIFACTS_DIR}/tests"
+mkdir -p "${ARTIFACTS_DIR}/coverage"
 
 # Colors
 if [[ -t 1 ]]; then
@@ -175,6 +179,36 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
     fi
 fi
 
+# ===== Generate TSF Artifacts =====
+if[[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
+    log_section "Generating TSF Artifacts"
+    
+    cd "${PROJECT_ROOT}"
+    log_info "Generating Cobertura XML..."
+    
+    gcovr --root . \
+          --filter 'src/.*' \
+          --filter 'Threadx/Core/Src/.*' \
+          --exclude '.*test.*' \
+          --exclude '.*mock.*' \
+          --xml-pretty \
+          --output "${ARTIFACTS_DIR}/coverage/coverage.xml" || log_warn "gcovr XML generation failed"
+          
+    if [[ -f "${ARTIFACTS_DIR}/coverage/coverage.xml" ]]; then
+        log_pass "Coverage XML saved: ${ARTIFACTS_DIR}/coverage/coverage.xml"
+    else
+        log_warn "Coverage XML not found"
+    fi
+    JUNIT_SRC="${MOTOR_SERVO_DIR}/build/artifacts/test/report.xml"
+    if [[ -f "${JUNIT_SRC}" ]]; then
+        cp "${JUNIT_SRC}" "${ARTIFACTS_DIR}/tests/junit_results.xml"
+        log_pass "JUnit XML saved: ${ARTIFACTS_DIR}/tests/junit_results.xml"
+    else
+        log_warn "JUnit report not found at ${JUNIT_SRC}"
+    fi
+fi
+
+# ===== Final Summary =====
 echo ""
 log_section "Test Summary"
 echo ""
