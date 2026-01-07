@@ -174,13 +174,13 @@ def coverage_threshold_validator(configuration: Dict) -> Tuple[float, List[Excep
 # ----------------------
 __all__ = [
     "junit_pass_rate_validator",
-    "cppcheck_error_validator",
+    "codeql_sarif_validator",
     "coverage_threshold_validator",
 ]
 
 
 # ----------------------
-# Trudag signature fix (optional)
+# Trudag signature fix
 # ----------------------
 # This block tries to make the function signatures match what Trudag expects.
 # If Trudag isn't available at install time, this block silently does nothing.
