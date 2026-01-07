@@ -1,10 +1,10 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : dc_motor.h
-  * @brief          : DC motor control header
-  ******************************************************************************
-  */
+******************************************************************************
+* @file           : dc_motor.h
+* @brief          : DC motor control header
+******************************************************************************
+*/
 /* USER CODE END Header */
 
 #ifndef __DC_MOTOR_H
@@ -14,15 +14,9 @@
 extern "C" {
 #endif
 
-#include "main.h"
 #include "pca9685.h"
-#include "main.h"
 #include "dc_motor_test.h"
 #include "app_threadx.h"
-#include <string.h>
-#include <stdio.h>
-#include <stdint.h>
-
 
 #define PCA9685_ADDR_MOTOR 0x60
 #define MOTOR_I2C hi2c3

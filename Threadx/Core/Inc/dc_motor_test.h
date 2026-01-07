@@ -6,11 +6,7 @@ extern "C" {
 #endif
 
 #include "app_threadx.h"
-#include "main.h"
 #include "dc_motor.h"
-#include <stdio.h>
-#include <string.h>
-#include <stdint.h>
 
 void Motor_Test_High(double speed);
 

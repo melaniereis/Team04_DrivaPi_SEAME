@@ -1,24 +1,3 @@
-/* USER CODE BEGIN Header */
-/**
-  ******************************************************************************
-  * @file           : speed_sensor.h
-  * @brief          : Header for speed_sensor.c file.
-  *                   This file contains the common defines of the application.
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2025 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
-/* USER CODE END Header */
-
-/* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __SPEED_SENSOR_H
 #define __SPEED_SENSOR_H
 
@@ -26,37 +5,6 @@
 extern "C" {
 #endif
 
-/* Includes ------------------------------------------------------------------*/
-#include "stm32u5xx_hal.h"
-
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
-#include "main.h"
-/* USER CODE END Includes */
-
-/* Exported types ------------------------------------------------------------*/
-/* USER CODE BEGIN ET */
-
-/* USER CODE END ET */
-
-/* Exported constants --------------------------------------------------------*/
-/* USER CODE BEGIN EC */
-
-/* USER CODE END EC */
-
-/* Exported macro ------------------------------------------------------------*/
-/* USER CODE BEGIN EM */
-
-/* USER CODE END EM */
-
-/* Exported functions prototypes ---------------------------------------------*/
-void Error_Handler(void);
-
-/* USER CODE BEGIN EFP */
-
-/* USER CODE END EFP */
-
-/* Private defines -----------------------------------------------------------*/
 #define WRLS_FLOW_Pin GPIO_PIN_15
 #define WRLS_FLOW_GPIO_Port GPIOG
 #define WRLS_UART4_RX_Pin GPIO_PIN_11
@@ -178,10 +126,8 @@ void Error_Handler(void);
 #define WRLS_WKUP_W_Pin GPIO_PIN_15
 #define WRLS_WKUP_W_GPIO_Port GPIOF
 
-/* USER CODE BEGIN Private defines */
-#include "main.h"
 #include "app_threadx.h"
-#include <stdio.h>
+
 #define WHEEL_PERIMETER_M   0.212f
 #define PULSES_PER_REV      30.0f
 #define TIMER_PERIOD        65535
@@ -191,7 +137,6 @@ void Error_Handler(void);
 #endif
 extern TIM_HandleTypeDef htim1;
 extern UART_HandleTypeDef huart1;
-/* USER CODE END Private defines */
 
 #ifdef __cplusplus
 }
