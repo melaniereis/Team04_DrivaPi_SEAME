@@ -1,23 +1,15 @@
 name: TSF Validation (PR)
 
 on:
-  pull_request:
-  push:
+  workflow_run:
+    workflows: ["Unit Tests & TSF Artifacts"]
+    types:
+      - completed
 
-jobs:
-  unit_tests:
-    outputs:
-      workflow_run_id: ${{ steps.get_run_id.outputs.run_id }}
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Get Workflow Run ID
-        id: get_run_id
-        run: echo "run_id=${{ github.run_id }}" >> $GITHUB_OUTPUT
 jobs:
   tsf-validation:
     runs-on: ubuntu-latest
-    depends-on: unit_tests
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     
     permissions:
       contents: write
@@ -40,14 +32,6 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Cache pip
-        uses: actions/cache@v5
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
       - name: Install official TSF tools
         run: |
           python -m pip install --upgrade pip
@@ -67,12 +51,16 @@ jobs:
 
       - name: Mark TSF items and links as reviewed
         run: |
-          # --- Speed Sensor (To be added) ---
+          # --- SPEED SENSOR ---
+          trudag manage set-item SWD-SpeedSensor
+          
+          # Evidence Linking
 
-          # --- SERVOMOTOR (To be added) ---
-          # 1. Register Items
-
-          # 2. Register Links (Traceability)
+          # --- SERVOMOTOR (Actuation) ---
+          
+          # Traceability
+          
+          # Evidence Linking
 
       - name: Run trudag lint
         id: lint
@@ -89,12 +77,11 @@ jobs:
         id: summary
         run: |
           if [ -f artifacts/trudag-lint.txt ]; then
-            echo "lint_summary<<EOF" >> $GITHUB_OUTPUT
-            head -c 500 artifacts/trudag-lint.txt >> $GITHUB_OUTPUT
-            echo "" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
+            # Capture first 10 lines and Base64 encode to prevent multiline errors
+            CONTENT=$(head -n 10 artifacts/trudag-lint.txt)
+            echo "lint_summary=$(echo "$CONTENT" | base64 -w 0)" >> $GITHUB_OUTPUT
           else
-            echo "lint_summary=No lint output generated" >> $GITHUB_OUTPUT
+            echo "lint_summary=$(echo "No output" | base64 -w 0)" >> $GITHUB_OUTPUT
           fi
 
       - name: Calculate trust scores
@@ -145,7 +132,7 @@ jobs:
             | **trudag score** | ${{ steps.scores.outputs.score_ok == 'true' && '✅ PASSED' || '❌ FAILED' }} |
             | **trudag publish** | ${{ steps.publish.outputs.publish_ok == 'true' && '✅ PASSED' || '❌ FAILED' }} |
 
-            ### 📋 Lint Output (first 500 chars)
+            ### 📋 Lint Output (Snippet)
             ```
             ${{ steps.summary.outputs.lint_summary }}
             ```
