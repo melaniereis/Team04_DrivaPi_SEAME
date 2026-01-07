@@ -14,8 +14,8 @@
 extern "C" {
 #endif
 
-#include "main.h"
-#include <stdint.h>
+#include "app_threadx.h"
+#include <stdarg.h>
 
 #define MODE1 0x00
 #define MODE2 0x01

@@ -27,12 +27,8 @@ static inline uint16_t clamp_u16(int32_t v)
  * @param max_pulse_counts
  * @return int
  */
-int Servo_SetAngle(I2C_HandleTypeDef *hi2c,
-				   uint8_t addr7,
-				   uint8_t channel,
-				   uint16_t angle_deg,
-				   uint16_t min_pulse_counts,
-				   uint16_t max_pulse_counts)
+int Servo_SetAngle(I2C_HandleTypeDef *hi2c, uint8_t addr7, uint8_t channel, uint16_t angle_deg, uint16_t min_pulse_counts,
+uint16_t max_pulse_counts)
 {
 	if (angle_deg > 180u)
 		angle_deg = 180u;
@@ -64,17 +60,9 @@ int Servo_SetAngle(I2C_HandleTypeDef *hi2c,
  * @param max_pulse_counts
  * @return int
  */
-int Servo_Sweep(I2C_HandleTypeDef *hi2c,
-				uint8_t addr7,
-				uint8_t channel,
-				uint16_t angle_start_deg,
-				uint16_t angle_end_deg,
-				uint16_t angle_step_deg,
-				uint32_t delay_ms,
-				uint16_t min_pulse_counts,
-				uint16_t max_pulse_counts)
+int Servo_Sweep(I2C_HandleTypeDef *hi2c, uint8_t addr7, uint8_t channel, uint16_t angle_start_deg, uint16_t angle_end_deg,
+uint16_t angle_step_deg, uint32_t delay_ms, uint16_t min_pulse_counts, uint16_t max_pulse_counts)
 {
-
 	double freq = (double)SERVO_DEFAULT_FREQ_HZ;
 	if (PCA9685_SetFrequency(hi2c, addr7, freq) != HAL_OK)
 	{
@@ -123,15 +111,13 @@ VOID servo_motor(ULONG initial_input)
 
 	while (1)
 	{
-		tx_event_flags_get(&event_flags, FLAG_CAN_STEER_CMD,
-						   TX_OR_CLEAR, &actual_flags, TX_NO_WAIT);
+		tx_event_flags_get(&event_flags, FLAG_CAN_STEER_CMD, TX_OR_CLEAR, &actual_flags, TX_NO_WAIT);
 
 		while (tx_queue_receive(&queue_steer_cmd, &msg, TX_NO_WAIT) == TX_SUCCESS)
 		{
 			float angle_f = *((float *)msg.data);
 			uint16_t angle = (uint16_t)angle_f;
-			(void)Servo_SetAngle(&hi2c3, PCA9685_ADDR_SERVO, SERVO_CH,
-								 angle, SERVO_DEFAULT_MIN_PULSE_COUNTS, SERVO_DEFAULT_MAX_PULSE_COUNTS);
+			(void)Servo_SetAngle(&hi2c3, PCA9685_ADDR_SERVO, SERVO_CH, angle, SERVO_DEFAULT_MIN_PULSE_COUNTS, SERVO_DEFAULT_MAX_PULSE_COUNTS);
 		}
 		tx_thread_sleep(50);
 	}

@@ -103,6 +103,7 @@ VOID canRX(ULONG initial_input);
 VOID canTX(ULONG initial_input);
 VOID speed_sensor(ULONG initial_input);
 void thread_init(void);
+int can_send(t_can_message* msg);
 /* USER CODE END EFP */
 
 /* USER CODE BEGIN 1 */
