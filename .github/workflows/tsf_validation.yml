@@ -4,6 +4,12 @@ on:
   pull_request:
   push:
 
+permissions:
+  contents: write
+  pull-requests: write
+  checks: write
+  actions: read
+
 jobs:
   run-tests:
     uses: ./.github/workflows/unit_tests.yml
@@ -12,10 +18,6 @@ jobs:
     needs: run-tests
     runs-on: ubuntu-latest
     
-    permissions:
-      contents: write
-      pull-requests: write
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -59,8 +61,6 @@ jobs:
       - name: Mark TSF items and links as reviewed
         run: |
           # --- SPEED SENSOR ---
-          # trudag manage set-link SWD-998 LLTC-998
-          
           # --- SERVOMOTOR (Actuation) ---
 
       - name: Run trudag lint
