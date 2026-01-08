@@ -81,17 +81,6 @@ jobs:
           path: build/coverage/html
           retention-days: 30
 
-      - name: Commit TSF Evidence to Repo
-        if: success() 
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "chore(verification): update unit test evidence [skip ci]"
-          
-          file_pattern: artifacts/verification/
-          
-          commit_user_name: "GitHub Actions Bot"
-          commit_user_email: "actions@github.com"
-
       - name: Post Test Results
         if: always()
         uses: actions/github-script@v7

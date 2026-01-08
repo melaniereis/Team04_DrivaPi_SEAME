@@ -130,12 +130,3 @@ jobs:
           fi
 
           echo "✅ No high/critical issues"
-
-      - name: Commit CodeQL Results to Repo
-        if: success()
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "chore(verification): update CodeQL SARIF [skip ci]"
-          file_pattern: artifacts/verification/static-analysis/codeql.sarif
-          commit_user_name: "GitHub Actions Bot"
-          commit_user_email: "actions@github.com"
