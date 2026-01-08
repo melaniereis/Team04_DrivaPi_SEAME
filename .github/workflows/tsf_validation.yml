@@ -9,7 +9,7 @@ on:
 jobs:
   tsf-validation:
     runs-on: ubuntu-latest
-    if: ${{ always() }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     
     permissions:
       contents: write
@@ -32,6 +32,14 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Cache pip packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-trustable-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-trustable-
+
       - name: Install official TSF tools
         run: |
           python -m pip install --upgrade pip
@@ -52,22 +60,17 @@ jobs:
       - name: Mark TSF items and links as reviewed
         run: |
           # --- SPEED SENSOR ---
-          trudag manage set-item SWD-SpeedSensor
+          trudag manage set-item SWD-SpeedSensor || true
           
-          # Evidence Linking
-
           # --- SERVOMOTOR (Actuation) ---
-          
-          # Traceability
-          
-          # Evidence Linking
+          trudag manage set-item SWD-ServoMotor || true
 
       - name: Run trudag lint
         id: lint
         continue-on-error: true
         run: |
-          mkdir -p artifacts
-          if trudag manage lint 2>&1 | tee artifacts/trudag-lint.txt; then
+          mkdir -p artifacts/tsf
+          if trudag manage lint 2>&1 | tee artifacts/tsf/trudag-lint.txt; then
             echo "lint_ok=true" >> $GITHUB_OUTPUT
           else
             echo "lint_ok=false" >> $GITHUB_OUTPUT
@@ -76,19 +79,20 @@ jobs:
       - name: Get lint summary
         id: summary
         run: |
-          if [ -f artifacts/trudag-lint.txt ]; then
-            # Capture first 10 lines and Base64 encode to prevent multiline errors
-            CONTENT=$(head -n 10 artifacts/trudag-lint.txt)
-            echo "lint_summary=$(echo "$CONTENT" | base64 -w 0)" >> $GITHUB_OUTPUT
+          if [ -f artifacts/tsf/trudag-lint.txt ]; then
+            echo "lint_summary<<EOF" >> $GITHUB_OUTPUT
+            head -c 500 artifacts/tsf/trudag-lint.txt >> $GITHUB_OUTPUT
+            echo "" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
           else
-            echo "lint_summary=$(echo "No output" | base64 -w 0)" >> $GITHUB_OUTPUT
+            echo "lint_summary=No lint output generated" >> $GITHUB_OUTPUT
           fi
 
       - name: Calculate trust scores
         id: scores
         continue-on-error: true
         run: |
-          if trudag score 2>&1 | tee artifacts/trudag-score.txt; then
+          if trudag score 2>&1 | tee artifacts/tsf/trudag-score.txt; then
             echo "score_ok=true" >> $GITHUB_OUTPUT
           else
             echo "score_ok=false" >> $GITHUB_OUTPUT
@@ -98,10 +102,10 @@ jobs:
         id: publish
         continue-on-error: true
         run: |
-          mkdir -p artifacts/trustable-report
-          if trudag publish --output-dir artifacts/trustable-report 2>&1; then
+          mkdir -p artifacts/tsf/trustable-report
+          if trudag publish --output-dir artifacts/tsf/trustable-report 2>&1; then
             echo "publish_ok=true" >> $GITHUB_OUTPUT
-          elif trudag publish --no-validate --output-dir artifacts/trustable-report 2>&1; then
+          elif trudag publish --no-validate --output-dir artifacts/tsf/trustable-report 2>&1; then
             echo "publish_ok=true" >> $GITHUB_OUTPUT
           else
             echo "publish_ok=false" >> $GITHUB_OUTPUT
@@ -113,13 +117,13 @@ jobs:
         with:
           name: tsf-validation-artifacts
           path: |
-            artifacts/
+            artifacts/tsf/
             .dotstop.dot
           retention-days: 30
 
       - name: Comment PR with validation results
+        if: github.event.workflow_run.pull_requests[0]
         uses: peter-evans/create-or-update-comment@v5
-        if: ${{ github.event.workflow_run.pull_requests[0] }}
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.workflow_run.pull_requests[0].number }}
@@ -132,7 +136,9 @@ jobs:
             | **trudag score** | ${{ steps.scores.outputs.score_ok == 'true' && '✅ PASSED' || '❌ FAILED' }} |
             | **trudag publish** | ${{ steps.publish.outputs.publish_ok == 'true' && '✅ PASSED' || '❌ FAILED' }} |
 
-            ### 📋 Lint Output (Snippet)
+            ### 📋 Lint Output (first 500 chars)
             ```
             ${{ steps.summary.outputs.lint_summary }}
             ```
+
+            **Artifacts**: [TSF Validation Results](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
