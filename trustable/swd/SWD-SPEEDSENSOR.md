@@ -12,11 +12,9 @@ text: |
 ASIL: "A"
 verification_method: "Unit Testing, Code Coverage, Static Analysis"
 
-# Links: Connects to parent Assertion
 parents:
   - id: SRD-SpeedSensor
 
-# Links: Connects to child Evidence
 children:
   - id: LLTC-SpeedUnitTests
   - id: LLTC-SpeedCoverage
@@ -27,7 +25,6 @@ reviewers:
 
 reviewed: '2026-01-05 - Approved by Bernardo Esteves <bernardo.esteves@seame.pt>'
 
-# Evidence Linking
 references:
   - type: "file"
     path: "Threadx/Core/Src/speed_sensor.c"

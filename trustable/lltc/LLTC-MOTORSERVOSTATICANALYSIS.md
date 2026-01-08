@@ -8,7 +8,6 @@ text: |
 
 verification_method: "Static Analysis (GitHub CodeQL)"
 
-# Links: Connects to the SWD it provides evidence for
 parents:
   - id: SWD-MOTORSERVO
 
@@ -17,12 +16,10 @@ reviewers:
     email: "miguel.cardoso@seame.pt"
 reviewed: '2026-01-07 - Approved by Miguel Cardoso <miguel.cardoso@seame.pt>'
 
-# Evidence Linking (use 'references:', NOT deprecated 'artifact:')
 references:
   - type: "file"
     path: "artifacts/verification/static-analysis/codeql.sarif"
 
-#Automated Validation
 evidence:
   type: codeql_sarif_validator
   references:

@@ -8,7 +8,6 @@ text: |
 
 verification_method: "Automated Unit Testing"
 
-# Links: Connects to the SWD it provides evidence for
 parents:
   - id: SWD-MOTORSERVO
 
@@ -17,7 +16,6 @@ reviewers:
     email: "miguel.cardoso@seame.pt"
 reviewed: '2026-01-07 - Approved by Miguel Cardoso <miguel.cardoso@seame.pt>'
 
-# Evidence Linking (use 'references:', NOT deprecated 'artifact:')
 references:
   - type: "file"
     path: "tests/unit/motor_servo/test/test_dc_motor_functions.c"
@@ -28,7 +26,6 @@ references:
   - type: "file"
     path: "tests/unit/motor_servo/test/test_threadx_servo_motor_with_mocks.c"
 
-# Automated Validation 
 evidence:
   type: junit_pass_rate_validator
   references:

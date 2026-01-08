@@ -8,7 +8,6 @@ text: |
 # TSF Type: Evidence
 verification_method: "Code Coverage Analysis (LCOV/GCOVR)"
 
-# Links: Connects to parent Assertion
 parents:
   - id: SWD-SpeedSensor
 
@@ -23,14 +22,12 @@ references:
     path: "artifacts/verification/coverage/coverage.xml"
     description: "Cobertura XML Report"
 
-# AUTOMATED VALIDATION
 evidence:
   type: coverage_threshold_validator
   configuration:
     min_line_rate: 90
     references:
     - type: file
-      # This path must match the output defined in your CI workflow
       path: artifacts/verification/coverage/coverage.xml
 
 active: true
