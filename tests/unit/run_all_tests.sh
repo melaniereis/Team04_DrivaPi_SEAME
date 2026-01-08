@@ -5,7 +5,7 @@
 # Purpose: Execute all unit tests and generate unified coverage report
 # ASIL Level: B/D
 # Author: DrivaPi Team
-# Version: 2.1.3
+# Version: 2.1.4
 # 
 # Features:
 # - Run motor_servo and speed_sensor tests sequentially
@@ -27,8 +27,6 @@ readonly MOTOR_SERVO_DIR="${SCRIPT_DIR}/motor_servo"
 readonly SPEED_SENSOR_DIR="${SCRIPT_DIR}/speed_sensor"
 
 # Handle coverage directory (Absolute Path)
-# If COVERAGE_DIR env var is set (CI), use it relative to project root if not absolute
-# Otherwise default to local tests/unit/coverage
 if [[ -n "${COVERAGE_DIR:-}" ]]; then
     if [[ "$COVERAGE_DIR" == /* ]]; then
         MASTER_COVERAGE_DIR="$COVERAGE_DIR"
@@ -85,7 +83,7 @@ MOTOR_SERVO_PASSED=0
 SPEED_SENSOR_PASSED=0
 
 echo ""
-log_section "ISO 26262 Master Unit Test Runner - DrivaPi (v2.1.3 - Unified Coverage)"
+log_section "ISO 26262 Master Unit Test Runner - DrivaPi (v2.1.4 - Unified Coverage)"
 echo ""
 
 # ===== Run Motor Servo Tests =====
@@ -222,10 +220,14 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
     fi
     
     JUNIT_SRC=""
-    # Check for Ceedling 1.0+ JUnit default filename (Log Factory)
-    if [[ -f "${MOTOR_SERVO_DIR}/build/artifacts/test/report_junit.xml" ]]; then
+    # Check possible JUnit locations
+    # NOTE: When running gcov:all, reports often end up in build/artifacts/gcov/
+    if [[ -f "${MOTOR_SERVO_DIR}/build/artifacts/gcov/junit_tests_report.xml" ]]; then
+        JUNIT_SRC="${MOTOR_SERVO_DIR}/build/artifacts/gcov/junit_tests_report.xml"
+    elif [[ -f "${MOTOR_SERVO_DIR}/build/artifacts/gcov/report_junit.xml" ]]; then
+        JUNIT_SRC="${MOTOR_SERVO_DIR}/build/artifacts/gcov/report_junit.xml"
+    elif [[ -f "${MOTOR_SERVO_DIR}/build/artifacts/test/report_junit.xml" ]]; then
         JUNIT_SRC="${MOTOR_SERVO_DIR}/build/artifacts/test/report_junit.xml"
-    # Check for legacy/custom filename
     elif [[ -f "${MOTOR_SERVO_DIR}/build/artifacts/test/report.xml" ]]; then
         JUNIT_SRC="${MOTOR_SERVO_DIR}/build/artifacts/test/report.xml"
     elif [[ -f "${MOTOR_SERVO_DIR}/test_reports/junit.xml" ]]; then
@@ -237,7 +239,7 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
         log_pass "JUnit XML saved: ${ARTIFACTS_DIR}/tests/junit_results.xml (Source: ${JUNIT_SRC})"
     else
         log_warn "JUnit report not found in standard locations"
-        log_info "Checked: ${MOTOR_SERVO_DIR}/build/artifacts/test/report_junit.xml"
+        log_info "Checked: ${MOTOR_SERVO_DIR}/build/artifacts/gcov/junit_tests_report.xml"
     fi
 fi
 
