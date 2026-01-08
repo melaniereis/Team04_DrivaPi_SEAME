@@ -32,19 +32,16 @@
   :enabled:
     - gcov
     - module_generator
-    - report_tests_pretty_stdout
+    - report_tests_log_factory
 
 :report_tests_log_factory:
   :reports:
-    - json
     - junit
-    - cppunit
     - html
 
 :extension:
   :executable: .out
 
-# FIXED: Removed references to non-existent 'test/mocks' directory
 :paths:
   :test:
     - +:test/**
