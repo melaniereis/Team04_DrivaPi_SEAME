@@ -1,55 +1,71 @@
 ---
 :project:
-  :use_exceptions: FALSE
-  :use_test_preprocessor: :none
-  :use_auxiliary_dependencies: TRUE
-  :build_root: build
-  :test_file_prefix: test_
   :which_ceedling: gem
   :ceedling_version: 1.0.1
+  :use_mocks: TRUE
+  :use_test_preprocessor: :none
+  :use_deep_preprocessor: :none
+  :use_backtrace: :simple
+  :use_decorators: :auto
+  :build_root: build
+  :test_file_prefix: test_
   :default_tasks:
     - test:all
-    - gcov:all
+  :test_threads: 8
+  :compile_threads: 8
+  :release_build: FALSE
+
+:mixins:
+  :enabled: []
+  :load_paths: []
+
+:test_build:
+  :use_assembly: FALSE
+
+:release_build:
+  :output: MyApp.out
+  :use_assembly: FALSE
+  :artifacts: []
+
+:plugins:
+  :load_paths: []
+  :enabled:
+    - gcov
+    - module_generator
+    - report_tests_pretty_stdout
+
+:report_tests_log_factory:
+  :reports:
+    - json
+    - junit
+    - cppunit
+    - html
 
 :extension:
   :executable: .out
 
+# FIXED: Removed references to non-existent 'test/mocks' directory
 :paths:
   :test:
     - +:test/**
     - -:test/support
-    - -:test/mocks
   :source:
-    - src
+    - src/**
   :include:
-    - test/mocks
-    - test/support
-    - src
+    - src/**
   :support:
     - test/support
   :libraries: []
 
+:files:
+  :test: []
+  :source: []
+
 :defines:
-  :common: &common_defines
-    - UNIT_TEST_BUILD
-    - TARGET_INDEPENDENT
   :test:
-    - *common_defines
     - TEST
-    - UNITY_INCLUDE_DOUBLE
-    - UNITY_DOUBLE_PRECISION=1e-12
-  :test_preprocess:
-    - *common_defines
-    - TEST
-  :gcov:
-    - *common_defines
-    - GCOV_BUILD
-
-:unity:
-  :vendor_path: vendor
-
-:cexception:
-  :vendor_path: vendor
+  :release: []
+  :use_test_definition: FALSE
 
 :cmock:
   :plugins:
@@ -57,15 +73,27 @@
     - :callback
   :verbosity: 2
   :when_no_prototypes: :warn
+  :skeleton_path: ''
   :mock_prefix: 'mock_'
   :mock_suffix: ''
+  :strippables: ['(?:__attribute__\s*\([ (]*.*?[ )]*\)+)']
+  :attributes:
+     - __ramfunc
+     - __irq
+     - __fiq
+     - register
+     - extern
+  :c_calling_conventions:
+     - __stdcall
+     - __cdecl
+     - __fastcall
+  :treat_externs: :exclude
+  :treat_inlines: :exclude
   :treat_as:
-    uint8_t: HEX8
-    uint16_t: HEX16
-    uint32_t: UINT32
-    int8_t: INT8
-    int16_t: INT16
-    int32_t: INT32
+    uint8: HEX8
+    uint16: HEX16
+    uint32: UINT32
+    int8: INT8
     bool: UINT8
   :memcmp_if_unknown: true
   :when_ptr: :compare_data
@@ -76,16 +104,20 @@
   :callback_after_arg_check: false
   :exclude_setjmp_h: false
 
-:plugins:
-  :enabled:
-    - gcov
-    - module_generator
-    - report_tests_log_factory
+:unity:
+  :defines:
+    - UNITY_INCLUDE_FLOAT
+    - UNITY_INCLUDE_DOUBLE
 
-:report_tests_log_factory:
-  :reports:
-    - junit
-    - html
+:environment: []
+
+:libraries:
+  :placement: :end
+  :flag: "-l${1}"
+  :path_flag: "-L ${1}"
+  :system: []
+  :test: []
+  :release: []
 
 :gcov:
   :summaries: TRUE
@@ -97,11 +129,3 @@
   :gcovr:
     :html_medium_threshold: 75
     :html_high_threshold: 90
-
-:libraries:
-  :placement: :end
-  :flag: "-l${1}"
-  :path_flag: "-L ${1}"
-  :system: []
-  :test: []
-  :release: []
