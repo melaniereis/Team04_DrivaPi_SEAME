@@ -18,10 +18,10 @@ reviewers:
 
 reviewed: '2026-01-07 - Approved by Melanie Reis'
 
-#references:
-#  - type: "file"
-#    path: "Threadx/Core/Src/servo_motor.h"
-#    description: "Hardware Constants (Channels/Limits)"
+references:
+  - type: "file"
+    path: "Threadx/Core/Src/servo_motor.h"
+    description: "Hardware Constants (Channels/Limits)"
 
 active: true
 derived: false
