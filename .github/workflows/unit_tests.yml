@@ -77,7 +77,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: coverage-html
-          path: tests/unit/coverage/html
+          path: build/coverage/html
           retention-days: 30
 
       - name: Post Test Results
