@@ -138,3 +138,5 @@ secrets.yml
 *.project/
 *.mxproject/
 *.settings/
+
+.clangd
