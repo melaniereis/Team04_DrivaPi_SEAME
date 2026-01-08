@@ -167,7 +167,7 @@ CAN TX Thread (Priority 7)
   └── Transmit via CAN bus
        ↓
 Supervisor Thread (Priority 10)
-  └── Monitor system health via UART
+  └── Empty (will track the other threads in the future)
 ```
 
 ---
