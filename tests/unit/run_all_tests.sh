@@ -206,13 +206,15 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
     
     # Ensure gcovr finds the objects
     gcovr --root . \
-          --filter 'src/.*' \
-          --filter 'Threadx/Core/Src/.*' \
           --exclude '.*test.*' \
           --exclude '.*mock.*' \
+          --exclude '.*build/.*' \
+          --exclude '.*CMake.*' \
+          --exclude '.*submodule.*' \
           --xml-pretty \
+          --print-summary \
           --output "${ARTIFACTS_DIR}/coverage/coverage.xml" || log_warn "gcovr XML generation failed"
-          
+                
     if [[ -f "${ARTIFACTS_DIR}/coverage/coverage.xml" ]]; then
         log_pass "Coverage XML saved: ${ARTIFACTS_DIR}/coverage/coverage.xml"
     else
