@@ -105,15 +105,7 @@ jobs:
         run: |
           mkdir -p artifacts/verification/static-analysis
           cp results/cpp.sarif artifacts/verification/static-analysis/codeql.sarif
-
-      - name: Commit CodeQL Results to Repo
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "chore(verification): update CodeQL SARIF [skip ci]"
-          file_pattern: artifacts/verification/static-analysis/codeql.sarif
-          commit_user_name: "GitHub Actions Bot"
-          commit_user_email: "actions@github.com"
-        
+  
       # Enforce security gate
       - name: Fail on high or critical issues
         if: always()
@@ -138,3 +130,12 @@ jobs:
           fi
 
           echo "✅ No high/critical issues"
+
+      - name: Commit CodeQL Results to Repo
+        if: success()
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(verification): update CodeQL SARIF [skip ci]"
+          file_pattern: artifacts/verification/static-analysis/codeql.sarif
+          commit_user_name: "GitHub Actions Bot"
+          commit_user_email: "actions@github.com"
