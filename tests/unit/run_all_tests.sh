@@ -5,7 +5,7 @@
 # Purpose: Execute all unit tests and generate unified coverage report
 # ASIL Level: B/D
 # Author: DrivaPi Team
-# Version: 2.1.0
+# Version: 2.1.1
 # 
 # Features:
 # - Run motor_servo and speed_sensor tests sequentially
@@ -89,13 +89,6 @@ echo ""
 log_section "Running Motor Servo Tests"
 echo ""
 
-if [[ -d "${SPEED_SENSOR_DIR}" ]] && cd "${SPEED_SENSOR_DIR}" && CALLED_FROM_MASTER=1 ./run_speedtest.sh; then
-    log_pass "Speed Sensor tests PASSED"
-    SPEED_SENSOR_PASSED=1
-else
-    log_fail "Speed Sensor tests FAILED"
-fi
-
 if [[ -d "${MOTOR_SERVO_DIR}" ]] && cd "${MOTOR_SERVO_DIR}" && ./scripts/run_tests.sh; then
     log_pass "Motor Servo tests PASSED"
     MOTOR_SERVO_PASSED=1
@@ -110,7 +103,6 @@ echo ""
 # ===== Run Speed Sensor Tests =====
 log_section "Running Speed Sensor Tests"
 echo ""
-
 
 if [[ -d "${SPEED_SENSOR_DIR}" ]] && cd "${SPEED_SENSOR_DIR}" && CALLED_FROM_MASTER=1 ./run_speedtest.sh; then
     log_pass "Speed Sensor tests PASSED"
@@ -129,13 +121,19 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
     echo ""
     
     MOTOR_SERVO_COVERAGE="${MOTOR_SERVO_DIR}/build/artifacts/gcov/coverage_filtered.info"
-    SPEED_SENSOR_COVERAGE="${SPEED_SENSOR_DIR}/build/artifacts/gcov/coverage_filtered.info"
+    
+    # Speed Sensor coverage is often output to the root dir by its script
+    SPEED_SENSOR_COVERAGE="${SPEED_SENSOR_DIR}/coverage_filtered.info"
+    if [[ ! -f "${SPEED_SENSOR_COVERAGE}" ]]; then
+        # Fallback to build dir if not found in root
+        SPEED_SENSOR_COVERAGE="${SPEED_SENSOR_DIR}/build/artifacts/gcov/coverage_filtered.info"
+    fi
     
     # Check persistent locations (saved outside the build/ directory)
     PERSISTENT_MOTOR_SERVO="${SCRIPT_DIR}/../../build/coverage/motor_servo/coverage_filtered.info"
     PERSISTENT_SPEED_SENSOR="${SCRIPT_DIR}/../../build/coverage/speed_sensor/coverage_filtered.info"
     
-    # Use persistent locations if they exist, otherwise try original locations
+    # Use persistent locations if they exist, otherwise keep original attempts
     if [[ -f "${PERSISTENT_MOTOR_SERVO}" ]]; then
         MOTOR_SERVO_COVERAGE="${PERSISTENT_MOTOR_SERVO}"
     fi
@@ -144,17 +142,9 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
         SPEED_SENSOR_COVERAGE="${PERSISTENT_SPEED_SENSOR}"
     fi
     
-    # If speed_sensor coverage is not found, check alternative names
-    if [[ ! -f "${SPEED_SENSOR_COVERAGE}" ]] && [[ -f "${SPEED_SENSOR_DIR}/build/artifacts/gcov/coverage_combined.info" ]]; then
-        SPEED_SENSOR_COVERAGE="${SPEED_SENSOR_DIR}/build/artifacts/gcov/coverage_combined.info"
-    fi
-    if [[ ! -f "${SPEED_SENSOR_COVERAGE}" ]] && [[ -f "$(dirname "${PERSISTENT_SPEED_SENSOR}")/coverage_combined.info" ]]; then
-        SPEED_SENSOR_COVERAGE="$(dirname "${PERSISTENT_SPEED_SENSOR}")/coverage_combined.info"
-    fi
-    
     if [[ -f "${MOTOR_SERVO_COVERAGE}" && -f "${SPEED_SENSOR_COVERAGE}" ]]; then
-        log_info "Motor Servo coverage found"
-        log_info "Speed Sensor coverage found"
+        log_info "Motor Servo coverage found: ${MOTOR_SERVO_COVERAGE}"
+        log_info "Speed Sensor coverage found: ${SPEED_SENSOR_COVERAGE}"
         
         COMBINED="${MASTER_COVERAGE_DIR}/coverage_combined.info"
         FILTERED="${MASTER_COVERAGE_DIR}/coverage_filtered.info"
@@ -199,8 +189,8 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
         
     else
         log_warn "Coverage files not available"
-        [[ ! -f "${MOTOR_SERVO_COVERAGE}" ]] && log_warn "  Missing: Motor Servo coverage"
-        [[ ! -f "${SPEED_SENSOR_COVERAGE}" ]] && log_warn "  Missing: Speed Sensor coverage"
+        [[ ! -f "${MOTOR_SERVO_COVERAGE}" ]] && log_warn "  Missing: Motor Servo coverage (${MOTOR_SERVO_COVERAGE})"
+        [[ ! -f "${SPEED_SENSOR_COVERAGE}" ]] && log_warn "  Missing: Speed Sensor coverage (${SPEED_SENSOR_COVERAGE})"
     fi
 fi
 
@@ -230,7 +220,11 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
     fi
     
     JUNIT_SRC=""
-    if [[ -f "${MOTOR_SERVO_DIR}/build/artifacts/test/report.xml" ]]; then
+    # Check for Ceedling 1.0+ JUnit default filename
+    if [[ -f "${MOTOR_SERVO_DIR}/build/artifacts/test/report_junit.xml" ]]; then
+        JUNIT_SRC="${MOTOR_SERVO_DIR}/build/artifacts/test/report_junit.xml"
+    # Check for legacy/custom filename
+    elif [[ -f "${MOTOR_SERVO_DIR}/build/artifacts/test/report.xml" ]]; then
         JUNIT_SRC="${MOTOR_SERVO_DIR}/build/artifacts/test/report.xml"
     elif [[ -f "${MOTOR_SERVO_DIR}/test_reports/junit.xml" ]]; then
         JUNIT_SRC="${MOTOR_SERVO_DIR}/test_reports/junit.xml"
@@ -241,7 +235,7 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
         log_pass "JUnit XML saved: ${ARTIFACTS_DIR}/tests/junit_results.xml"
     else
         log_warn "JUnit report not found in standard locations"
-        log_info "Checked: ${MOTOR_SERVO_DIR}/build/artifacts/test/report.xml"
+        log_info "Checked: ${MOTOR_SERVO_DIR}/build/artifacts/test/report_junit.xml"
     fi
 fi
 
