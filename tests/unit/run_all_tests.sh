@@ -180,7 +180,7 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
 fi
 
 # ===== Generate TSF Artifacts =====
-if[[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
+if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
     log_section "Generating TSF Artifacts"
     
     cd "${PROJECT_ROOT_DIR}"
