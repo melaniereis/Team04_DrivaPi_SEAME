@@ -5,59 +5,24 @@ on:
   push:
 
 jobs:
+  run-tests:
+    uses: ./.github/workflows/unit_tests.yml
+
   tsf-validation:
+    needs: run-tests
     runs-on: ubuntu-latest
     
     permissions:
       contents: write
       pull-requests: write
-      actions: read
-      checks: read
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Wait for Unit Tests to Complete
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          echo "🔎 Looking for 'Unit Tests' workflow run for commit: ${{ github.sha }}"
-          
-          FOUND_ID=""
-          # Retry for up to 5 minutes (30 * 10s) to find the run
-          # This handles cases where the Unit Test workflow is queued or slow to start
-          for i in {1..30}; do
-            # We filter by filename 'unit_tests.yml' and the specific commit SHA
-            RUN_ID=$(gh run list \
-              --workflow "unit_tests.yml" \
-              --commit "${{ github.sha }}" \
-              --json databaseId \
-              --jq '.[0].databaseId')
-            
-            if [ -n "$RUN_ID" ] && [ "$RUN_ID" != "null" ]; then
-              echo "✅ Found Unit Test Run ID: $RUN_ID"
-              FOUND_ID="$RUN_ID"
-              break
-            fi
-            echo "⏳ Attempt $i/30: Unit Test workflow not initialized yet. Waiting 10s..."
-            sleep 10
-          done
-
-          if [ -z "$FOUND_ID" ]; then
-            echo "❌ Error: Timed out waiting for Unit Tests to start."
-            exit 1
-          fi
-
-          echo "👀 Watching run $FOUND_ID until completion..."
-          gh run watch "$FOUND_ID" --exit-status
-          echo "✅ Unit Tests completed successfully."
-
       - name: Download Verification Artifacts
-        uses: dawidd6/action-download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          workflow: "unit_tests.yml"
-          commit: ${{ github.sha }}
           name: verification-artifacts
           path: artifacts/verification
 
@@ -94,6 +59,8 @@ jobs:
       - name: Mark TSF items and links as reviewed
         run: |
           # --- SPEED SENSOR ---
+          # trudag manage set-link SWD-998 LLTC-998
+          
           # --- SERVOMOTOR (Actuation) ---
 
       - name: Run trudag lint
@@ -143,7 +110,7 @@ jobs:
           fi
 
       - name: Upload TSF artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: tsf-validation-artifacts
@@ -153,7 +120,7 @@ jobs:
           retention-days: 30
 
       - name: Comment PR with validation results
-        if: github.event.pull_request
+        if: github.event_name == 'pull_request'
         uses: peter-evans/create-or-update-comment@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
