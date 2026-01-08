@@ -81,7 +81,7 @@
     - gcov
     - module_generator
 
-:report_tests_lof_factory:
+:report_tests_log_factory:
   :reports:
     - junit
     - html
