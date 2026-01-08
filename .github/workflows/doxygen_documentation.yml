@@ -5,7 +5,6 @@ on:
 
   pull_request:
 
-
 jobs:
   generate-documentation:
     runs-on: ubuntu-latest
