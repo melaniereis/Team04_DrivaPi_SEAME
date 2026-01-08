@@ -1,8 +1,6 @@
 name: "Unit Tests & TSF Artifacts"
 
 on:
-  push:
-  pull_request:
   workflow_dispatch:
   workflow_call:
 
