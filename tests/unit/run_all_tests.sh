@@ -5,7 +5,7 @@
 # Purpose: Execute all unit tests and generate unified coverage report
 # ASIL Level: B/D
 # Author: DrivaPi Team
-# Version: 2.1.2
+# Version: 2.1.3
 # 
 # Features:
 # - Run motor_servo and speed_sensor tests sequentially
@@ -18,19 +18,30 @@ set -e
 set -u
 set -o pipefail
 
+# Ensure we have absolute paths
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly PROJECT_ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+
+# Define sub-project directories
 readonly MOTOR_SERVO_DIR="${SCRIPT_DIR}/motor_servo"
 readonly SPEED_SENSOR_DIR="${SCRIPT_DIR}/speed_sensor"
 
-# Ensure absolute path for coverage output to avoid lcov confusion
-MASTER_COVERAGE_DIR="${COVERAGE_DIR:-${SCRIPT_DIR}/coverage}"
-if [[ "$MASTER_COVERAGE_DIR" != /* ]]; then
-    MASTER_COVERAGE_DIR="${PROJECT_ROOT_DIR}/${MASTER_COVERAGE_DIR}"
+# Handle coverage directory (Absolute Path)
+# If COVERAGE_DIR env var is set (CI), use it relative to project root if not absolute
+# Otherwise default to local tests/unit/coverage
+if [[ -n "${COVERAGE_DIR:-}" ]]; then
+    if [[ "$COVERAGE_DIR" == /* ]]; then
+        MASTER_COVERAGE_DIR="$COVERAGE_DIR"
+    else
+        MASTER_COVERAGE_DIR="${PROJECT_ROOT_DIR}/${COVERAGE_DIR}"
+    fi
+else
+    MASTER_COVERAGE_DIR="${SCRIPT_DIR}/coverage"
 fi
 
 readonly ARTIFACTS_DIR="${PROJECT_ROOT_DIR}/artifacts/verification"
 
+# Create directories
 mkdir -p "${MASTER_COVERAGE_DIR}"
 mkdir -p "${ARTIFACTS_DIR}/tests"
 mkdir -p "${ARTIFACTS_DIR}/coverage"
@@ -74,7 +85,7 @@ MOTOR_SERVO_PASSED=0
 SPEED_SENSOR_PASSED=0
 
 echo ""
-log_section "ISO 26262 Master Unit Test Runner - DrivaPi (v2.1 - Unified Coverage)"
+log_section "ISO 26262 Master Unit Test Runner - DrivaPi (v2.1.3 - Unified Coverage)"
 echo ""
 
 # ===== Run Motor Servo Tests =====
@@ -134,9 +145,8 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
         COMBINED="${MASTER_COVERAGE_DIR}/coverage_combined.info"
         FILTERED="${MASTER_COVERAGE_DIR}/coverage_filtered.info"
         
-        # Merge coverage files (Verbose mode, no error suppression)
-        # Using lcov 2.0+ syntax or fallback
-        log_info "Merging tracefiles..."
+        # Merge coverage files
+        log_info "Merging tracefiles to ${COMBINED}..."
         lcov -a "${MOTOR_SERVO_COVERAGE}" -a "${SPEED_SENSOR_COVERAGE}" \
              -o "${COMBINED}" \
              --rc lcov_branch_coverage=1
@@ -144,7 +154,6 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
         if [[ -f "${COMBINED}" ]]; then
             # Extract source files only
             log_info "Filtering tracefiles..."
-            # Try removal method first as it's often more robust
             lcov -r "${COMBINED}" \
                  '/usr/*' '*vendor*' '*cmock*' '*unity*' '*c_exception*' \
                  '*build/test/*' '*test/runners*' '*test/mocks*' '/var/lib/gems/*' \
@@ -164,7 +173,7 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
                     --demangle-cpp > /dev/null
                 
                 if [[ -f "${HTML}/index.html" ]]; then
-                    log_pass "Coverage report: ${HTML}/index.html"
+                    log_pass "Coverage report generated: ${HTML}/index.html"
                 else
                     log_warn "HTML generation failed"
                 fi
@@ -177,11 +186,11 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
             lcov --summary "${FILTERED}" --rc lcov_branch_coverage=1 || true
             echo ""
         else
-            log_fail "Failed to create combined coverage file"
+            log_fail "Failed to create combined coverage file at ${COMBINED}"
         fi
         
     else
-        log_warn "Coverage files not available"
+        log_warn "Coverage files not available for aggregation"
         [[ ! -f "${MOTOR_SERVO_COVERAGE}" ]] && log_warn "  Missing: Motor Servo coverage (${MOTOR_SERVO_COVERAGE})"
         [[ ! -f "${SPEED_SENSOR_COVERAGE}" ]] && log_warn "  Missing: Speed Sensor coverage (${SPEED_SENSOR_COVERAGE})"
     fi
@@ -213,7 +222,7 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
     fi
     
     JUNIT_SRC=""
-    # Check for Ceedling 1.0+ JUnit default filename
+    # Check for Ceedling 1.0+ JUnit default filename (Log Factory)
     if [[ -f "${MOTOR_SERVO_DIR}/build/artifacts/test/report_junit.xml" ]]; then
         JUNIT_SRC="${MOTOR_SERVO_DIR}/build/artifacts/test/report_junit.xml"
     # Check for legacy/custom filename
