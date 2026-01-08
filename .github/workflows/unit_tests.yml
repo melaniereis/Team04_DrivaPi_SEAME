@@ -25,6 +25,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
 
       - name: Install dependencies
         run: |
@@ -62,7 +64,6 @@ jobs:
         run: |
           mkdir -p artifacts/verification/tests
           mkdir -p artifacts/verification/coverage
-          mkdir -p artifacts/verification/static-analysis
 
       - name: Upload Verification Artifacts (TSF)
         uses: actions/upload-artifact@v6
@@ -79,6 +80,17 @@ jobs:
           name: coverage-html
           path: build/coverage/html
           retention-days: 30
+
+      - name: Commit TSF Evidence to Repo
+        if: success() 
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(verification): update unit test evidence [skip ci]"
+          
+          file_pattern: artifacts/verification/
+          
+          commit_user_name: "GitHub Actions Bot"
+          commit_user_email: "actions@github.com"
 
       - name: Post Test Results
         if: always()
