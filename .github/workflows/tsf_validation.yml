@@ -5,6 +5,8 @@ on:
     workflows: ["Unit Tests & TSF Artifacts"]
     types:
       - completed
+  push:
+  pull_request:
 
 jobs:
   tsf-validation:
