@@ -43,7 +43,7 @@ jobs:
       - name: Install Ceedling and gcovr
         run: |
           sudo gem install ceedling
-          pip3 install gcovr
+          pip3 install lcov_cobertura gcovr
 
       - name: Verify tool versions
         run: |
