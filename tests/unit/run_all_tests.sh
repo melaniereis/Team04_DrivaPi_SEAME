@@ -14,17 +14,26 @@
 # - Color-coded output
 ################################################################################
 
+
 set -e
 set -u
 set -o pipefail
 
+
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly PROJECT_ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 readonly MOTOR_SERVO_DIR="${SCRIPT_DIR}/motor_servo"
 readonly SPEED_SENSOR_DIR="${SCRIPT_DIR}/speed_sensor"
 
+
 MASTER_COVERAGE_DIR="${COVERAGE_DIR:-${SCRIPT_DIR}/coverage}"
+readonly ARTIFACTS_DIR="${PROJECT_ROOT_DIR}/artifacts/verification"
+
 
 mkdir -p "${MASTER_COVERAGE_DIR}"
+mkdir -p "${ARTIFACTS_DIR}/tests"
+mkdir -p "${ARTIFACTS_DIR}/coverage"
+
 
 # Colors
 if [[ -t 1 ]]; then
@@ -39,38 +48,47 @@ else
     readonly RED='' GREEN='' YELLOW='' BLUE='' CYAN='' BOLD='' NC=''
 fi
 
+
 log_section() {
     echo -e "${BOLD}${BLUE}============================================================================${NC}"
     echo -e "${BOLD}${BLUE} $1${NC}"
     echo -e "${BOLD}${BLUE}============================================================================${NC}"
 }
 
+
 log_pass() {
     echo -e "${GREEN}✓ $1${NC}"
 }
+
 
 log_fail() {
     echo -e "${RED}✗ $1${NC}"
 }
 
+
 log_info() {
     echo -e "${CYAN}[INFO]${NC} $1"
 }
+
 
 log_warn() {
     echo -e "${YELLOW}[WARN]${NC} $1"
 }
 
+
 MOTOR_SERVO_PASSED=0
 SPEED_SENSOR_PASSED=0
+
 
 echo ""
 log_section "ISO 26262 Master Unit Test Runner - DrivaPi (v2.1 - Unified Coverage)"
 echo ""
 
+
 # ===== Run Motor Servo Tests =====
 log_section "Running Motor Servo Tests"
 echo ""
+
 
 if [[ -d "${MOTOR_SERVO_DIR}" ]] && cd "${MOTOR_SERVO_DIR}" && ./scripts/run_tests.sh; then
     log_pass "Motor Servo tests PASSED"
@@ -79,11 +97,14 @@ else
     log_fail "Motor Servo tests FAILED"
 fi
 
+
 echo ""
+
 
 # ===== Run Speed Sensor Tests =====
 log_section "Running Speed Sensor Tests"
 echo ""
+
 
 if [[ -d "${SPEED_SENSOR_DIR}" ]] && cd "${SPEED_SENSOR_DIR}" && CALLED_FROM_MASTER=1 ./run_speedtest.sh; then
     log_pass "Speed Sensor tests PASSED"
@@ -92,7 +113,9 @@ else
     log_fail "Speed Sensor tests FAILED"
 fi
 
+
 echo ""
+
 
 # ===== Aggregate Coverage =====
 if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
@@ -175,6 +198,49 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
     fi
 fi
 
+
+# ===== Generate TSF Artifacts =====
+if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
+    log_section "Generating TSF Artifacts"
+    
+    cd "${PROJECT_ROOT_DIR}"
+    log_info "Generating Cobertura XML..."
+    
+    mkdir -p "${ARTIFACTS_DIR}/coverage"
+    mkdir -p "${ARTIFACTS_DIR}/tests"
+    
+    gcovr --root . \
+          --filter 'src/.*' \
+          --filter 'Threadx/Core/Src/.*' \
+          --exclude '.*test.*' \
+          --exclude '.*mock.*' \
+          --xml-pretty \
+          --output "${ARTIFACTS_DIR}/coverage/coverage.xml" || log_warn "gcovr XML generation failed"
+          
+    if [[ -f "${ARTIFACTS_DIR}/coverage/coverage.xml" ]]; then
+        log_pass "Coverage XML saved: ${ARTIFACTS_DIR}/coverage/coverage.xml"
+    else
+        log_warn "Coverage XML not found"
+    fi
+    
+    JUNIT_SRC=""
+    if [[ -f "${MOTOR_SERVO_DIR}/build/artifacts/test/report.xml" ]]; then
+        JUNIT_SRC="${MOTOR_SERVO_DIR}/build/artifacts/test/report.xml"
+    elif [[ -f "${MOTOR_SERVO_DIR}/test_reports/junit.xml" ]]; then
+        JUNIT_SRC="${MOTOR_SERVO_DIR}/test_reports/junit.xml"
+    fi
+    
+    if [[ -n "${JUNIT_SRC}" && -f "${JUNIT_SRC}" ]]; then
+        cp "${JUNIT_SRC}" "${ARTIFACTS_DIR}/tests/junit_results.xml"
+        log_pass "JUnit XML saved: ${ARTIFACTS_DIR}/tests/junit_results.xml"
+    else
+        log_warn "JUnit report not found in standard locations"
+        log_info "Checked: ${MOTOR_SERVO_DIR}/build/artifacts/test/report.xml"
+    fi
+fi
+
+
+# ===== Final Summary =====
 echo ""
 log_section "Test Summary"
 echo ""
@@ -185,6 +251,7 @@ echo "[TEST_COUNT] Motor Servo: 168 tests"
 echo "[TEST_COUNT] Speed Sensor: 11 tests"
 echo "[TEST_COUNT] Total: 179 tests"
 echo ""
+
 
 if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
     echo -e "${BOLD}${GREEN}============================================================================${NC}"
