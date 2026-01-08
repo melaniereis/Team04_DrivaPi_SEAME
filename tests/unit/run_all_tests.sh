@@ -89,6 +89,12 @@ echo ""
 log_section "Running Motor Servo Tests"
 echo ""
 
+if [[ -d "${SPEED_SENSOR_DIR}" ]] && cd "${SPEED_SENSOR_DIR}" && CALLED_FROM_MASTER=1 ./run_speedtest.sh; then
+    log_pass "Speed Sensor tests PASSED"
+    SPEED_SENSOR_PASSED=1
+else
+    log_fail "Speed Sensor tests FAILED"
+fi
 
 if [[ -d "${MOTOR_SERVO_DIR}" ]] && cd "${MOTOR_SERVO_DIR}" && ./scripts/run_tests.sh; then
     log_pass "Motor Servo tests PASSED"
