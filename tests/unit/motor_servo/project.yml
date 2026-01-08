@@ -80,9 +80,12 @@
   :enabled:
     - gcov
     - module_generator
-    - junit_tests_report
-:junit_tests_report:
-  :artifact_filename: report_junit.xml
+    - report_tests_log_factory
+
+:report_tests_log_factory:
+  :reports:
+    - junit
+    - html
 
 :gcov:
   :summaries: TRUE
