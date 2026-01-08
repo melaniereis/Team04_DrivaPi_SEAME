@@ -194,54 +194,39 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
     fi
 fi
 
-# ===== Generate TSF Artifacts =====
+# ===== Generate TSF Artifacts =====# ... (Keep the lcov aggregation part that works) ...
 if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
     log_section "Generating TSF Artifacts"
     
-    cd "${PROJECT_ROOT_DIR}"
-    log_info "Generating Cobertura XML..."
+    mkdir -p "artifacts/verification/coverage"
+    mkdir -p "artifacts/verification/tests"
     
-    mkdir -p "${ARTIFACTS_DIR}/coverage"
-    mkdir -p "${ARTIFACTS_DIR}/tests"
-    
-    # Ensure gcovr finds the objects
-    gcovr --root . \
-          --exclude '.*test.*' \
-          --exclude '.*mock.*' \
-          --exclude '.*build/.*' \
-          --exclude '.*CMake.*' \
-          --exclude '.*submodule.*' \
-          --xml-pretty \
-          --print-summary \
-          --output "${ARTIFACTS_DIR}/coverage/coverage.xml" || log_warn "gcovr XML generation failed"
-                
-    if [[ -f "${ARTIFACTS_DIR}/coverage/coverage.xml" ]]; then
-        log_pass "Coverage XML saved: ${ARTIFACTS_DIR}/coverage/coverage.xml"
+    LCOV_INFO="build/coverage/coverage_combined.info"
+    XML_OUT="artifacts/verification/coverage/coverage.xml"
+
+    if [[ -f "$LCOV_INFO" ]]; then
+        echo "[INFO] Converting LCOV info to Cobertura XML..."
+        if command -v lcov_cobertura &> /dev/null; then
+            lcov_cobertura "$LCOV_INFO" --output "$XML_OUT"
+            log_pass "Coverage XML saved: $XML_OUT"
+        else
+            log_warn "lcov_cobertura not found. Install with: pip3 install lcov_cobertura"
+            log_warn "Attempting fallback to gcovr..."
+            
+            gcovr --root . --xml-pretty --output "$XML_OUT" .
+        fi
     else
-        log_warn "Coverage XML not found"
+        log_fail "LCOV info file not found: $LCOV_INFO"
     fi
-    
+
     JUNIT_SRC=""
-    # Check possible JUnit locations
-    # NOTE: When running gcov:all, reports often end up in build/artifacts/gcov/
-    if [[ -f "${MOTOR_SERVO_DIR}/build/artifacts/gcov/junit_tests_report.xml" ]]; then
-        JUNIT_SRC="${MOTOR_SERVO_DIR}/build/artifacts/gcov/junit_tests_report.xml"
-    elif [[ -f "${MOTOR_SERVO_DIR}/build/artifacts/gcov/report_junit.xml" ]]; then
-        JUNIT_SRC="${MOTOR_SERVO_DIR}/build/artifacts/gcov/report_junit.xml"
-    elif [[ -f "${MOTOR_SERVO_DIR}/build/artifacts/test/report_junit.xml" ]]; then
-        JUNIT_SRC="${MOTOR_SERVO_DIR}/build/artifacts/test/report_junit.xml"
-    elif [[ -f "${MOTOR_SERVO_DIR}/build/artifacts/test/report.xml" ]]; then
-        JUNIT_SRC="${MOTOR_SERVO_DIR}/build/artifacts/test/report.xml"
-    elif [[ -f "${MOTOR_SERVO_DIR}/test_reports/junit.xml" ]]; then
-        JUNIT_SRC="${MOTOR_SERVO_DIR}/test_reports/junit.xml"
+    if [[ -f "tests/unit/motor_servo/build/artifacts/gcov/junit_tests_report.xml" ]]; then
+        JUNIT_SRC="tests/unit/motor_servo/build/artifacts/gcov/junit_tests_report.xml"
     fi
     
     if [[ -n "${JUNIT_SRC}" && -f "${JUNIT_SRC}" ]]; then
-        cp "${JUNIT_SRC}" "${ARTIFACTS_DIR}/tests/junit_results.xml"
-        log_pass "JUnit XML saved: ${ARTIFACTS_DIR}/tests/junit_results.xml (Source: ${JUNIT_SRC})"
-    else
-        log_warn "JUnit report not found in standard locations"
-        log_info "Checked: ${MOTOR_SERVO_DIR}/build/artifacts/gcov/junit_tests_report.xml"
+        cp "${JUNIT_SRC}" "artifacts/verification/tests/junit_results.xml"
+        log_pass "JUnit XML saved."
     fi
 fi
 
