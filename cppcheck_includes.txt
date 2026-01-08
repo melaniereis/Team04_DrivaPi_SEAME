@@ -1,3 +1,0 @@
-build/_deps/googletest-src/googletest/include
-build/_deps/googletest-src/googlemock/include
-src
