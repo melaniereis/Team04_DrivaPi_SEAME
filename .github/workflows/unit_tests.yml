@@ -56,8 +56,14 @@ jobs:
       - name: Run Tests (Master Script)
         run: |
           chmod +x tests/unit/run_all_tests.sh
-          # Direct script execution
           bash tests/unit/run_all_tests.sh 2>&1 | tee test_output.log
+
+      - name: Ensure verification artifacts directory exists
+        if: always()
+        run: |
+          mkdir -p artifacts/verification/tests
+          mkdir -p artifacts/verification/coverage
+          mkdir -p artifacts/verification/static-analysis
 
       - name: Upload Verification Artifacts (TSF)
         uses: actions/upload-artifact@v6
