@@ -60,10 +60,8 @@ jobs:
       - name: Mark TSF items and links as reviewed
         run: |
           # --- SPEED SENSOR ---
-          trudag manage set-item SWD-SpeedSensor || true
           
           # --- SERVOMOTOR (Actuation) ---
-          trudag manage set-item SWD-ServoMotor || true
 
       - name: Run trudag lint
         id: lint
