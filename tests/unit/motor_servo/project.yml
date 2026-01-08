@@ -18,11 +18,9 @@
   :test:
     - +:test/**
     - -:test/support
-    - -:test/mocks
   :source:
     - src
   :include:
-    - test/mocks
     - test/support
     - src
   :support:
