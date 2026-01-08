@@ -113,6 +113,8 @@ fi
 echo ""
 
 # ===== Aggregate Coverage =====
+cd "${PROJECT_ROOT_DIR}"
+
 if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
     log_section "Aggregating Coverage Reports"
     echo ""
@@ -201,7 +203,7 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
     mkdir -p "artifacts/verification/coverage"
     mkdir -p "artifacts/verification/tests"
     
-    LCOV_INFO="build/coverage/coverage_combined.info"
+    LCOV_INFO="tests/unit/coverage/coverage_combined.info"
     XML_OUT="artifacts/verification/coverage/coverage.xml"
 
     if [[ -f "$LCOV_INFO" ]]; then
