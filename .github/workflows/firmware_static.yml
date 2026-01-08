@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   security-events: write
   actions: read
 
@@ -18,11 +18,13 @@ jobs:
   codeql:
     name: CodeQL Analysis
     runs-on: ubuntu-latest
-
+    
     steps:
       # Checkout
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
 
       # Toolchain
       - name: Install ARM toolchain
@@ -99,6 +101,19 @@ jobs:
           path: results/cpp.sarif
           retention-days: 30
 
+      - name: Prepare TSF Artifacts
+        run: |
+          mkdir -p artifacts/verification/static-analysis
+          cp results/cpp.sarif artifacts/verification/static-analysis/codeql.sarif
+
+      - name: Commit CodeQL Results to Repo
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(verification): update CodeQL SARIF [skip ci]"
+          file_pattern: artifacts/verification/static-analysis/codeql.sarif
+          commit_user_name: "GitHub Actions Bot"
+          commit_user_email: "actions@github.com"
+        
       # Enforce security gate
       - name: Fail on high or critical issues
         if: always()
