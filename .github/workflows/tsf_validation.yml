@@ -11,15 +11,50 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      actions: read
+      checks: read
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Wait for Unit Tests to Complete
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Waiting for 'Unit Tests & TSF Artifacts' workflow to finish on this commit..."
+          
+          # 1. Get the Run ID of the Unit Test workflow for the CURRENT commit
+          # Retries for 60 seconds to ensure the other workflow has actually started
+          for i in {1..6}; do
+            RUN_ID=$(gh run list \
+              --workflow "unit_tests.yml" \
+              --commit "${{ github.sha }}" \
+              --json databaseId \
+              --jq '.[0].databaseId')
+            
+            if [ -n "$RUN_ID" ] && [ "$RUN_ID" != "null" ]; then
+              echo "Found Unit Test Run ID: $RUN_ID"
+              break
+            fi
+            echo "Waiting for Unit Test workflow to initialize..."
+            sleep 10
+          done
+
+          if [ -z "$RUN_ID" ] || [ "$RUN_ID" == "null" ]; then
+            echo "Error: Could not find a running Unit Test workflow for commit ${{ github.sha }}"
+            exit 1
+          fi
+
+          # 2. Watch the run until it finishes. If it fails, this step fails.
+          gh run watch "$RUN_ID" --exit-status
+
+
       - name: Download Verification Artifacts
         uses: dawidd6/action-download-artifact@v3
         with:
-          workflow: Unit Tests & TSF Artifacts
+          workflow: "unit_tests.yml"
+          commit: ${{ github.sha }}
           name: verification-artifacts
           path: artifacts/verification
 
@@ -56,7 +91,6 @@ jobs:
       - name: Mark TSF items and links as reviewed
         run: |
           # --- SPEED SENSOR ---
-          
           # --- SERVOMOTOR (Actuation) ---
 
       - name: Run trudag lint
@@ -116,11 +150,11 @@ jobs:
           retention-days: 30
 
       - name: Comment PR with validation results
-        if: github.event.workflow_run.pull_requests[0]
+        if: github.event.pull_request
         uses: peter-evans/create-or-update-comment@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.workflow_run.pull_requests[0].number }}
+          issue-number: ${{ github.event.pull_request.number }}
           body: |
             ## 🔍 TSF Validation Results
 
@@ -130,7 +164,7 @@ jobs:
             | **trudag score** | ${{ steps.scores.outputs.score_ok == 'true' && '✅ PASSED' || '❌ FAILED' }} |
             | **trudag publish** | ${{ steps.publish.outputs.publish_ok == 'true' && '✅ PASSED' || '❌ FAILED' }} |
 
-            ### 📋 Lint Output (first 500 chars)
+            ### 📋 Lint Output
             ```
             ${{ steps.summary.outputs.lint_summary }}
             ```
