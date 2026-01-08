@@ -80,6 +80,7 @@
   :enabled:
     - gcov
     - module_generator
+    - xml_tests_report
 
 :gcov:
   :summaries: TRUE
@@ -100,3 +101,5 @@
   :test: []
   :release: []
 
+:xml_tests_report:
+  :artifact_filename: report.xml
