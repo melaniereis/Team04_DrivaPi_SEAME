@@ -136,7 +136,7 @@ App_ThreadX_Init()
   │   ├── tx_thread_create(servo_motor thread)
   │   ├── tx_thread_create(speed_sensor thread)
   │   ├── tx_thread_create(can_tx thread)
-  │   └── tx_thread_create(can_rx_e thread)
+  │   └── tx_thread_create(can_rx thread)
   └── return TX_SUCCESS
 ```
 
