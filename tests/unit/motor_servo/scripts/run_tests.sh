@@ -221,17 +221,20 @@ generate_coverage() {
 generate_sonarqube_xml() {
     log_header "Generating SonarQube XML"
 
-    cd "${PROJECT_ROOT}"
+    local REPO_ROOT="$(cd "${PROJECT_ROOT}/../../.." && pwd)"
 
-    gcovr --root "../../.." \
-          --filter 'Threadx/Core/Src/.*' \
-          --exclude '.*test.*' \
-          --exclude '.*mock.*' \
-          --txt-metric branch \
-          --xml \
-          --xml-pretty \
-          --output "${REPORTS_DIR}/coverage-sonar.xml" \
-          "${BUILD_DIR}"
+    log_info "Repo Root determined as: ${REPO_ROOT}"
+
+    gcovr \
+        --root "${REPO_ROOT}" \
+        --filter ".*Threadx/Core/Src/.*" \
+        --exclude ".*test.*" \
+        --exclude ".*mock.*" \
+        --txt-metric branch \
+        --xml \
+        --xml-pretty \
+        --output "${REPORTS_DIR}/coverage-sonar.xml" \
+        "${BUILD_DIR}"
 
     log_success "SonarQube XML: ${REPORTS_DIR}/coverage-sonar.xml"
 }
