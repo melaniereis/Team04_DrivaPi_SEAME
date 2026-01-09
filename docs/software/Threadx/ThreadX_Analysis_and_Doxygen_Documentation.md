@@ -527,7 +527,7 @@ VOID canRX(ULONG initial_input)
 
 ---
 
-## 13 - Conclusion
+## 12 - Conclusion
 
 The DrivaPi ThreadX implementation provides a robust embedded real-time system with:
 - **6 concurrent threads** managing motor control, sensor input, and CAN communication
