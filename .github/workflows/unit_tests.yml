@@ -33,10 +33,7 @@ jobs:
             build-essential \
             lcov \
             ruby \
-            ruby-dev \
-            git \
-            python3 \
-            python3-pip
+            ruby-dev
 
       - name: Install Ceedling and gcovr
         run: |
