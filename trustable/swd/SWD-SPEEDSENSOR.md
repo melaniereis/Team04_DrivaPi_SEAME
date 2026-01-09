@@ -1,5 +1,5 @@
 ---
-id: SWD-SpeedSensor
+id: SWD-SPEEDSENSOR
 header: "Speed Sensor Logic Implementation"
 text: |
   "The 'speed_sensor' software component shall implement the 'read_speed_sensor()' function to:
@@ -13,12 +13,12 @@ ASIL: "A"
 verification_method: "Unit Testing, Code Coverage, Static Analysis"
 
 parents:
-  - id: SRD-SpeedSensor
+  - id: SRD-SPEEDSENSOR
 
 children:
-  - id: LLTC-SpeedUnitTests
-  - id: LLTC-SpeedCoverage
-  - id: LLTC-SpeedStaticAnalysis
+  - id: LLTC-SPEEDUNITTESTS
+  - id: LLTC-SPEEDCOVERAGE
+  - id: LLTC-SPEEDSTATICANALYSIS
 
 reviewers:
   - name: "Bernardo Esteves"
