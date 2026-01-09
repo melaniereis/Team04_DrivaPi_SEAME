@@ -18,6 +18,7 @@ parents:
 children:
   - id: LLTC-SpeedUnitTests
   - id: LLTC-SpeedCoverage
+  - id: LLTC-SpeedStaticAnalysis
 
 reviewers:
   - name: "Bernardo Esteves"
