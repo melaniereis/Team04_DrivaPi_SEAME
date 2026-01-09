@@ -221,11 +221,9 @@ generate_coverage() {
 generate_sonarqube_xml() {
     log_header "Generating SonarQube XML"
 
-    local REPO_ROOT="$(cd "${PROJECT_ROOT}/../../.." && pwd)"
+    cd "${PROJECT_ROOT}"
 
-    cd "${REPO_ROOT}"
-
-    gcovr --root . \
+    gcovr --root "../../.." \
           --filter 'Threadx/Core/Src/.*' \
           --exclude '.*test.*' \
           --exclude '.*mock.*' \
