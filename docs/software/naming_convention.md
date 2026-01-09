@@ -6,8 +6,8 @@ The goal of this standard is **Visual Distinction**. You should be able to ident
 
 * **Files:** Compatibility (`snake_case`)
 * **Types & Functions:** Proper Nouns (`PascalCase`)
-* **Variables:** Instances (`camelCase`)
-* **Constants:** Screaming (`UPPER_CASE`)
+* **Variables:** Instances (`snake_case`)
+* **Constants:** Screaming (`UPPER_SNAKE_CASE`)
 
 ---
 
@@ -93,27 +93,27 @@ if (UartOp()) { // In this case, we can't immediately know what 'Op' means
 
 ## 5. Variables
 
-Variables represent "Instances". They use `camelCase` to visually sit "lower" than Types and Functions.
+Variables represent "Dara" and "Instances". They use `snake_case` to visually sit "lower" than Types and Functions.
 
-* **Format:** `camelCase`
-* **Local Variables:** Short and concise, offering immediate information about what it does.
-* **Function Arguments:** Descriptive `camelCase`.
+* **Format:** `snake_case`
+* **Pattern:** Lowercase, short and concise, offering immediate information about what it does. Descriptive `snake_case` with possibility to add unit information like `length_cm`. Should NOT have more than one underscore `_`.
 * **Pointer naming:** Do not use `p_var` or Hungarian notation (`pPtr`). The type is usually visible.
-* **Exceptions:** If defining the type of value for the variable, like speed in mps, or time in ms, use `speedMPS` or `timeMS`. The unit of measurement should be written in `CAPS` and should occupy the rightmost part of the variable's name.
+* **Exceptions:** If defining the type of value for the variable, like speed in mps, or time in ms, use `speed_mps` or `time_ms`. The unit of measurement should be separated by the underscore `_` and should occupy the rightmost part of the variable's name.
 
 ```c
 // Function arguments and local variables
-void DisplaySetBrightness(int brightnessLevel) {
-    int maxLevel = 255;
+void DisplaySetBrightness(int brightness_level) {
+    int max_level = 255;
 
-    if (brightnessLevel > maxLevel) {
-        brightnessLevel = maxLevel;
+    if (brightness_level > max_level) {
+        brightness_level = max_level;
     }
 }
 
 // Don't do this:
 void DisplaySetBrightness(int brightnessLevel) {
 	int n = 1; // In this case, 'n' should be called 'number', or 'num', at the very least.
+	char name_of_display // Here, 'name_of_display' can be switched to 'display_name' to simplify and de-clutter the code.
 }
 ```
 
