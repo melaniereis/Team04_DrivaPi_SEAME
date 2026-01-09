@@ -63,6 +63,7 @@ Functions represent "Actions." Because C does not have namespaces, **Function na
 * **Pattern:** `Module + Verb + Subject` (or `Module + Action`)
 * **Prefix:** Must match the filename (or logical module).
 * **Type:** Must be in lowercase, like `void`,`int`,`char`, etc. (unless specified otherwise in libs).
+* **Exceptions:** When defining a function with a **specific/complicated** name, such as including the specific chip name `PCA9685` in the related `InitDevice()` function, you should separate the specific name with an underscore `_`, like so: `PCA9685_InitDevice`.
 
 | Scope | Format | Pattern | Example |
 | --- | --- | --- | --- |
@@ -72,6 +73,7 @@ Functions represent "Actions." Because C does not have namespaces, **Function na
 ```c
 // Good Definition
 void UartTransmitByte(uint8_t data) { ... }
+void PCA9685_InitDevice() { ... }
 
 // Good Usage
 if (UartIsOpen()) {
@@ -79,7 +81,7 @@ if (UartIsOpen()) {
 }
 
 // Bad Definition
-VOID UartTx(uint8_t d) { ... } // 'VOID' should be 'void' to improve readability
+VOID UARTTx(uint8_t d) { ... } // 'VOID' should be 'void' to improve readability | UART can't be in CAPS because of case conflicts with the next word.
 
 // Bad Usage
 if (UartOp()) { // In this case, we can't immediately know what 'Op' means
@@ -96,7 +98,8 @@ Variables represent "Instances". They use `camelCase` to visually sit "lower" th
 * **Format:** `camelCase`
 * **Local Variables:** Short and concise, offering immediate information about what it does.
 * **Function Arguments:** Descriptive `camelCase`.
-* **Pointer naming:** Do not use Hungarian notation (`pPtr`). The type is usually visible.
+* **Pointer naming:** Do not use `p_var` or Hungarian notation (`pPtr`). The type is usually visible.
+* **Exceptions:** If defining the type of value for the variable, like speed in mps, or time in ms, use `speedMPS` or `timeMS`. The unit of measurement should be written in `CAPS` and should occupy the rightmost part of the variable's name.
 
 ```c
 // Function arguments and local variables
