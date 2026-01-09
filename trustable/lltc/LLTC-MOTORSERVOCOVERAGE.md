@@ -22,11 +22,11 @@ references:
 
 evidence:
   type: coverage_threshold_validator
-  references:
-    - type: "file"
-      path: "artifacts/verification/coverage/coverage.xml"
   configuration:
     min_line_rate: 90
+    references:
+    - type: "file"
+      path: "artifacts/verification/coverage/coverage.xml"
 
 active: true
 derived: false

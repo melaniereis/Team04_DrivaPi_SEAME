@@ -22,11 +22,11 @@ references:
 
 evidence:
   type: codeql_sarif_validator
-  references:
-    - type: "file"
-      path: "artifacts/verification/static_analysis/codeql.sarif"
   configuration:
     allowed_errors: 0
+    references:
+    - type: "file"
+      path: "artifacts/verification/static_analysis/codeql.sarif"
 
 active: true
 derived: false
