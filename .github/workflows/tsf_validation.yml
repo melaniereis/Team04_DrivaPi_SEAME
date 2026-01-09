@@ -72,6 +72,11 @@ jobs:
           trudag manage set-link SWD-SPEEDSENSOR LLTC-SPEEDUNITTESTS
           trudag manage set-link SWD-SPEEDSENSOR LLTC-SPEEDCOVERAGE
           trudag manage set-link SWD-SPEEDSENSOR LLTC-SPEEDSTATICANALYSIS
+
+          echo ""
+          cat .dotstop.dot
+          echo ""
+          echo "✅ Signatures forced successfully."
       # === END OF TEMPORARY FIX ===
 
       - name: Run trudag lint
