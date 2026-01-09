@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TypeAlias, Dict, List, Tuple
 import xml.etree.ElementTree as ET
 import os
+import json
 
 yaml: TypeAlias = str | int | float | bool | list["yaml"] | dict[str, "yaml"]
 
@@ -182,15 +183,12 @@ __all__ = [
 # ----------------------
 # Trudag signature fix
 # ----------------------
-# This block tries to make the function signatures match what Trudag expects.
-# If Trudag isn't available at install time, this block silently does nothing.
-# You don't need to understand this to use the validators; it's for integration.
 try:
     from trudag.dotstop.core.validator import Validator
 
     _validator_fns = [
         junit_pass_rate_validator,
-        cppcheck_error_validator,
+        codeql_sarif_validator,       # <--- CORREÇÃO 2: Nome da função corrigido
         coverage_threshold_validator,
     ]
 
