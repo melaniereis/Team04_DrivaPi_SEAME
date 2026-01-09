@@ -219,45 +219,22 @@ generate_coverage() {
 # ============================================================================
 
 generate_sonarqube_xml() {
-    log_header "Generating SonarQube XML (DEBUG MODE)"
+    log_header "Generating SonarQube XML"
 
     local REPO_ROOT="$(cd "${PROJECT_ROOT}/../../.." && pwd)"
-    log_info "Repo Root: ${REPO_ROOT}"
-    log_info "Build Dir: ${BUILD_DIR}"
 
-    # DEBUG 1: Verify .gcda files exist and where they are
-    log_info "--- DEBUG: Searching for .gcda files in Build Dir ---"
-    find "${BUILD_DIR}" -name "*.gcda" | head -n 5
-    echo "..."
-
-    # DEBUG 2: Verify Source file paths
-    log_info "--- DEBUG: Checking Source File Locations ---"
-    find "${REPO_ROOT}/Threadx/Core/Src" -name "*.c" | head -n 3
-
-    log_info "--- Running gcovr ---"
-
-    # We remove --xml temporarily to see stdout if needed, but here we keep it
-    # and add --verbose to see why it filters everything.
     gcovr \
-        --verbose \
         --root "${REPO_ROOT}" \
-        --filter ".*Threadx/Core/Src/.*" \
+        --filter ".*src/.*" \
         --exclude ".*test.*" \
         --exclude ".*mock.*" \
         --txt-metric branch \
         --xml \
         --xml-pretty \
         --output "${REPORTS_DIR}/coverage-sonar.xml" \
-        "${BUILD_DIR}" 2>&1 | tee "${REPORTS_DIR}/gcovr_debug.log"
+        "${BUILD_DIR}"
 
-    # DEBUG 3: Check if the XML is empty
-    if [[ -s "${REPORTS_DIR}/coverage-sonar.xml" ]]; then
-        log_success "SonarQube XML generated: ${REPORTS_DIR}/coverage-sonar.xml"
-        grep -C 2 "filename" "${REPORTS_DIR}/coverage-sonar.xml" | head -n 10 || echo "XML is valid but empty of classes"
-    else
-        log_fail "SonarQube XML is empty or missing!"
-        cat "${REPORTS_DIR}/gcovr_debug.log" | grep -i "filter" | head -n 20
-    fi
+    log_success "SonarQube XML: ${REPORTS_DIR}/coverage-sonar.xml"
 }
 
 # ============================================================================
