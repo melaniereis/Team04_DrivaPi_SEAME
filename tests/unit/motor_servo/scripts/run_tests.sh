@@ -224,7 +224,7 @@ generate_sonarqube_xml() {
     cd "${PROJECT_ROOT}"
 
     gcovr --root=. \
-          --filter='../Threadx/Core/Src/.*' \
+          --filter='../../../Threadx/Core/Src/.*' \  # <--- CHANGED: ../ became ../../../
           --exclude='.*test.*' \
           --exclude='.*mock.*' \
           --txt-metric branch \
