@@ -17,7 +17,7 @@ To meet the "Trustable" standard for ASIL A, the following verification activiti
     * **Target:** 100% Requirements Coverage.
 
 2.  **Static Analysis:**
-    * Must run `cppcheck` or equivalent.
+    * Must run `codeQL` or equivalent.
     * **Target:** Zero "Error" severity findings.
 
 3.  **Code Coverage:**

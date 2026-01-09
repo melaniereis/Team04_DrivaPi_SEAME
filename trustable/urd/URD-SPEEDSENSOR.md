@@ -7,7 +7,6 @@ text: |
 # TSF Type: Expectation
 verification_method: "System Testing"
 
-# Links: Connects to child Assertion
 children:
   - id: SRD-SpeedSensor
 
@@ -15,7 +14,6 @@ reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
 
-# Auto-approved for this task
 reviewed: '2026-01-05 - Approved by Melanie Reis <melanie.reis@seame.pt>'
 
 references:

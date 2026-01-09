@@ -7,7 +7,6 @@ text: |
 # TSF Type: Assertion
 verification_method: "Integration Testing"
 
-# Links
 parents:
   - id: URD-SpeedSensor
 children:

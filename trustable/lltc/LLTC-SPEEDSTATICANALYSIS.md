@@ -17,19 +17,18 @@ reviewers:
 
 reviewed: '2026-01-06 - Approved by Hugo Lopes <hugo.lopes@seame.pt>'
 
-#references:
-#  - type: "file"
-#    path: "artifacts/verification/static-analysis/codeql.sarif"
-#    description: "CodeQL SARIF Report"
+references:
+  - type: "file"
+    path: "artifacts/verification/static-analysis/codeql.sarif"
+    description: "CodeQL SARIF Report"
 
-# NEW VALIDATOR CONFIGURATION
-#evidence:
-#  type: codeql_sarif_validator
-#  configuration:
-#    allowed_errors: 0
-#    references:
-#    - type: file
-#      path: artifacts/verification/static-analysis/codeql.sarif
+evidence:
+  type: codeql_sarif_validator
+  configuration:
+    allowed_errors: 0
+    references:
+    - type: file
+      path: artifacts/verification/static-analysis/codeql.sarif
 
 active: true
 derived: false
