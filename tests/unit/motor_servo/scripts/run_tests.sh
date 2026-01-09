@@ -1,12 +1,12 @@
 #!/bin/bash
 ################################################################################
 # ISO 26262 Unit Test Automation Script
-# 
+#
 # Purpose: Execute unit tests with 100% branch coverage validation
 # ASIL Level: B/D
 # Author: DrivaPi Team
 # Version: 1.0.0
-# 
+#
 # Features:
 # - Automatic build cleanup
 # - Unit test execution with Ceedling
@@ -70,26 +70,26 @@ log_fail() { echo -e "${BOLD}${RED}✗ $*${NC}"; }
 
 check_prerequisites() {
     log_header "Checking Prerequisites"
-    
+
     local missing=()
-    
+
     command -v ruby >/dev/null 2>&1 || missing+=("ruby")
     command -v gcc >/dev/null 2>&1 || missing+=("gcc")
     command -v gcov >/dev/null 2>&1 || missing+=("gcov")
     command -v gcovr >/dev/null 2>&1 || missing+=("gcovr")
     command -v lcov >/dev/null 2>&1 || missing+=("lcov")
     command -v genhtml >/dev/null 2>&1 || missing+=("genhtml")
-    
+
     if ! gem list -i ceedling >/dev/null 2>&1; then
         missing+=("ceedling")
     fi
-    
+
     if [ ${#missing[@]} -gt 0 ]; then
         log_error "Missing tools: ${missing[*]}"
         log_info "Install: sudo apt-get install ruby gcc gcov lcov && pip3 install gcovr && gem install ceedling"
         exit 1
     fi
-    
+
     log_success "All prerequisites satisfied"
 }
 
@@ -99,21 +99,21 @@ check_prerequisites() {
 
 cleanup_build() {
     log_header "Cleaning Previous Build"
-    
+
     cd "${PROJECT_ROOT}"
-    
+
     if [ -d "${BUILD_DIR}" ]; then
         rm -rf "${BUILD_DIR}"
     fi
-    
+
     find . -type f \( -name "*.gcda" -o -name "*.gcno" -o -name "*.gcov" \) -delete
-    
+
     rm -rf "${REPORTS_DIR}"
     mkdir -p "${REPORTS_DIR}"
 
     # Pre-create Ceedling output folders to satisfy path validation and mock includes
     mkdir -p "${BUILD_DIR}/test/mocks" "${BUILD_DIR}/gcov/out"
-    
+
     log_success "Cleanup complete"
 }
 
@@ -142,13 +142,13 @@ ensure_vendor() {
 
 run_tests() {
     log_header "Running Unit Tests"
-    
+
     cd "${PROJECT_ROOT}"
-    
+
     ensure_vendor
 
     local log_file="${REPORTS_DIR}/test_output.log"
-    
+
     if ceedling gcov:all 2>&1 | tee "$log_file"; then
         log_success "All tests PASSED"
     else
@@ -160,13 +160,13 @@ run_tests() {
 
 run_speed_sensor_tests() {
     log_header "Speed Sensor Coverage Note"
-    
+
     # Note: The speed_sensor/ folder contains a comprehensive standalone test (404 lines)
     # that requires complex mock setup. The main project already includes robust speed sensor testing:
     # - test_speed_sensor_functions.c: Unit tests for speed calculation logic
     # - test_threadx_speed_sensor.c: Integration tests with ThreadX
     # These tests provide good coverage of speed sensor functionality.
-    
+
     log_info "Speed sensor tests executed:"
     log_info "  ✓ test_speed_sensor_functions.c"
     log_info "  ✓ test_threadx_speed_sensor.c"
@@ -181,11 +181,11 @@ run_speed_sensor_tests() {
 
 generate_coverage() {
     log_header "Generating Coverage Reports"
-    
+
     cd "${PROJECT_ROOT}"
-    
+
     mkdir -p "${COVERAGE_DIR}/html"
-    
+
     # LCOV report
     log_info "Generating LCOV report..."
     lcov --capture \
@@ -193,7 +193,7 @@ generate_coverage() {
          --output-file "${COVERAGE_DIR}/coverage.info" \
          --rc lcov_branch_coverage=1 \
          --ignore-errors source,gcov 2>&1 | grep -v "WARNING" || true
-    
+
     # Filter - Remove vendor/framework/test files
     lcov --remove "${COVERAGE_DIR}/coverage.info" \
          '/usr/*' '*/test/*' '*/mock_*' '*/unity/*' '*/cmock/*' '*vendor*' \
@@ -201,7 +201,7 @@ generate_coverage() {
          --output-file "${COVERAGE_DIR}/coverage_filtered.info" \
          --rc lcov_branch_coverage=1 \
          --ignore-errors unused 2>&1 | grep -v "WARNING" || true
-    
+
     # HTML report
     genhtml "${COVERAGE_DIR}/coverage_filtered.info" \
             --output-directory "${COVERAGE_DIR}/html" \
@@ -210,7 +210,7 @@ generate_coverage() {
             --function-coverage \
             --legend \
             --rc genhtml_branch_coverage=1
-    
+
     log_success "HTML report: ${COVERAGE_DIR}/html/index.html"
 }
 
@@ -220,18 +220,18 @@ generate_coverage() {
 
 generate_sonarqube_xml() {
     log_header "Generating SonarQube XML"
-    
+
     cd "${PROJECT_ROOT}"
-    
+
     gcovr --root=. \
           --filter='../Threadx/Core/Src/.*' \
           --exclude='.*test.*' \
           --exclude='.*mock.*' \
-          --branches \
+          --txt-metric branch \
           --xml \
           --xml-pretty \
           --output="${REPORTS_DIR}/coverage-sonar.xml"
-    
+
     log_success "SonarQube XML: ${REPORTS_DIR}/coverage-sonar.xml"
 }
 
@@ -241,7 +241,7 @@ generate_sonarqube_xml() {
 
 validate_coverage() {
     log_header "Validating Coverage (ISO 26262 ASIL-B/D)"
-    
+
     # Simply report that coverage was generated - detailed validation happens in Ceedling
     if [[ -f "${COVERAGE_DIR}/coverage_filtered.info" ]] || [[ -d "${COVERAGE_DIR}/html" ]]; then
         log_success "Coverage data available"
@@ -259,15 +259,15 @@ validate_coverage() {
 
 save_coverage_for_aggregation() {
     log_header "Saving Coverage for Aggregation"
-    
+
     # Save to persistent location (outside build/ to survive cleanup)
     # Use absolute path to ensure it goes to the right place
     # PROJECT_ROOT is set to motor_servo dir, so we need to go up 3 levels to reach drivapi/
     ABSOLUTE_PROJECT_ROOT="$(cd "${PROJECT_ROOT}/../.." && pwd)"
     PERSISTENT_COVERAGE_DIR="${ABSOLUTE_PROJECT_ROOT}/build/coverage/motor_servo"
-    
+
     mkdir -p "${PERSISTENT_COVERAGE_DIR}"
-    
+
     if [[ -f "${COVERAGE_DIR}/coverage_filtered.info" ]]; then
         cp "${COVERAGE_DIR}/coverage_filtered.info" "${PERSISTENT_COVERAGE_DIR}/coverage_filtered.info"
         log_success "Coverage saved for aggregation: ${PERSISTENT_COVERAGE_DIR}/coverage_filtered.info"
@@ -282,12 +282,12 @@ save_coverage_for_aggregation() {
 
 main() {
     local start_time=$(date +%s)
-    
+
     log_header "ISO 26262 Unit Test Automation - DrivaPi"
     echo -e "${BOLD}ASIL Level:${NC} B/D"
     echo -e "${BOLD}Coverage Requirement:${NC} 100% Branch Coverage"
     echo ""
-    
+
     check_prerequisites
     cleanup_build
     run_tests
@@ -295,15 +295,15 @@ main() {
     generate_coverage
     generate_sonarqube_xml
     save_coverage_for_aggregation
-    
+
     if ! validate_coverage; then
         log_fail "VALIDATION FAILED"
         exit 1
     fi
-    
+
     local end_time=$(date +%s)
     local duration=$((end_time - start_time))
-    
+
     echo ""
     log_header "✓ ALL TESTS PASSED - ISO 26262 COMPLIANT"
     log_info "Execution time: ${duration}s"
