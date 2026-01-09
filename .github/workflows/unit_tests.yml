@@ -17,7 +17,7 @@ jobs:
   unit_tests:
     name: Run Tests & Generate TSF Evidence
     runs-on: ubuntu-latest
-    
+
     env:
       BUILD_DIR: build/host
       COVERAGE_DIR: build/coverage
@@ -25,8 +25,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-        with:
-          ref: ${{ github.head_ref }}
 
       - name: Install dependencies
         run: |
@@ -81,58 +79,58 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            
+
             // Extract test results
             let testPassed = 0;
             let testFailed = 0;
             let motorServoCount = 0;
             let speedSensorCount = 0;
             let testSummary = '';
-            
+
             if (fs.existsSync('test_output.log')) {
               const logContent = fs.readFileSync('test_output.log', 'utf8');
-              
+
               // Extract test counts from [TEST_COUNT] markers
               const motorServoCountMatch = logContent.match(/\[TEST_COUNT\] Motor Servo:\s*(\d+)\s*tests/i);
               const speedSensorCountMatch = logContent.match(/\[TEST_COUNT\] Speed Sensor:\s*(\d+)\s*tests/i);
-              
+
               if (motorServoCountMatch) {
                 motorServoCount = parseInt(motorServoCountMatch[1]);
               }
               if (speedSensorCountMatch) {
                 speedSensorCount = parseInt(speedSensorCountMatch[1]);
               }
-              
+
               // Fallback: if markers not found, use defaults
               if (motorServoCount === 0) motorServoCount = 168;
               if (speedSensorCount === 0) speedSensorCount = 11;
-              
+
               testPassed = motorServoCount + speedSensorCount;
-              
+
               // Check for failure indicators in status lines
               const motorServoFailed = logContent.match(/\[INFO\] Motor Servo:\s+FAILED/i);
               const speedSensorFailed = logContent.match(/\[INFO\] Speed Sensor:\s+FAILED/i);
               testFailed = (motorServoFailed || speedSensorFailed) ? 1 : 0;
-              
+
               // Extract test status (PASSED or FAILED)
               const motorServoMatch = logContent.match(/\[INFO\] Motor Servo:\s+(PASSED|FAILED)/i);
               const speedSensorMatch = logContent.match(/\[INFO\] Speed Sensor:\s+(PASSED|FAILED)/i);
-              
+
               // Test status based on output
               const motorServoStatus = motorServoMatch ? motorServoMatch[1] : (testFailed === 0 ? 'PASSED' : 'FAILED');
               const speedSensorStatus = speedSensorMatch ? speedSensorMatch[1] : (testFailed === 0 ? 'PASSED' : 'FAILED');
-              
+
               // Check for coverage summary
               const coverageMatch = logContent.match(/lines.*?(\d+\.\d+)%.*?functions.*?(\d+\.\d+)%.*?branches.*?(\d+\.\d+)%/s);
-              const coverageInfo = coverageMatch ? 
+              const coverageInfo = coverageMatch ?
                 `\n#### 📊 Coverage\n- **Lines**: ${coverageMatch[1]}%\n- **Functions**: ${coverageMatch[2]}%\n- **Branches**: ${coverageMatch[3]}%\n` :
                 '\n#### 📊 Coverage\nCoverage report available in artifacts.\n';
-              
+
               testSummary = `
             ### 🧪 Unit Test Results
-            
+
             **Overall Status**: ${testPassed > 0 && testFailed === 0 ? '✅ PASSED' : '❌ FAILED'}
-            
+
             - **Motor Servo Tests**: ${motorServoStatus} (${motorServoCount} tests)
             - **Speed Sensor Tests**: ${speedSensorStatus} (${speedSensorCount} tests)
             ${coverageInfo}
@@ -140,13 +138,13 @@ jobs:
             Full coverage reports available in workflow artifacts
             `;
             }
-            
+
             // Always add to job summary
             await core.summary
               .addHeading('🧪 Unit Test Results', 2)
               .addRaw(testSummary || '🧪 Unit tests completed. Check logs for details.')
               .write();
-            
+
             // Try to post as comment (PR or commit)
             try {
               if (context.eventName === 'pull_request') {
