@@ -48,7 +48,7 @@ references:
     description: "Hazard Analysis (HARA)"
 
   - type: "file"
-    path: "docs/standards/iso26262/asil-justification-SWD-SPEEDSENSOR.md"
+    path: "docs/standards/iso26262/asil-justification-SWD-SpeedSensor.md"
     description: "ASIL A Justification and Verification Strategy"
 
 active: true

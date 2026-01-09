@@ -19,7 +19,7 @@ reviewed: '2026-01-05 - Approved by Bernardo Esteves <bernardo.esteves@seame.pt>
 
 references:
   - type: "file"
-    path: "Core/Test/speed_sensor/test_speed_sensor.c"
+    path: "tests/unit/speed_sensor/test/test_speed_sensor.c"
     description: "Test Source Code"
 
 evidence:

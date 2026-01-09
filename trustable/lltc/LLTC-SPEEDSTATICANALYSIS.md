@@ -19,7 +19,7 @@ reviewed: '2026-01-06 - Approved by Hugo Lopes <hugo.lopes@seame.pt>'
 
 references:
   - type: "file"
-    path: "artifacts/verification/static-analysis/codeql.sarif"
+    path: "artifacts/verification/static_analysis/codeql.sarif"
     description: "CodeQL SARIF Report"
 
 evidence:
@@ -28,7 +28,7 @@ evidence:
     allowed_errors: 0
     references:
     - type: file
-      path: artifacts/verification/static-analysis/codeql.sarif
+      path: artifacts/verification/static_analysis/codeql.sarif
 
 active: true
 derived: false

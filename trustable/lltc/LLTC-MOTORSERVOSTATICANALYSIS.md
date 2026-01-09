@@ -18,13 +18,13 @@ reviewed: '2026-01-07 - Approved by Miguel Cardoso <miguel.cardoso@seame.pt>'
 
 references:
   - type: "file"
-    path: "artifacts/verification/static-analysis/codeql.sarif"
+    path: "artifacts/verification/static_analysis/codeql.sarif"
 
 evidence:
   type: codeql_sarif_validator
   references:
     - type: "file"
-      path: "artifacts/verification/static-analysis/codeql.sarif"
+      path: "artifacts/verification/static_analysis/codeql.sarif"
   configuration:
     allowed_errors: 0
 
