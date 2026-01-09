@@ -96,7 +96,7 @@ if (UartOp()) { // In this case, we can't immediately know what 'Op' means
 Variables represent "Dara" and "Instances". They use `snake_case` to visually sit "lower" than Types and Functions.
 
 * **Format:** `snake_case`
-* **Pattern:** Lowercase, short and concise, offering immediate information about what it does. Descriptive `snake_case` with possibility to add unit information like `length_cm`. Should NOT have more than one underscore `_`.
+* **Pattern:** Lowercase, short and concise, offering immediate information about what it does. Descriptive `snake_case` with possibility to add unit information like `length_cm`. Try to not have more than one underscore `_`, although up to two underscores is acceptable, like: `is_first_run`.
 * **Pointer naming:** Do not use `p_var` or Hungarian notation (`pPtr`). The type is usually visible.
 * **Exceptions:** If defining the type of value for the variable, like speed in mps, or time in ms, use `speed_mps` or `time_ms`. The unit of measurement should be separated by the underscore `_` and should occupy the rightmost part of the variable's name.
 
@@ -113,7 +113,7 @@ void DisplaySetBrightness(int brightness_level) {
 // Don't do this:
 void DisplaySetBrightness(int brightnessLevel) {
 	int n = 1; // In this case, 'n' should be called 'number', or 'num', at the very least.
-	char name_of_display // Here, 'name_of_display' can be switched to 'display_name' to simplify and de-clutter the code.
+	char name_of_display_type // Here, 'name_of_display_type' can simply be switched to 'display_name' to simplify and de-clutter the code.
 }
 ```
 
