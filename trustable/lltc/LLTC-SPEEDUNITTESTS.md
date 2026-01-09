@@ -1,5 +1,5 @@
 ---
-id: LLTC-Speed-UnitTests
+id: LLTC-SPEEDUNITTESTS
 header: "Unit Test Verification for Speed Logic"
 text: |
   "All unit tests for the speed sensor module shall pass, confirming logic for
@@ -9,7 +9,7 @@ text: |
 verification_method: "Automated Unit Testing (CTest/Unity)"
 
 parents:
-  - id: SWD-SpeedSensor
+  - id: SWD-SPEEDSENSOR
 
 reviewers:
   - name: "Bernardo Esteves"

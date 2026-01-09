@@ -1,5 +1,5 @@
 ---
-id: SRD-SpeedSensor
+id: SRD-SPEEDSENSOR
 header: "Speed Calculation via Wheel Encoder"
 text: |
   "The system shall calculate the speed in m/s by measuring the time delta between wheel encoder pulses using a hardware timer, assuming a wheel perimeter of 0.212m and 30 pulses per revolution."
@@ -8,9 +8,9 @@ text: |
 verification_method: "Integration Testing"
 
 parents:
-  - id: URD-SpeedSensor
+  - id: URD-SPEEDSENSOR
 children:
-  - id: SWD-SpeedSensor
+  - id: SWD-SPEEDSENSOR
 
 reviewers:
   - name: "Melanie Reis"

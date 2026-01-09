@@ -1,15 +1,15 @@
 ---
-id: LLTC-SpeedStaticAnalysis
+id: LLTC-SPEEDSTATICANALYSIS
 header: "Static Code Analysis (CodeQL)"
 text: |
-  "The source code shall pass CodeQL security and quality queries with zero 
+  "The source code shall pass CodeQL security and quality queries with zero
   high-severity errors (as defined in the SARIF output)."
 
 # TSF Type: Evidence
 verification_method: "Static Analysis (GitHub CodeQL)"
 
 parents:
-  - id: SWD-SpeedSensor
+  - id: SWD-SPEEDSENSOR
 
 reviewers:
   - name: "Hugo Lopes"

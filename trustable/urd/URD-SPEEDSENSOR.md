@@ -1,5 +1,5 @@
 ---
-id: URD-SpeedSensor
+id: URD-SPEEDSENSOR
 header: "Vehicle Speed Monitoring"
 text: |
   "The DrivaPi system shall calculate and display the current vehicle linear speed to enable the operator to monitor the vehicle's state during autonomous operation."
@@ -8,7 +8,7 @@ text: |
 verification_method: "System Testing"
 
 children:
-  - id: SRD-SpeedSensor
+  - id: SRD-SPEEDSENSOR
 
 reviewers:
   - name: "Melanie Reis"
