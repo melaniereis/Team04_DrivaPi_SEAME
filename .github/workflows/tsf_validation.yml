@@ -47,8 +47,6 @@ jobs:
           pip install pyyaml
           git clone https://gitlab.com/CodethinkLabs/trustable/trustable.git /tmp/trustable
           cd /tmp/trustable
-          git fetch --tags || true
-          git checkout 2025.9.16 || git checkout master || echo "Using available branch"
           pip install .
           cd -
 
