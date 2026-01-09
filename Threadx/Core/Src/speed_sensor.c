@@ -5,7 +5,7 @@
 *
 * @return float
 */
-float read_speed_sensor(void)
+float ReadSpeedSensor(void)
 {
 	static ULONG last_time_ticks = 0;
 	static uint32_t last_count = 0;
@@ -53,7 +53,7 @@ float read_speed_sensor(void)
 * @param initial_input
 * @return VOID
 */
-VOID speed_sensor(ULONG initial_input)
+VOID SpeedSensor(ULONG initial_input)
 {
 	char msg[64];
 
@@ -73,14 +73,14 @@ VOID speed_sensor(ULONG initial_input)
 
 		tx_thread_sleep(100);
 
-		float current_speed = read_speed_sensor();
+		float current_speed = ReadSpeedSensor();
 
 		snprintf(msg, sizeof(msg), "Speed: %.2f m/s\r\n", current_speed);
 		HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), 100);
 
 
 		tx_mutex_get(&speed_data_mutex, TX_WAIT_FOREVER);
-		g_vehicle_speed = current_speed;
+		g_vehicleSpeed = current_speed;
 		tx_mutex_put(&speed_data_mutex);
 
 		tx_event_flags_set(&event_flags, FLAG_SENSOR_UPDATE, TX_OR);

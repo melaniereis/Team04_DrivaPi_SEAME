@@ -6,7 +6,7 @@
  * @param initial_input
  * @return VOID
  */
-VOID ld1_thread_entry(ULONG initial_input)
+void ld1_ThreadEntry(ULONG initial_input)
 {
 	const char *msg_tick = "Supervising\r\n";
 

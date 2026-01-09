@@ -10,10 +10,10 @@
 void FloatToUint8(uint8_t* buffer, float number, int precision)
 {
 	float val = (number < 0) ? -number : number;
-	int intPart = (int)val;
-	float remainder = val - intPart;
-	int decPart = (int)(remainder * pow(10, precision));
-	sprintf((char*)buffer, "%d.%0*d", intPart, precision, decPart);
+	int int_part = (int)val;
+	float remainder = val - int_part;
+	int dec_part = (int)(remainder * pow(10, precision));
+	sprintf((char*)buffer, "%d.%0*d", int_part, precision, dec_part);
 }
 
 /**
@@ -22,14 +22,14 @@ void FloatToUint8(uint8_t* buffer, float number, int precision)
 * @param msg
 * @param speed
 */
-void make_speed_status_msg(t_can_message *msg, float speed)
+void CraftSpeedMessage(t_can_message *msg, float speed)
 {
 	msg->id = 0x100;
 	msg->len = 4;
 
 	memcpy(msg->data, &speed, 4);
 	HAL_UART_Transmit(&huart1, (uint8_t*)msg->data, 4, 100);
-	can_send(msg);
+	CanSend(msg);
 }
 
 /**
@@ -38,23 +38,23 @@ void make_speed_status_msg(t_can_message *msg, float speed)
 * @param msg
 * @return int
 */
-int can_send(t_can_message* msg)
+int CanSend(t_can_message* msg)
 {
-	FDCAN_TxHeaderTypeDef TxHeader;
-	TxHeader.Identifier = msg->id;
-	TxHeader.IdType = FDCAN_STANDARD_ID;
-	TxHeader.TxFrameType = FDCAN_DATA_FRAME;
-	TxHeader.DataLength = FDCAN_DLC_BYTES_4;
-	TxHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
-	TxHeader.BitRateSwitch = FDCAN_BRS_OFF;
-	TxHeader.FDFormat = FDCAN_CLASSIC_CAN;
-	TxHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
-	TxHeader.MessageMarker = 0;
+	FDCAN_TxHeaderTypeDef tx_header;
+	tx_header.Identifier = msg->id;
+	tx_header.IdType = FDCAN_STANDARD_ID;
+	tx_header.TxFrameType = FDCAN_DATA_FRAME;
+	tx_header.DataLength = FDCAN_DLC_BYTES_4;
+	tx_header.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+	tx_header.BitRateSwitch = FDCAN_BRS_OFF;
+	tx_header.FDFormat = FDCAN_CLASSIC_CAN;
+	tx_header.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
+	tx_header.MessageMarker = 0;
 
-	char wUpmsg[20] = "TransCan!\r\n";
+	char wUpmsg[20] = "TransCan!\r\n"; // Refactor: wtf does this mean??
 	HAL_UART_Transmit(&huart1, (uint8_t*)wUpmsg, strlen(wUpmsg), 10);
 
-	if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, (uint8_t*)msg->data) != HAL_OK)
+	if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &tx_header, (uint8_t*)msg->data) != HAL_OK)
 	{
 		char err_msg[20] = "FailTransmitCAN!\r\n";
 		HAL_UART_Transmit(&huart1, (uint8_t*)err_msg, strlen(err_msg), 10);
@@ -69,7 +69,7 @@ int can_send(t_can_message* msg)
 * @param initial_input
 * @return VOID
 */
-VOID canTX(ULONG initial_input)
+VOID CanTx(ULONG initial_input)
 {
 	t_can_message msg;
 	ULONG actual_flags;
@@ -84,10 +84,10 @@ VOID canTX(ULONG initial_input)
 
 
 		tx_mutex_get(&speed_data_mutex, TX_WAIT_FOREVER);
-		float speed = g_vehicle_speed;
+		float speed = g_vehicleSpeed;
 		tx_mutex_put(&speed_data_mutex);
 
-		make_speed_status_msg(&msg, speed);
+		CraftSpeedMessage(&msg, speed);
 
 		tx_thread_sleep(10);
 	}

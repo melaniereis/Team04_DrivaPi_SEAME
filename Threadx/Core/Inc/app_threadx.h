@@ -96,14 +96,14 @@ UINT App_ThreadX_Init(VOID *memory_ptr);
 void MX_ThreadX_Init(void);
 
 /* USER CODE BEGIN EFP */
-VOID ld1_thread_entry(ULONG initial_input);
-VOID dc_motor(ULONG initial_input);
-VOID servo_motor(ULONG initial_input);
-VOID canRX(ULONG initial_input);
-VOID canTX(ULONG initial_input);
-VOID speed_sensor(ULONG initial_input);
-void thread_init(void);
-int can_send(t_can_message* msg);
+VOID ld1_ThreadEntry(ULONG initial_input);
+VOID DcMotor(ULONG initial_input);
+VOID ServoMotor(ULONG initial_input);
+VOID CanRx(ULONG initial_input);
+VOID CanTx(ULONG initial_input);
+VOID SpeedSensor(ULONG initial_input);
+void ThreadInit(void);
+int CanSend(t_can_message* msg);
 /* USER CODE END EFP */
 
 /* USER CODE BEGIN 1 */
@@ -112,7 +112,7 @@ extern TX_QUEUE             queue_speed_cmd;
 extern TX_QUEUE             queue_steer_cmd;
 extern TX_EVENT_FLAGS_GROUP	event_flags;
 extern TX_MUTEX             speed_data_mutex;
-extern float				g_vehicle_speed;
+extern float				g_vehicleSpeed;
 /* USER CODE END 1 */
 
 #ifdef __cplusplus

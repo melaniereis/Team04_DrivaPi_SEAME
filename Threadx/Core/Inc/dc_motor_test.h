@@ -8,7 +8,7 @@ extern "C" {
 #include "app_threadx.h"
 #include "dc_motor.h"
 
-void Motor_Test_High(double speed);
+void MotorTestHigh(double speed);
 
 #ifdef __cplusplus
 }

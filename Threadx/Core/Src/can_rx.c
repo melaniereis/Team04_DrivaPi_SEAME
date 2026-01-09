@@ -6,18 +6,18 @@
 * @param msg
 * @return uint8_t
 */
-uint8_t can_receive(t_can_message *msg)
+uint8_t CanReceive(t_can_message *msg)
 {
-	FDCAN_RxHeaderTypeDef rxHeader;
-	uint8_t rxData[8];
+	FDCAN_RxHeaderTypeDef rx_header;
+	uint8_t rx_data[8];
 
 	if (HAL_FDCAN_GetRxFifoFillLevel(&hfdcan1, FDCAN_RX_FIFO0) > 0)
 	{
-		if (HAL_FDCAN_GetRxMessage(&hfdcan1, FDCAN_RX_FIFO0, &rxHeader, rxData) == HAL_OK)
+		if (HAL_FDCAN_GetRxMessage(&hfdcan1, FDCAN_RX_FIFO0, &rx_header, rx_data) == HAL_OK)
 		{
-			msg->id = rxHeader.Identifier;
-			msg->len = (rxHeader.DataLength <= 8) ? rxHeader.DataLength : 8;
-			memcpy(msg->data, rxData, msg->len);
+			msg->id = rx_header.Identifier;
+			msg->len = (rx_header.DataLength <= 8) ? rx_header.DataLength : 8;
+			memcpy(msg->data, rx_data, msg->len);
 			return 1; // Message received
 		}
 	}
@@ -28,9 +28,9 @@ uint8_t can_receive(t_can_message *msg)
 * @brief
 *
 * @param initial_input
-* @return VOID
+* @return void
 */
-VOID canRX(ULONG initial_input)
+void CanRx(ULONG initial_input)
 {
 	t_can_message msg;
 
@@ -38,7 +38,7 @@ VOID canRX(ULONG initial_input)
 	while (1)
 	{
 		HAL_UART_Transmit(&huart1, (uint8_t*)msg_tick, strlen(msg_tick), 10);
-		if (can_receive(&msg))
+		if (CanReceive(&msg))
 		{
 			switch (msg.id)
 			{

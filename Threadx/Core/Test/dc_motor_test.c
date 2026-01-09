@@ -5,7 +5,7 @@
  *
  * @param s
  */
-static void UART_Print(const char *s)
+static void UartPrint(const char *s)
 {
     HAL_UART_Transmit(&huart1, (uint8_t*)s, strlen(s), HAL_MAX_DELAY);
 }
@@ -15,29 +15,29 @@ static void UART_Print(const char *s)
  *
  * @param speed
  */
-void Motor_Test_High(double speed) {
+void MotorTestHigh(double speed) {
 
-    UART_Print("-> FORWARD (1.5s)...\r\n");
-    Motor_Forward(speed);
+    UartPrint("-> FORWARD (1.5s)...\r\n");
+    MotorForward(speed);
     tx_thread_sleep(150);
     tx_thread_sleep(30);
 
-    UART_Print("-> BACKWARD (1.5s)...\r\n");
-    Motor_Backward(speed);
+    UartPrint("-> BACKWARD (1.5s)...\r\n");
+    MotorBackward(speed);
     tx_thread_sleep(150);
-    Motor_Stop();
+    MotorStop();
     tx_thread_sleep(30);
 
-    UART_Print("-> LEFT (1.2s)...\r\n");
-    Motor_Left(speed);
+    UartPrint("-> LEFT (1.2s)...\r\n");
+    MotorLeft(speed);
     tx_thread_sleep(120);
-    Motor_Stop();
+    MotorStop();
     tx_thread_sleep(30);
 
-    UART_Print("-> RIGHT (1.2s)...\r\n");
-    Motor_Right(speed);
+    UartPrint("-> RIGHT (1.2s)...\r\n");
+    MotorRight(speed);
     tx_thread_sleep(120);
-    Motor_Stop();
+    MotorStop();
 
-    UART_Print("Motor_Test_High: complete\r\n");
+    UartPrint("Motor_Test_High: complete\r\n");
 }

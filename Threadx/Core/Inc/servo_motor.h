@@ -40,11 +40,11 @@ extern "C" {
 * - Servo_Sweep: sweep servo between start and end angles stepping by
 *   angle_step_deg and pausing delay_ms between steps. Returns 0 on success.
 */
-int Servo_SetAngle(I2C_HandleTypeDef *hi2c, uint8_t addr7, uint8_t channel, uint16_t angle_deg, uint16_t min_pulse_counts,
-	uint16_t max_pulse_counts);
+int SetServoAngle(I2C_HandleTypeDef *hi2c, uint8_t addr7, uint8_t channel, uint16_t angle_deg, uint16_t min_pulse,
+	uint16_t max_pulse);
 
-int Servo_Sweep(I2C_HandleTypeDef *hi2c, uint8_t addr7, uint8_t channel, uint16_t angle_start_deg, uint16_t angle_end_deg,
-uint16_t angle_step_deg, uint32_t delay_ms, uint16_t min_pulse_counts, uint16_t max_pulse_counts);
+int ServoSweep(I2C_HandleTypeDef *hi2c, uint8_t addr7, uint8_t channel, uint16_t angleStartDeg, uint16_t angleEndDeg,
+uint16_t angleStepDeg, uint32_t delay_ms, uint16_t min_pulse, uint16_t max_pulse);
 
 extern I2C_HandleTypeDef hi2c3;
 

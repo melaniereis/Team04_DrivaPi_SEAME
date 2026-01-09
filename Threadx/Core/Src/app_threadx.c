@@ -46,11 +46,11 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
 thread_t				threads[6];
-TX_QUEUE                queue_speed_cmd;
-TX_QUEUE                queue_steer_cmd;
-TX_EVENT_FLAGS_GROUP    event_flags;
-TX_MUTEX                speed_data_mutex;
-float                   g_vehicle_speed;
+TX_QUEUE                queue_speed_cmd; // Refactor: What is this variable? Should be g_queueSpeedCmd
+TX_QUEUE                queue_steer_cmd; // Refactor: What is this variable? Should be g_queueSteerCmd
+TX_EVENT_FLAGS_GROUP    event_flags;//      Refactor: What is this variable? Should be g_eventFlags
+TX_MUTEX                speed_data_mutex;// Refactor: What is this variable? Should be g_SpeedDataMutex
+float                   g_vehicleSpeed;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -63,7 +63,7 @@ float                   g_vehicle_speed;
 * @param memory_ptr: memory pointer
 * @retval int
 */
-UINT App_ThreadX_Init(VOID *memory_ptr)
+UINT App_ThreadX_Init(void *memory_ptr)
 {
 	UINT ret = TX_SUCCESS;
 /* USER CODE BEGIN App_ThreadX_MEM_POOL */
@@ -71,18 +71,18 @@ UINT App_ThreadX_Init(VOID *memory_ptr)
 /* USER CODE END App_ThreadX_MEM_POOL */
 /* USER CODE BEGIN App_ThreadX_Init */
 
-	g_vehicle_speed = 0;
+	g_vehicleSpeed = 0;
 
 	const char *msg = "\r\n=== DrivaPi ThreadX Init ===\r\n";
 	HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
 
 	msg = "Initializing PCA9685 devices...\r\n";
 	HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
-	PCA9685_Init_All_Devices();
+	PCA9685_InitAllDevices();
 
 	msg = "Stopping motors...\r\n";
 	HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
-	Motor_Stop();
+	MotorStop();
 
 	tx_queue_create(&queue_speed_cmd, "Speed Queue", sizeof(t_can_message)/sizeof(ULONG),
 	memory_ptr, QUEUE_SIZE * sizeof(t_can_message));
@@ -96,7 +96,7 @@ UINT App_ThreadX_Init(VOID *memory_ptr)
 
 	msg = "Initializing threads...\r\n";
 	HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
-	thread_init();
+	ThreadInit();
 
 	msg = "=== Init Complete ===\r\n\r\n";
 	HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
@@ -104,7 +104,7 @@ UINT App_ThreadX_Init(VOID *memory_ptr)
 
 	return ret;
 }
-
+//We will lose this upon editing inside STM32CubeIDE:
 /**
 * @brief  Function that implements the kernel's initialization.
 * @param  None

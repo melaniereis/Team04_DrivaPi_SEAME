@@ -6,7 +6,7 @@
  * @param v
  * @return uint16_t
  */
-static inline uint16_t clamp_u16(int32_t v)
+static inline uint16_t ClampU16(int32_t v) // Refactor: wtf is v??
 {
 	if (v < 0)
 		return 0;
@@ -23,23 +23,23 @@ static inline uint16_t clamp_u16(int32_t v)
  * @param addr7
  * @param channel
  * @param angle_deg
- * @param min_pulse_counts
- * @param max_pulse_counts
+ * @param min_pulse
+ * @param max_pulse
  * @return int
  */
-int Servo_SetAngle(I2C_HandleTypeDef *hi2c, uint8_t addr7, uint8_t channel, uint16_t angle_deg, uint16_t min_pulse_counts,
-uint16_t max_pulse_counts)
+int SetServoAngle(I2C_HandleTypeDef *hi2c, uint8_t addr7, uint8_t channel, uint16_t angle_deg, uint16_t min_pulse,
+uint16_t max_pulse)
 {
 	if (angle_deg > 180u)
 		angle_deg = 180u;
 
-	if (min_pulse_counts >= max_pulse_counts)
+	if (min_pulse >= max_pulse)
 		return -1;
 
-	uint32_t range = (uint32_t)max_pulse_counts - (uint32_t)min_pulse_counts;
-	uint32_t pulse = (uint32_t)min_pulse_counts + (range * angle_deg) / 180u;
+	uint32_t range = (uint32_t)max_pulse - (uint32_t)min_pulse;
+	uint32_t pulse = (uint32_t)min_pulse + (range * angle_deg) / 180u;
 
-	HAL_StatusTypeDef st = PCA9685_SetPWM(hi2c, addr7, channel, 0, clamp_u16((int32_t)pulse));
+	HAL_StatusTypeDef st = PCA9685_SetPWM(hi2c, addr7, channel, 0, ClampU16((int32_t)pulse));
 	if (st != HAL_OK)
 		return -2;
 
@@ -52,16 +52,16 @@ uint16_t max_pulse_counts)
  * @param hi2c
  * @param addr7
  * @param channel
- * @param angle_start_deg
- * @param angle_end_deg
- * @param angle_step_deg
+ * @param start_angle
+ * @param end_angle
+ * @param step_angle
  * @param delay_ms
- * @param min_pulse_counts
- * @param max_pulse_counts
+ * @param min_pulse
+ * @param max_pulse
  * @return int
  */
-int Servo_Sweep(I2C_HandleTypeDef *hi2c, uint8_t addr7, uint8_t channel, uint16_t angle_start_deg, uint16_t angle_end_deg,
-uint16_t angle_step_deg, uint32_t delay_ms, uint16_t min_pulse_counts, uint16_t max_pulse_counts)
+int ServoSweep(I2C_HandleTypeDef *hi2c, uint8_t addr7, uint8_t channel, uint16_t start_angle, uint16_t end_angle,
+uint16_t step_angle, uint32_t delay_ms, uint16_t min_pulse, uint16_t max_pulse)
 {
 	double freq = (double)SERVO_DEFAULT_FREQ_HZ;
 	if (PCA9685_SetFrequency(hi2c, addr7, freq) != HAL_OK)
@@ -70,26 +70,26 @@ uint16_t angle_step_deg, uint32_t delay_ms, uint16_t min_pulse_counts, uint16_t 
 		HAL_UART_Transmit(&huart1, (uint8_t *)msg, strlen(msg), HAL_MAX_DELAY);
 	}
 
-	if (angle_step_deg == 0)
-		angle_step_deg = 1;
+	if (step_angle == 0)
+		step_angle = 1;
 
-	if (angle_start_deg <= angle_end_deg)
+	if (start_angle <= end_angle)
 	{
-		for (uint16_t angle = angle_start_deg; angle <= angle_end_deg; angle += angle_step_deg)
+		for (uint16_t angle = start_angle; angle <= end_angle; angle += step_angle)
 		{
-			Servo_SetAngle(hi2c, addr7, channel, angle, min_pulse_counts, max_pulse_counts);
+			SetServoAngle(hi2c, addr7, channel, angle, min_pulse, max_pulse);
 			HAL_Delay(delay_ms);
-			if (angle > UINT16_MAX - angle_step_deg)
+			if (angle > UINT16_MAX - step_angle)
 				break;
 		}
 	}
 	else
 	{
-		for (int angle = (int)angle_start_deg; angle >= (int)angle_end_deg; angle -= (int)angle_step_deg)
+		for (int angle = (int)start_angle; angle >= (int)end_angle; angle -= (int)step_angle)
 		{
-			Servo_SetAngle(hi2c, addr7, channel, (uint16_t)angle, min_pulse_counts, max_pulse_counts);
+			SetServoAngle(hi2c, addr7, channel, (uint16_t)angle, min_pulse, max_pulse);
 			HAL_Delay(delay_ms);
-			if (angle - (int)angle_step_deg > angle)
+			if (angle - (int)step_angle > angle)
 				break;
 		}
 	}
@@ -102,9 +102,9 @@ uint16_t angle_step_deg, uint32_t delay_ms, uint16_t min_pulse_counts, uint16_t 
  * @brief
  *
  * @param initial_input
- * @return VOID
+ * @return void
  */
-VOID servo_motor(ULONG initial_input)
+void ServoMotor(ULONG initial_input)
 {
 	t_can_message msg;
 	ULONG actual_flags;
@@ -117,7 +117,7 @@ VOID servo_motor(ULONG initial_input)
 		{
 			float angle_f = *((float *)msg.data);
 			uint16_t angle = (uint16_t)angle_f;
-			(void)Servo_SetAngle(&hi2c3, PCA9685_ADDR_SERVO, SERVO_CH, angle, SERVO_DEFAULT_MIN_PULSE_COUNTS, SERVO_DEFAULT_MAX_PULSE_COUNTS);
+			(void)SetServoAngle(&hi2c3, PCA9685_ADDR_SERVO, SERVO_CH, angle, SERVO_DEFAULT_MIN_PULSE_COUNTS, SERVO_DEFAULT_MAX_PULSE_COUNTS);
 		}
 		tx_thread_sleep(50);
 	}
