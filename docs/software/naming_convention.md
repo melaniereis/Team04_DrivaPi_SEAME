@@ -63,7 +63,7 @@ Functions represent "Actions." Because C does not have namespaces, **Function na
 * **Pattern:** `Module + Verb + Subject` (or `Module + Action`)
 * **Prefix:** Must match the filename (or logical module).
 * **Type:** Must be in lowercase, like `void`,`int`,`char`, etc. (unless specified otherwise in libs).
-* **Exceptions:** When defining a function with a **specific/complicated** name, such as including the specific chip name `PCA9685` in the related `InitDevice()` function, you should separate the specific name with an underscore `_`, like so: `PCA9685_InitDevice`.
+* **Exceptions:** When defining a function with a **specific/complicated** name, such as including the specific chip name `PCA9685` in the related `InitDevice()` function, you should separate the specific name with an underscore `_` and keep the rest in `PascalCase`, like so: `PCA9685_InitDevice`.
 
 | Scope | Format | Pattern | Example |
 | --- | --- | --- | --- |
