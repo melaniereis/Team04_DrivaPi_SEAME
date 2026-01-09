@@ -23,7 +23,6 @@ children:
 reviewers:
   - name: "Bernardo Esteves"
     email: "bernardo.esteves@seame.pt"
-
 reviewed: '2026-01-05 - Approved by Bernardo Esteves <bernardo.esteves@seame.pt>'
 
 references:
