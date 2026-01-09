@@ -1,7 +1,7 @@
 # dotstop_extensions/validators.py
 from __future__ import annotations
 from typing import TypeAlias, Dict, List, Tuple
-import xml.etree.ElementTree as ET 
+import xml.etree.ElementTree as ET
 import os
 
 yaml: TypeAlias = str | int | float | bool | list["yaml"] | dict[str, "yaml"]
@@ -26,8 +26,8 @@ def _path_from_config(configuration: dict | None) -> str | None:
 # -------------------------
 def junit_pass_rate_validator(configuration: dict[str, yaml]) -> tuple[float, list[Exception | Warning]]:
     try:
-        cfg = configuration or {}  
-        path = _path_from_config(cfg) 
+        cfg = configuration or {}
+        path = _path_from_config(cfg)
         if not path:
             return (0.0, [ValueError("No path provided in validator configuration (references or path).")])
         if not os.path.exists(path):
@@ -116,7 +116,7 @@ def coverage_threshold_validator(configuration: Dict) -> Tuple[float, List[Excep
         tree = ET.parse(path)
         root = tree.getroot()
 
-        coverage = None 
+        coverage = None
         def _to_percent(s: str) -> float | None:
             try:
                 v = float(s)
@@ -158,7 +158,7 @@ def coverage_threshold_validator(configuration: Dict) -> Tuple[float, List[Excep
                 "(root, metrics, statistics/coverage) in coverage file"
             )])
 
-        min_cov = float(cfg.get("min_line_rate", 80))
+        min_cov = float(cfg.get("min_line_rate", 90))
         if min_cov <= 0:
             return (0.0, [ValueError("Invalid min_line_rate in configuration")])
 
