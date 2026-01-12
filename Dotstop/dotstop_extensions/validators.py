@@ -179,7 +179,6 @@ __all__ = [
     "coverage_threshold_validator",
 ]
 
-
 # ----------------------
 # Trudag signature fix
 # ----------------------
