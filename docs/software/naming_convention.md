@@ -168,8 +168,8 @@ When renaming your legacy code, follow these patterns to ensure consistency:
 #define buff_size 128
 
 typedef struct {
-    int baud;
-    int is_open;
+    int BaudRate;
+    bool IsOpen;
 } serial_config_t;
 
 serial_config_t cfg;
@@ -191,14 +191,14 @@ int send(char * p) {
 #define SERIAL_BUFFER_SIZE 128
 
 typedef struct {
-    int BaudRate;
-    bool IsOpen;
+	int baud;
+    int is_open;
 } SerialConfig;
 
 SerialConfig g_serialConfig;
 
 void SerialInit(void) {
-    g_serialConfig.BaudRate = 9600;
+    g_serialConfig.baud = 9600;
 }
 
 int SerialSendString(char* payload) {
