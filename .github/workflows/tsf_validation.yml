@@ -9,24 +9,38 @@ permissions:
   pull-requests: write
   checks: write
   actions: read
+  security-events: write
 
 jobs:
   run-tests:
     uses: ./.github/workflows/unit_tests.yml
 
+  run-codeql:
+    uses: ./.github/workflows/firmware_static.yml
+
   tsf-validation:
-    needs: run-tests
+    needs: [run-tests, run-codeql]
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Download Verification Artifacts
+      - name: Download Unit Test Evidence
         uses: actions/download-artifact@v4
         with:
           name: verification-artifacts
           path: artifacts/verification
+
+      - name: Download Static Analysis Evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: codeql-sarif-filtered
+          path: artifacts/verification/static_analysis
+
+      - name: Fix SARIF Filename
+        run: |
+          mv artifacts/verification/static_analysis/*.sarif artifacts/verification/static_analysis/codeql.sarif
+
+          echo "📂 Verified Evidence Layout:"
+          ls -R artifacts/verification
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
@@ -108,7 +122,7 @@ jobs:
         with:
           name: tsf-validation-artifacts
           path: |
-            artifacts/tsf/
+            artifacts/tsf
             .dotstop.dot
           retention-days: 30
 
