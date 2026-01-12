@@ -291,4 +291,5 @@ void PCA9685_InitAllDevices(void)
 			}
 		}
 	}
+	MotorStop();
 }

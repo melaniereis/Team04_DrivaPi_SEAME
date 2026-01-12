@@ -12,8 +12,7 @@
 extern "C" {
 #endif
 
-#include "pca9685.h"
-#include "dc_motor_test.h"
+
 #include "app_threadx.h"
 
 #define PCA9685_ADDR_MOTOR 0x60

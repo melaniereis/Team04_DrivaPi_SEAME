@@ -16,7 +16,6 @@ extern "C" {
 #endif
 
 #include "app_threadx.h"
-#include "dc_motor.h"
 
 void MotorTestHigh(double speed);
 

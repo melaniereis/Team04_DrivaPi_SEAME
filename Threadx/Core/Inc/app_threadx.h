@@ -35,6 +35,10 @@ extern "C" {
 #include <stdint.h>
 #include <math.h>
 #include "main.h"
+#include "pca9685.h"
+#include "dc_motor.h"
+#include "servo_motor.h"
+#include "dc_motor_test.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
