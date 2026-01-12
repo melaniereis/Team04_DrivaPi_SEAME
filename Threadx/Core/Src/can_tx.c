@@ -1,3 +1,13 @@
+/**
+  ******************************************************************************
+  * @file    can_tx.c
+  * @author  DrivaPi Team
+  * @brief   This file contains the CAN TX thread function. This thread is responsible
+  *          for sending CAN messages based on the vehicle's speed data.
+  ******************************************************************************
+  * @attention
+  *
+*/
 #include "app_threadx.h"
 
 /**

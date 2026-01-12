@@ -1,11 +1,9 @@
-/* USER CODE BEGIN Header */
 /**
 ******************************************************************************
 * @file           : servo_motor.h
 * @brief          : Servo motor control header
 ******************************************************************************
 */
-/* USER CODE END Header */
 
 #ifndef __SERVO_MOTOR_H
 #define __SERVO_MOTOR_H

@@ -1,3 +1,13 @@
+/**
+  ******************************************************************************
+  * @file    Threadx/Core/Src/servo_motor.c
+  * @author  DrivaPi Team
+  * @brief   This file contains the servo motor control functions.
+  ******************************************************************************
+  * @attention
+  *
+  */
+
 #include "servo_motor.h"
 
 /**

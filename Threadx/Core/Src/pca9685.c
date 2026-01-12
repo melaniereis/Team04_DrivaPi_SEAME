@@ -250,6 +250,10 @@ HAL_StatusTypeDef PCA9685_SetFrequency(I2C_HandleTypeDef *hi2c, uint8_t addr7, d
 	return HAL_OK;
 }
 
+/** @param hi2c
+ * @param addr
+ * @return
+ */
 HAL_StatusTypeDef PCA9685_Sleep(I2C_HandleTypeDef *hi2c, uint16_t addr)
 {
 	uint8_t data[2];

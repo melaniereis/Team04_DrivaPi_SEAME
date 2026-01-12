@@ -1,3 +1,13 @@
+/**
+  ******************************************************************************
+  * @file    Threadx/Core/Src/thread_init.c
+  * @author  DrivaPi Team
+  * @brief   This file contains the thread initialization function.
+  ******************************************************************************
+  * @attention
+  *
+  */
+
 #include "app_threadx.h"
 
 /**

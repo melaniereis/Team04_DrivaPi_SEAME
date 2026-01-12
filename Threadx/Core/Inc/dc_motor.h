@@ -1,11 +1,9 @@
-/* USER CODE BEGIN Header */
 /**
 ******************************************************************************
 * @file           : dc_motor.h
 * @brief          : DC motor control header
 ******************************************************************************
 */
-/* USER CODE END Header */
 
 #ifndef __DC_MOTOR_H
 #define __DC_MOTOR_H
