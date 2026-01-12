@@ -42,9 +42,9 @@ typedef struct {
 
 // Good
 typedef enum {
-    StateIdle,
-    StateRunning,
-    StateError
+    STATE_IDLE,
+    STATE_RUNNING,
+    STATE_ERROR
 } SystemState;
 
 // Usage is clean and readable:
@@ -140,7 +140,7 @@ Preprocessor definitions must be visually jarring to warn the developer that the
 | Type | Format | Example |
 | --- | --- | --- |
 | #define Macros | `UPPER_SNAKE_CASE` | `MAX_BUFFER_SIZE` |
-| Enum Values | `PascalCase` | `ColorRed`, `ColorBlue` (Scoped to Enum name if possible) |
+| Enum Values | `UPPER_SNAKE_CASE` | `COLOR_RED`, `COLOR_BLUE` (Scoped to Enum name if possible) |
 | Const Variables | `kPascalCase` | `kDefaultTimeout` |
 
 ---
