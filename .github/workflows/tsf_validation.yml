@@ -40,6 +40,28 @@ jobs:
 
       - name: Organize Evidence
         run: |
+          # Debug: Show us what was actually downloaded
+          echo "🔎 Inspecting downloaded CodeQL artifact:"
+          ls -R temp_codeql
+
+          # Create the destination directory
+          mkdir -p artifacts/verification/static_analysis
+
+          # Robust Fix: Find the .sarif file wherever it is and copy it to the target
+          # This works whether it is in 'temp_codeql/cpp.sarif' or 'temp_codeql/results/cpp.sarif'
+          find temp_codeql -name "*.sarif" -exec cp {} artifacts/verification/static_analysis/codeql.sarif \;
+
+          # Check if the copy worked
+          if [ ! -f artifacts/verification/static_analysis/codeql.sarif ]; then
+             echo "❌ Error: Could not find or copy codeql.sarif"
+             exit 1
+          fi
+
+          echo "✅ Evidence organized successfully:"
+          ls -R artifacts/verification
+
+      - name: Organize Evidence
+        run: |
           mkdir -p artifacts/verification/static_analysis
           cp temp_codeql/results/cpp.sarif artifacts/verification/static_analysis/codeql.sarif
 
