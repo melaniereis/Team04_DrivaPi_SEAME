@@ -48,11 +48,6 @@ Gemfile.lock
 # Note: Keep .dotstop.dot for tracking
 # .dotstop.dot
 
-# Artifacts (generated files - KEEP verification artifacts for evidence linking)
-# TSF Verification Artifacts (COMMIT THESE - needed for evidence linking)
-!artifacts/verification/
-!artifacts/verification/**
-
 # Traceability reports (regenerated, don't commit)
 artifacts/traceability/*.csv
 artifacts/traceability/*.md
