@@ -93,7 +93,7 @@ if (UartOp()) { // In this case, we can't immediately know what 'Op' means
 
 ## 5. Variables
 
-Variables represent "Dara" and "Instances". They use `snake_case` to visually sit "lower" than Types and Functions.
+Variables represent "Data" and "Instances". They use `snake_case` to visually sit "lower" than Types and Functions.
 
 * **Format:** `snake_case`
 * **Pattern:** Lowercase, short and concise, offering immediate information about what it does. Descriptive `snake_case` with possibility to add unit information like `length_cm`. Try to not have more than one underscore `_`, although up to two underscores is acceptable, like: `is_first_run`.
