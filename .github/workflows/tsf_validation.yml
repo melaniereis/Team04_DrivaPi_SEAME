@@ -23,24 +23,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download Unit Test Evidence
-        uses: actions/download-artifact@v4
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Download Verification Artifacts
+        uses: actions/download-artifact@v7
         with:
           name: verification-artifacts
           path: artifacts/verification
-
-      - name: Download Static Analysis Evidence
-        uses: actions/download-artifact@v4
-        with:
-          name: codeql-sarif-filtered
-          path: artifacts/verification/static_analysis
-
-      - name: Fix SARIF Filename
-        run: |
-          mv artifacts/verification/static_analysis/*.sarif artifacts/verification/static_analysis/codeql.sarif
-
-          echo "📂 Verified Evidence Layout:"
-          ls -R artifacts/verification
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
