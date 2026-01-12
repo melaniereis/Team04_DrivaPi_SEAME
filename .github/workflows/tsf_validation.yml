@@ -64,15 +64,15 @@ jobs:
           pip install .
           cd -
 
-      - name: Install local validators
-        run: pip install -e Dotstop
-
       - name: Debug Directory Structure
         run: |
           echo "Current location: $(pwd)"
           ls -la
           echo "Checking Dotstop folder:"
           ls -la Dotstop || echo "Dotstop folder not found!"
+
+      - name: Install local validators
+        run: pip install -e Dotstop
 
       - name: Create temporary symlink to .dotstop.dot
         run: ln -sf Dotstop/.dotstop.dot .dotstop.dot
