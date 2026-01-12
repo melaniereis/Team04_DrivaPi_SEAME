@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install dependencies
         run: |
@@ -51,17 +51,11 @@ jobs:
 
       - name: Run Tests (Master Script)
         run: |
-          # This script now generates artifacts directly into artifacts/verification
           chmod +x tests/unit/run_all_tests.sh
           bash tests/unit/run_all_tests.sh 2>&1 | tee test_output.log
 
-      - name: Verify Artifacts Exist (Debug)
-        run: |
-          echo "📂 Checking TSF Evidence..."
-          ls -R artifacts/verification
-
       - name: Upload Verification Artifacts (TSF)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: verification-artifacts
@@ -70,7 +64,7 @@ jobs:
 
       - name: Upload Coverage HTML
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: coverage-html
           path: build/coverage/html
