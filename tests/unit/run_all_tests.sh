@@ -196,7 +196,7 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
     fi
 fi
 
-# ===== Generate TSF Artifacts =====# ... (Keep the lcov aggregation part that works) ...
+# ===== Generate TSF Artifacts =====
 if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
     log_section "Generating TSF Artifacts"
 
@@ -207,29 +207,32 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
     XML_OUT="artifacts/verification/coverage/coverage.xml"
 
     if [[ -f "$LCOV_INFO" ]]; then
-        echo "[INFO] Converting LCOV info to Cobertura XML..."
         if command -v lcov_cobertura &> /dev/null; then
             lcov_cobertura "$LCOV_INFO" --output "$XML_OUT"
             log_pass "Coverage XML saved: $XML_OUT"
         else
-            log_warn "lcov_cobertura not found. Install with: pip3 install lcov_cobertura"
-            log_warn "Attempting fallback to gcovr..."
-
             gcovr --root . --xml-pretty --output "$XML_OUT" .
         fi
-    else
-        log_fail "LCOV info file not found: $LCOV_INFO"
     fi
 
-    JUNIT_SRC=""
-    if [[ -f "tests/unit/motor_servo/build/artifacts/gcov/junit_tests_report.xml" ]]; then
-        JUNIT_SRC="tests/unit/motor_servo/build/artifacts/gcov/junit_tests_report.xml"
-    fi
+    XML_TEST_OUT="artifacts/verification/tests/junit_results.xml"
+    JUNIT_1="tests/unit/motor_servo/build/artifacts/gcov/junit_tests_report.xml"
+    JUNIT_2="tests/unit/speed_sensor/build/artifacts/gcov/junit_tests_report.xml"
 
-    if [[ -n "${JUNIT_SRC}" && -f "${JUNIT_SRC}" ]]; then
-        cp "${JUNIT_SRC}" "artifacts/verification/tests/junit_results.xml"
-        log_pass "JUnit XML saved."
-    fi
+    echo '<?xml version="1.0" encoding="UTF-8" ?>' > "$XML_TEST_OUT"
+    echo '<testsuites>' >> "$XML_TEST_OUT"
+
+    append_xml_content() {
+        if [[ -f "$1" ]]; then
+            grep -v '<?xml' "$1" | grep -v '<testsuites' | grep -v '</testsuites>' >> "$XML_TEST_OUT"
+        fi
+    }
+
+    append_xml_content "$JUNIT_1"
+    append_xml_content "$JUNIT_2"
+
+    echo '</testsuites>' >> "$XML_TEST_OUT"
+    log_pass "Merged JUnit XML saved."
 fi
 
 # ===== Final Summary =====
