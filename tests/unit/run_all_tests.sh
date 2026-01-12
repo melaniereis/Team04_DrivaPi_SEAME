@@ -18,15 +18,12 @@ set -e
 set -u
 set -o pipefail
 
-# Ensure we have absolute paths
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly PROJECT_ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
-# Define sub-project directories
 readonly MOTOR_SERVO_DIR="${SCRIPT_DIR}/motor_servo"
 readonly SPEED_SENSOR_DIR="${SCRIPT_DIR}/speed_sensor"
 
-# Handle coverage directory (Absolute Path)
 if [[ -n "${COVERAGE_DIR:-}" ]]; then
     if [[ "$COVERAGE_DIR" == /* ]]; then
         MASTER_COVERAGE_DIR="$COVERAGE_DIR"
@@ -39,12 +36,10 @@ fi
 
 readonly ARTIFACTS_DIR="${PROJECT_ROOT_DIR}/artifacts/verification"
 
-# Create directories
 mkdir -p "${MASTER_COVERAGE_DIR}"
 mkdir -p "${ARTIFACTS_DIR}/tests"
 mkdir -p "${ARTIFACTS_DIR}/coverage"
 
-# Colors
 if [[ -t 1 ]]; then
     readonly RED='\033[0;31m'
     readonly GREEN='\033[0;32m'
@@ -121,13 +116,11 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
 
     MOTOR_SERVO_COVERAGE="${MOTOR_SERVO_DIR}/build/artifacts/gcov/coverage_filtered.info"
 
-    # Check root dir of speed_sensor (where run_speedtest.sh puts it) first
     SPEED_SENSOR_COVERAGE="${SPEED_SENSOR_DIR}/coverage_filtered.info"
     if [[ ! -f "${SPEED_SENSOR_COVERAGE}" ]]; then
         SPEED_SENSOR_COVERAGE="${SPEED_SENSOR_DIR}/build/artifacts/gcov/coverage_filtered.info"
     fi
 
-    # Check persistent locations
     PERSISTENT_MOTOR_SERVO="${SCRIPT_DIR}/../../build/coverage/motor_servo/coverage_filtered.info"
     PERSISTENT_SPEED_SENSOR="${SCRIPT_DIR}/../../build/coverage/speed_sensor/coverage_filtered.info"
 
@@ -145,14 +138,12 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
         COMBINED="${MASTER_COVERAGE_DIR}/coverage_combined.info"
         FILTERED="${MASTER_COVERAGE_DIR}/coverage_filtered.info"
 
-        # Merge coverage files
         log_info "Merging tracefiles to ${COMBINED}..."
         lcov -a "${MOTOR_SERVO_COVERAGE}" -a "${SPEED_SENSOR_COVERAGE}" \
              -o "${COMBINED}" \
              --rc lcov_branch_coverage=1
 
         if [[ -f "${COMBINED}" ]]; then
-            # Extract source files only
             log_info "Filtering tracefiles..."
             lcov -r "${COMBINED}" \
                  '/usr/*' '*vendor*' '*cmock*' '*unity*' '*c_exception*' \
@@ -161,7 +152,6 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
                  --rc lcov_branch_coverage=1 || \
             cp "${COMBINED}" "${FILTERED}"
 
-            # Generate HTML
             if command -v genhtml &> /dev/null; then
                 HTML="${MASTER_COVERAGE_DIR}/html"
                 log_info "Generating HTML to ${HTML}..."
@@ -251,13 +241,11 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
     echo -e "${BOLD}${GREEN}============================================================================${NC}"
     echo -e "${BOLD}${GREEN} ✓ ALL TESTS PASSED - ISO 26262 COMPLIANT${NC}"
 
-    # Determine which coverage report to show
     if [[ -f "${MASTER_COVERAGE_DIR}/html/index.html" ]]; then
         echo -e "${BOLD}${GREEN} Coverage (Aggregated): ${MASTER_COVERAGE_DIR}/html/index.html${NC}"
     elif [[ -f "${MASTER_COVERAGE_DIR}/index.html" ]]; then
         echo -e "${BOLD}${GREEN} Coverage Index: ${MASTER_COVERAGE_DIR}/index.html${NC}"
     else
-        # Fall back to individual reports
         echo -e "${BOLD}${GREEN} Coverage Reports:${NC}"
         echo -e "${BOLD}${GREEN}   Motor Servo:   ${MOTOR_SERVO_DIR}/build/artifacts/gcov/html/index.html${NC}"
         echo -e "${BOLD}${GREEN}   Speed Sensor:  ${SPEED_SENSOR_DIR}/coverage_report/index.html${NC}"
