@@ -16,17 +16,13 @@ reviewers:
     email: "miguel.cardoso@seame.pt"
 reviewed: '2026-01-07 - Approved by Miguel Cardoso <miguel.cardoso@seame.pt>'
 
-references:
-  - type: "file"
-    path: "artifacts/verification/static_analysis/codeql.sarif"
-
 evidence:
   type: codeql_sarif_validator
   configuration:
     allowed_errors: 0
     references:
-    - type: "file"
-      path: "artifacts/verification/static_analysis/codeql.sarif"
+    - type: file
+      path: artifacts/verification/static_analysis/codeql.sarif
 
 active: true
 derived: false
