@@ -44,10 +44,6 @@ Gemfile.lock
 .DS_Store
 .settings
 
-# TSF/Doorstop
-# Note: Keep .dotstop.dot for tracking
-# .dotstop.dot
-
 # Traceability reports (regenerated, don't commit)
 artifacts/traceability/*.csv
 artifacts/traceability/*.md
