@@ -188,7 +188,7 @@ try:
 
     _validator_fns = [
         junit_pass_rate_validator,
-        codeql_sarif_validator,       # <--- CORREÇÃO 2: Nome da função corrigido
+        codeql_sarif_validator,
         coverage_threshold_validator,
     ]
 
