@@ -16,17 +16,13 @@ reviewers:
     email: "miguel.cardoso@seame.pt"
 reviewed: '2026-01-07 - Approved by Miguel Cardoso <miguel.cardoso@seame.pt>'
 
-references:
-  - type: "file"
-    path: "artifacts/verification/coverage/coverage.xml"
-
 evidence:
   type: coverage_threshold_validator
   configuration:
     min_line_rate: 90
     references:
-    - type: "file"
-      path: "artifacts/verification/coverage/coverage.xml"
+    - type: file
+      path: artifacts/verification/coverage/coverage.xml
 
 active: true
 derived: false
