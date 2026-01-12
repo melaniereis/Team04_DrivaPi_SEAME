@@ -1,8 +1,6 @@
 name: "CodeQL C Analysis for STM32"
 
 on:
-  push:
-  pull_request:
   workflow_dispatch:
   workflow_call:
 
