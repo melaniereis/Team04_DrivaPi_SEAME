@@ -214,7 +214,7 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
 
     append_xml_content() {
         if [[ -f "$1" ]]; then
-            grep -v '<?xml' "$1" | grep -v '<testsuites' | grep -v '</testsuites>' >> "$XML_TEST_OUT"
+            grep -v '<?xml' "$1" | grep -v '<testsuites[[:space:]]*>' | grep -v '</testsuites[[:space:]]*>' >> "$XML_TEST_OUT"
         fi
     }
 
