@@ -66,10 +66,10 @@ jobs:
           cd -
 
       - name: Install local validators
-        run: pip install -e Dotstop
+        run: pip install -e dotstop
 
       - name: Create temporary symlink to .dotstop.dot
-        run: ln -sf Dotstop/.dotstop.dot .dotstop.dot
+        run: ln -sf dotstop/.dotstop.dot .dotstop.dot
 
       - name: Run trudag lint
         id: lint
