@@ -1,12 +1,12 @@
 #!/bin/bash
 ################################################################################
 # Master Unit Test Automation Script with Aggregated Coverage
-# 
+#
 # Purpose: Execute all unit tests and generate unified coverage report
 # ASIL Level: B/D
 # Author: DrivaPi Team
-# Version: 2.1.0
-# 
+# Version: 2.1.4
+#
 # Features:
 # - Run motor_servo and speed_sensor tests sequentially
 # - Aggregate LCOV coverage reports into single report (source only)
@@ -14,28 +14,32 @@
 # - Color-coded output
 ################################################################################
 
-
 set -e
 set -u
 set -o pipefail
 
-
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly PROJECT_ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+
 readonly MOTOR_SERVO_DIR="${SCRIPT_DIR}/motor_servo"
 readonly SPEED_SENSOR_DIR="${SCRIPT_DIR}/speed_sensor"
 
+if [[ -n "${COVERAGE_DIR:-}" ]]; then
+    if [[ "$COVERAGE_DIR" == /* ]]; then
+        MASTER_COVERAGE_DIR="$COVERAGE_DIR"
+    else
+        MASTER_COVERAGE_DIR="${PROJECT_ROOT_DIR}/${COVERAGE_DIR}"
+    fi
+else
+    MASTER_COVERAGE_DIR="${SCRIPT_DIR}/coverage"
+fi
 
-MASTER_COVERAGE_DIR="${COVERAGE_DIR:-${SCRIPT_DIR}/coverage}"
 readonly ARTIFACTS_DIR="${PROJECT_ROOT_DIR}/artifacts/verification"
-
 
 mkdir -p "${MASTER_COVERAGE_DIR}"
 mkdir -p "${ARTIFACTS_DIR}/tests"
 mkdir -p "${ARTIFACTS_DIR}/coverage"
 
-
-# Colors
 if [[ -t 1 ]]; then
     readonly RED='\033[0;31m'
     readonly GREEN='\033[0;32m'
@@ -48,47 +52,38 @@ else
     readonly RED='' GREEN='' YELLOW='' BLUE='' CYAN='' BOLD='' NC=''
 fi
 
-
 log_section() {
     echo -e "${BOLD}${BLUE}============================================================================${NC}"
     echo -e "${BOLD}${BLUE} $1${NC}"
     echo -e "${BOLD}${BLUE}============================================================================${NC}"
 }
 
-
 log_pass() {
     echo -e "${GREEN}✓ $1${NC}"
 }
-
 
 log_fail() {
     echo -e "${RED}✗ $1${NC}"
 }
 
-
 log_info() {
     echo -e "${CYAN}[INFO]${NC} $1"
 }
-
 
 log_warn() {
     echo -e "${YELLOW}[WARN]${NC} $1"
 }
 
-
 MOTOR_SERVO_PASSED=0
 SPEED_SENSOR_PASSED=0
 
-
 echo ""
-log_section "ISO 26262 Master Unit Test Runner - DrivaPi (v2.1 - Unified Coverage)"
+log_section "ISO 26262 Master Unit Test Runner - DrivaPi (v2.1.4 - Unified Coverage)"
 echo ""
-
 
 # ===== Run Motor Servo Tests =====
 log_section "Running Motor Servo Tests"
 echo ""
-
 
 if [[ -d "${MOTOR_SERVO_DIR}" ]] && cd "${MOTOR_SERVO_DIR}" && ./scripts/run_tests.sh; then
     log_pass "Motor Servo tests PASSED"
@@ -97,14 +92,11 @@ else
     log_fail "Motor Servo tests FAILED"
 fi
 
-
 echo ""
-
 
 # ===== Run Speed Sensor Tests =====
 log_section "Running Speed Sensor Tests"
 echo ""
-
 
 if [[ -d "${SPEED_SENSOR_DIR}" ]] && cd "${SPEED_SENSOR_DIR}" && CALLED_FROM_MASTER=1 ./run_speedtest.sh; then
     log_pass "Speed Sensor tests PASSED"
@@ -113,132 +105,125 @@ else
     log_fail "Speed Sensor tests FAILED"
 fi
 
-
 echo ""
 
-
 # ===== Aggregate Coverage =====
+cd "${PROJECT_ROOT_DIR}"
+
 if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
     log_section "Aggregating Coverage Reports"
     echo ""
-    
+
     MOTOR_SERVO_COVERAGE="${MOTOR_SERVO_DIR}/build/artifacts/gcov/coverage_filtered.info"
-    SPEED_SENSOR_COVERAGE="${SPEED_SENSOR_DIR}/build/artifacts/gcov/coverage_filtered.info"
-    
-    # Check persistent locations (saved outside the build/ directory)
+
+    SPEED_SENSOR_COVERAGE="${SPEED_SENSOR_DIR}/coverage_filtered.info"
+    if [[ ! -f "${SPEED_SENSOR_COVERAGE}" ]]; then
+        SPEED_SENSOR_COVERAGE="${SPEED_SENSOR_DIR}/build/artifacts/gcov/coverage_filtered.info"
+    fi
+
     PERSISTENT_MOTOR_SERVO="${SCRIPT_DIR}/../../build/coverage/motor_servo/coverage_filtered.info"
     PERSISTENT_SPEED_SENSOR="${SCRIPT_DIR}/../../build/coverage/speed_sensor/coverage_filtered.info"
-    
-    # Use persistent locations if they exist, otherwise try original locations
+
     if [[ -f "${PERSISTENT_MOTOR_SERVO}" ]]; then
         MOTOR_SERVO_COVERAGE="${PERSISTENT_MOTOR_SERVO}"
     fi
-    
     if [[ -f "${PERSISTENT_SPEED_SENSOR}" ]]; then
         SPEED_SENSOR_COVERAGE="${PERSISTENT_SPEED_SENSOR}"
     fi
-    
-    # If speed_sensor coverage is not found, check alternative names
-    if [[ ! -f "${SPEED_SENSOR_COVERAGE}" ]] && [[ -f "${SPEED_SENSOR_DIR}/build/artifacts/gcov/coverage_combined.info" ]]; then
-        SPEED_SENSOR_COVERAGE="${SPEED_SENSOR_DIR}/build/artifacts/gcov/coverage_combined.info"
-    fi
-    if [[ ! -f "${SPEED_SENSOR_COVERAGE}" ]] && [[ -f "$(dirname "${PERSISTENT_SPEED_SENSOR}")/coverage_combined.info" ]]; then
-        SPEED_SENSOR_COVERAGE="$(dirname "${PERSISTENT_SPEED_SENSOR}")/coverage_combined.info"
-    fi
-    
+
     if [[ -f "${MOTOR_SERVO_COVERAGE}" && -f "${SPEED_SENSOR_COVERAGE}" ]]; then
-        log_info "Motor Servo coverage found"
-        log_info "Speed Sensor coverage found"
-        
+        log_info "Motor Servo coverage found: ${MOTOR_SERVO_COVERAGE}"
+        log_info "Speed Sensor coverage found: ${SPEED_SENSOR_COVERAGE}"
+
         COMBINED="${MASTER_COVERAGE_DIR}/coverage_combined.info"
         FILTERED="${MASTER_COVERAGE_DIR}/coverage_filtered.info"
-        
-        # Merge coverage files (with branch coverage support)
+
+        log_info "Merging tracefiles to ${COMBINED}..."
         lcov -a "${MOTOR_SERVO_COVERAGE}" -a "${SPEED_SENSOR_COVERAGE}" \
              -o "${COMBINED}" \
-             --rc lcov_branch_coverage=1 2>/dev/null || true
-        
-        # Extract source files only (no vendor, test runners, mocks, etc.)
-        lcov --extract "${COMBINED}" \
-             "*/motor_servo/src/*" "*/speed_sensor/src/*" \
-             -o "${FILTERED}" \
-             --rc lcov_branch_coverage=1 2>/dev/null || \
-        # Fallback: comprehensive removal
-        lcov -r "${COMBINED}" \
-             '/usr/*' '*vendor*' '*cmock*' '*unity*' '*c_exception*' \
-             '*build/test/*' '*test/runners*' '*test/mocks*' '/var/lib/gems/*' \
-             -o "${FILTERED}" \
-             --rc lcov_branch_coverage=1 2>/dev/null || \
-        cp "${COMBINED}" "${FILTERED}"
-        
-        # Generate HTML
-        if command -v genhtml &> /dev/null; then
-            HTML="${MASTER_COVERAGE_DIR}/html"
-            genhtml -o "${HTML}" "${FILTERED}" \
-                --title "DrivaPi - Unified Test Coverage" \
-                --branch-coverage \
-                --function-coverage \
-                --rc genhtml_branch_coverage=1 \
-                --demangle-cpp > /dev/null 2>&1 || true
-            
-            if [[ -f "${HTML}/index.html" ]]; then
-                log_pass "Coverage report: ${HTML}/index.html"
+             --rc lcov_branch_coverage=1
+
+        if [[ -f "${COMBINED}" ]]; then
+            log_info "Filtering tracefiles..."
+            lcov -r "${COMBINED}" \
+                 '/usr/*' '*vendor*' '*cmock*' '*unity*' '*c_exception*' \
+                 '*build/test/*' '*test/runners*' '*test/mocks*' '/var/lib/gems/*' \
+                 -o "${FILTERED}" \
+                 --rc lcov_branch_coverage=1 || \
+            cp "${COMBINED}" "${FILTERED}"
+
+            if command -v genhtml &> /dev/null; then
+                HTML="${MASTER_COVERAGE_DIR}/html"
+                log_info "Generating HTML to ${HTML}..."
+                genhtml -o "${HTML}" "${FILTERED}" \
+                    --title "DrivaPi - Unified Test Coverage" \
+                    --branch-coverage \
+                    --function-coverage \
+                    --rc genhtml_branch_coverage=1 \
+                    --demangle-cpp > /dev/null
+
+                if [[ -f "${HTML}/index.html" ]]; then
+                    log_pass "Coverage report generated: ${HTML}/index.html"
+                else
+                    log_warn "HTML generation failed"
+                fi
+            else
+                log_warn "genhtml not found"
             fi
+
+            echo ""
+            log_info "Combined Coverage Summary:"
+            lcov --summary "${FILTERED}" --rc lcov_branch_coverage=1 || true
+            echo ""
+        else
+            log_fail "Failed to create combined coverage file at ${COMBINED}"
         fi
-        
-        echo ""
-        log_info "Combined Coverage Summary:"
-        lcov --summary "${FILTERED}" 2>/dev/null || true
-        echo ""
-        
+
     else
-        log_warn "Coverage files not available"
-        [[ ! -f "${MOTOR_SERVO_COVERAGE}" ]] && log_warn "  Missing: Motor Servo coverage"
-        [[ ! -f "${SPEED_SENSOR_COVERAGE}" ]] && log_warn "  Missing: Speed Sensor coverage"
+        log_warn "Coverage files not available for aggregation"
+        [[ ! -f "${MOTOR_SERVO_COVERAGE}" ]] && log_warn "  Missing: Motor Servo coverage (${MOTOR_SERVO_COVERAGE})"
+        [[ ! -f "${SPEED_SENSOR_COVERAGE}" ]] && log_warn "  Missing: Speed Sensor coverage (${SPEED_SENSOR_COVERAGE})"
     fi
 fi
-
 
 # ===== Generate TSF Artifacts =====
 if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
     log_section "Generating TSF Artifacts"
-    
-    cd "${PROJECT_ROOT_DIR}"
-    log_info "Generating Cobertura XML..."
-    
-    mkdir -p "${ARTIFACTS_DIR}/coverage"
-    mkdir -p "${ARTIFACTS_DIR}/tests"
-    
-    gcovr --root . \
-          --filter 'src/.*' \
-          --filter 'Threadx/Core/Src/.*' \
-          --exclude '.*test.*' \
-          --exclude '.*mock.*' \
-          --xml-pretty \
-          --output "${ARTIFACTS_DIR}/coverage/coverage.xml" || log_warn "gcovr XML generation failed"
-          
-    if [[ -f "${ARTIFACTS_DIR}/coverage/coverage.xml" ]]; then
-        log_pass "Coverage XML saved: ${ARTIFACTS_DIR}/coverage/coverage.xml"
-    else
-        log_warn "Coverage XML not found"
-    fi
-    
-    JUNIT_SRC=""
-    if [[ -f "${MOTOR_SERVO_DIR}/build/artifacts/test/report.xml" ]]; then
-        JUNIT_SRC="${MOTOR_SERVO_DIR}/build/artifacts/test/report.xml"
-    elif [[ -f "${MOTOR_SERVO_DIR}/test_reports/junit.xml" ]]; then
-        JUNIT_SRC="${MOTOR_SERVO_DIR}/test_reports/junit.xml"
-    fi
-    
-    if [[ -n "${JUNIT_SRC}" && -f "${JUNIT_SRC}" ]]; then
-        cp "${JUNIT_SRC}" "${ARTIFACTS_DIR}/tests/junit_results.xml"
-        log_pass "JUnit XML saved: ${ARTIFACTS_DIR}/tests/junit_results.xml"
-    else
-        log_warn "JUnit report not found in standard locations"
-        log_info "Checked: ${MOTOR_SERVO_DIR}/build/artifacts/test/report.xml"
-    fi
-fi
 
+    mkdir -p "artifacts/verification/coverage"
+    mkdir -p "artifacts/verification/tests"
+
+    LCOV_INFO="${MASTER_COVERAGE_DIR}/coverage_combined.info"
+    XML_OUT="artifacts/verification/coverage/coverage.xml"
+
+    if [[ -f "$LCOV_INFO" ]]; then
+        if command -v lcov_cobertura &> /dev/null; then
+            lcov_cobertura "$LCOV_INFO" --output "$XML_OUT"
+            log_pass "Coverage XML saved: $XML_OUT"
+        else
+            gcovr --root . --xml-pretty --output "$XML_OUT" .
+        fi
+    fi
+
+    XML_TEST_OUT="artifacts/verification/tests/junit_results.xml"
+    JUNIT_1="tests/unit/motor_servo/build/artifacts/gcov/junit_tests_report.xml"
+    JUNIT_2="tests/unit/speed_sensor/build/artifacts/gcov/junit_tests_report.xml"
+
+    echo '<?xml version="1.0" encoding="UTF-8" ?>' > "$XML_TEST_OUT"
+    echo '<testsuites>' >> "$XML_TEST_OUT"
+
+    append_xml_content() {
+        if [[ -f "$1" ]]; then
+            grep -v '<?xml' "$1" | grep -v '<testsuites[[:space:]]*>' | grep -v '</testsuites[[:space:]]*>' >> "$XML_TEST_OUT"
+        fi
+    }
+
+    append_xml_content "$JUNIT_1"
+    append_xml_content "$JUNIT_2"
+
+    echo '</testsuites>' >> "$XML_TEST_OUT"
+    log_pass "Merged JUnit XML saved."
+fi
 
 # ===== Final Summary =====
 echo ""
@@ -252,25 +237,20 @@ echo "[TEST_COUNT] Speed Sensor: 11 tests"
 echo "[TEST_COUNT] Total: 179 tests"
 echo ""
 
-
 if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
     echo -e "${BOLD}${GREEN}============================================================================${NC}"
     echo -e "${BOLD}${GREEN} ✓ ALL TESTS PASSED - ISO 26262 COMPLIANT${NC}"
-    
-    # Determine which coverage report to show
+
     if [[ -f "${MASTER_COVERAGE_DIR}/html/index.html" ]]; then
-        # Aggregated coverage exists
         echo -e "${BOLD}${GREEN} Coverage (Aggregated): ${MASTER_COVERAGE_DIR}/html/index.html${NC}"
     elif [[ -f "${MASTER_COVERAGE_DIR}/index.html" ]]; then
-        # CMake-generated index exists
         echo -e "${BOLD}${GREEN} Coverage Index: ${MASTER_COVERAGE_DIR}/index.html${NC}"
     else
-        # Fall back to individual reports
         echo -e "${BOLD}${GREEN} Coverage Reports:${NC}"
         echo -e "${BOLD}${GREEN}   Motor Servo:   ${MOTOR_SERVO_DIR}/build/artifacts/gcov/html/index.html${NC}"
         echo -e "${BOLD}${GREEN}   Speed Sensor:  ${SPEED_SENSOR_DIR}/coverage_report/index.html${NC}"
     fi
-    
+
     echo -e "${BOLD}${GREEN}============================================================================${NC}"
     exit 0
 else

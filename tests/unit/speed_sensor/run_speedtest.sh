@@ -52,13 +52,18 @@ echo ""
 
 
 # 6. Cleanup
+if [[ "${CI:-false}" == "true" || "${CALLED_FROM_MASTER:-0}" == "1" ]]; then
+    echo ""
+    echo "ℹ️ Skipping cleanup (CI/Master mode) to preserve artifacts for aggregation"
+else
+  echo ""
+  echo "🧹 Cleaning up..."
+  echo "Removing coverage.info..."
+  rm -f coverage.info || true
+  echo "Running clobber.."
+  ceedling clobber || true
+  echo ""
+  echo "✓ Cleanup done!"
+fi
 echo ""
-echo "🧹 Cleaning up..."
-echo "Removing coverage.info..."
-rm -f coverage.info || true
-echo "Running clobber.."
-ceedling clobber || true
-
-echo ""
-echo "✓ Cleanup done!"
 echo "✓ Speed Sensor tests PASSED"

@@ -9,15 +9,19 @@ permissions:
   pull-requests: write
   checks: write
   actions: read
+  security-events: write
 
 jobs:
   run-tests:
     uses: ./.github/workflows/unit_tests.yml
 
+  run-codeql:
+    uses: ./.github/workflows/firmware_static.yml
+
   tsf-validation:
-    needs: run-tests
+    needs: [run-tests, run-codeql]
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -27,6 +31,17 @@ jobs:
         with:
           name: verification-artifacts
           path: artifacts/verification
+
+      - name: Download CodeQL Artifacts
+        uses: actions/download-artifact@v7
+        with:
+          name: codeql-sarif-filtered
+          path: temp_codeql
+
+      - name: Organize Evidence
+        run: |
+          mkdir -p artifacts/verification/static_analysis
+          find temp_codeql -name "*.sarif" -exec cp {} artifacts/verification/static_analysis/codeql.sarif \;
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v6
@@ -47,8 +62,6 @@ jobs:
           pip install pyyaml
           git clone https://gitlab.com/CodethinkLabs/trustable/trustable.git /tmp/trustable
           cd /tmp/trustable
-          git fetch --tags || true
-          git checkout 2025.9.16 || git checkout master || echo "Using available branch"
           pip install .
           cd -
 
@@ -57,11 +70,6 @@ jobs:
 
       - name: Create temporary symlink to .dotstop.dot
         run: ln -sf Dotstop/.dotstop.dot .dotstop.dot
-
-      - name: Mark TSF items and links as reviewed
-        run: |
-          # --- SPEED SENSOR ---
-          # --- SERVOMOTOR (Actuation) ---
 
       - name: Run trudag lint
         id: lint
@@ -115,7 +123,7 @@ jobs:
         with:
           name: tsf-validation-artifacts
           path: |
-            artifacts/tsf/
+            artifacts/tsf
             .dotstop.dot
           retention-days: 30
 
