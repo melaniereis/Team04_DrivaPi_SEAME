@@ -33,7 +33,7 @@ jobs:
           path: artifacts/verification
 
       - name: Download CodeQL Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: codeql-sarif-filtered
           path: temp_codeql
