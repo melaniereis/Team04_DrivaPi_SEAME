@@ -148,12 +148,14 @@ secrets.yml
 .scratch/
 .local/
 .cache/
+.clangd/
 
 # STM32 config
 *.cproject/
 *.project/
 *.mxproject/
 *.settings/
+
 # CMake build directories
 tests/build/
 build/

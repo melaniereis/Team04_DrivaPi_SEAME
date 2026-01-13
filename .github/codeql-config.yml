@@ -7,6 +7,7 @@ paths-ignore:
   - Threadx/Middlewares
   - Threadx/AZURE_RTOS
   - Threadx/Core/Startup
+  - Threadx/Core/Src/system_stm32u5xx.c
   - build
   - Debug
   - Release
