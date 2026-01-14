@@ -206,8 +206,8 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
     fi
 
     XML_TEST_OUT="artifacts/verification/tests/junit_results.xml"
-    JUNIT_1="tests/unit/motor_servo/build/artifacts/gcov/junit_tests_report.xml"
-    JUNIT_2="tests/unit/speed_sensor/build/artifacts/gcov/junit_tests_report.xml"
+    JUNIT_1="tests/unit/motor-servo/build/artifacts/gcov/junit_tests_report.xml"
+    JUNIT_2="tests/unit/speed-sensor/build/artifacts/gcov/junit_tests_report.xml"
 
     echo '<?xml version="1.0" encoding="UTF-8" ?>' > "$XML_TEST_OUT"
     echo '<testsuites>' >> "$XML_TEST_OUT"
