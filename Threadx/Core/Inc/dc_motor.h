@@ -12,7 +12,6 @@
 extern "C" {
 #endif
 
-
 #include "app_threadx.h"
 
 #define PCA9685_ADDR_MOTOR 0x60
@@ -25,11 +24,9 @@ extern "C" {
 #define MOTOR_R_A 1
 #define MOTOR_R_B 2
 
-
 #ifndef PCA9685_COUNTS
 #define PCA9685_COUNTS 4096u
 #endif
-
 
 void SetMotor(double value);
 void MotorSetPWM(int32_t left_counts, int32_t right_counts);
@@ -44,5 +41,4 @@ extern I2C_HandleTypeDef hi2c3;
 #ifdef __cplusplus
 }
 #endif
-
 #endif
