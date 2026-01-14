@@ -154,3 +154,4 @@ secrets.yml
 # CMake build directories
 tests/build/
 build/
+/.dotstop.dot
