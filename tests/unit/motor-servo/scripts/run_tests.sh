@@ -266,13 +266,7 @@ save_coverage_for_aggregation() {
     # Use absolute path to ensure it goes to the right place
     # PROJECT_ROOT is set to motor-servo dir, so we need to go up 3 levels to reach drivapi/
     ABSOLUTE_PROJECT_ROOT="$(cd "${PROJECT_ROOT}/../.." && pwd)"
-<<<<<<< HEAD
-    PERSISTENT_COVERAGE_DIR="${ABSOLUTE_PROJECT_ROOT}/build/coverage/motor_servo"
-
-=======
     PERSISTENT_COVERAGE_DIR="${ABSOLUTE_PROJECT_ROOT}/build/coverage/motor-servo"
-    
->>>>>>> 27b2440 (fix: update coverage path in motor-servo test script)
     mkdir -p "${PERSISTENT_COVERAGE_DIR}"
 
     if [[ -f "${COVERAGE_DIR}/coverage_filtered.info" ]]; then
