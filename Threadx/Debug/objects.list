@@ -3,6 +3,7 @@
 "./Core/Src/can_rx.o"
 "./Core/Src/can_tx.o"
 "./Core/Src/dc_motor.o"
+"./Core/Src/motor_utils.o"
 "./Core/Src/main.o"
 "./Core/Src/pca9685.o"
 "./Core/Src/servo_motor.o"
