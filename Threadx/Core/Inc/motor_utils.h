@@ -1,3 +1,13 @@
+/**
+  ******************************************************************************
+  * @file    motor_utils.h
+  * @author  MCD Application Team
+  * @brief   Header for motor_utils.c module
+  ******************************************************************************
+  * @attention
+  *
+*/
+
 #ifndef __MOTOR_UTILS_H
 #define __MOTOR_UTILS_H
 
