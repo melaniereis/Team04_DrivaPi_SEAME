@@ -121,8 +121,8 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
         SPEED_SENSOR_COVERAGE="${SPEED_SENSOR_DIR}/build/artifacts/gcov/coverage_filtered.info"
     fi
 
-    PERSISTENT_MOTOR_SERVO="${SCRIPT_DIR}/../../build/coverage/motor_servo/coverage_filtered.info"
-    PERSISTENT_SPEED_SENSOR="${SCRIPT_DIR}/../../build/coverage/speed_sensor/coverage_filtered.info"
+    PERSISTENT_MOTOR_SERVO="${SCRIPT_DIR}/../../build/coverage/motor-servo/coverage_filtered.info"
+    PERSISTENT_SPEED_SENSOR="${SCRIPT_DIR}/../../build/coverage/speed-sensor/coverage_filtered.info"
 
     if [[ -f "${PERSISTENT_MOTOR_SERVO}" ]]; then
         MOTOR_SERVO_COVERAGE="${PERSISTENT_MOTOR_SERVO}"
