@@ -12,21 +12,6 @@
 /**
 * @brief
 *
-* @param v
-* @return uint16_t
-*/
-static inline uint16_t ClampU16(int32_t computedValue)
-{
-	if (computedValue < 0)
-		return 0;
-	if (computedValue >= (int32_t)PCA9685_COUNTS) 
-		return (uint16_t)(PCA9685_COUNTS - 1u);
-	return (uint16_t)computedValue;
-}
-
-/**
-* @brief
-*
 */
 void MotorStop(void)
 {

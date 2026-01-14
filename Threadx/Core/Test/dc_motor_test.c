@@ -1,14 +1,13 @@
-#include "dc_motor_test.h"
-
 /**
- * @brief
- *
- * @param s
- */
-static void UartPrint(const char *s)
-{
-    HAL_UART_Transmit(&huart1, (uint8_t*)s, strlen(s), HAL_MAX_DELAY);
-}
+  ******************************************************************************
+  * @file    dc_motor_test.c
+  * @author  Team04 DrivaPi
+  * @brief   This file contains the implementation of DC motor test functions.
+  ******************************************************************************
+  * @attention
+  *
+*/
+#include "dc_motor_test.h"
 
 /**
  * @brief

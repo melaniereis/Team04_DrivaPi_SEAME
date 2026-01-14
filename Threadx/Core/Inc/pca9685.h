@@ -37,5 +37,4 @@ extern uint8_t g_i2cDebug;
 #ifdef __cplusplus
 }
 #endif
-
 #endif

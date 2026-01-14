@@ -22,5 +22,4 @@ void MotorTestHigh(double speed);
 #ifdef __cplusplus
 }
 #endif
-
 #endif

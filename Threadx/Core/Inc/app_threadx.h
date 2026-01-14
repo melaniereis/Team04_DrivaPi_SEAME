@@ -39,6 +39,7 @@ extern "C" {
 #include "dc_motor.h"
 #include "servo_motor.h"
 #include "dc_motor_test.h"
+#include "motor_utils.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

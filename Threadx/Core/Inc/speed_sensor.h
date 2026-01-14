@@ -30,5 +30,4 @@ extern UART_HandleTypeDef huart1;
 #ifdef __cplusplus
 }
 #endif
-
 #endif

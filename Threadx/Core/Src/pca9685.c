@@ -13,41 +13,6 @@ uint8_t g_i2cDebug = 0;
 
 /**
  *
- * @param format
- * @param ...
- */
-static void UartPrintf(const char* format, ...)
-{
-	char buffer[256];
-	va_list args;
-	va_start(args, format);
-	vsnprintf(buffer, sizeof(buffer), format, args);
-	va_end(args);
-	HAL_UART_Transmit(&huart1, (uint8_t*)buffer, strlen(buffer), HAL_MAX_DELAY);
-}
-
-/**
- *
- * @param msg
- */
-void UartPrint(const char* msg)
-{
-	HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
-}
-
-/**
- *
- * @param ms
- */
-static void SoftwareDelay(uint32_t ms)
-{
-	volatile uint32_t count = ms * 20000; 
-	while (count--)
-		__asm("nop");
-}
-
-/**
- *
  * @param hi2c
  * @param addr7
  * @param reg
