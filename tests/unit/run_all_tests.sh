@@ -20,14 +20,9 @@ set -o pipefail
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly PROJECT_ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-<<<<<<< HEAD
 
-readonly MOTOR_SERVO_DIR="${SCRIPT_DIR}/motor_servo"
-readonly SPEED_SENSOR_DIR="${SCRIPT_DIR}/speed_sensor"
-=======
 readonly MOTOR_SERVO_DIR="${SCRIPT_DIR}/motor-servo"
 readonly SPEED_SENSOR_DIR="${SCRIPT_DIR}/speed-sensor"
->>>>>>> 71916d8 (refactor: standardize directory naming to industry conventions)
 
 if [[ -n "${COVERAGE_DIR:-}" ]]; then
     if [[ "$COVERAGE_DIR" == /* ]]; then
@@ -120,7 +115,6 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
     echo ""
 
     MOTOR_SERVO_COVERAGE="${MOTOR_SERVO_DIR}/build/artifacts/gcov/coverage_filtered.info"
-<<<<<<< HEAD
 
     SPEED_SENSOR_COVERAGE="${SPEED_SENSOR_DIR}/coverage_filtered.info"
     if [[ ! -f "${SPEED_SENSOR_COVERAGE}" ]]; then
@@ -130,34 +124,13 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
     PERSISTENT_MOTOR_SERVO="${SCRIPT_DIR}/../../build/coverage/motor_servo/coverage_filtered.info"
     PERSISTENT_SPEED_SENSOR="${SCRIPT_DIR}/../../build/coverage/speed_sensor/coverage_filtered.info"
 
-=======
-    SPEED_SENSOR_COVERAGE="${SPEED_SENSOR_DIR}/build/artifacts/gcov/coverage_filtered.info"
-    
-    # Check persistent locations (saved outside the build/ directory)
-    PERSISTENT_MOTOR_SERVO="${SCRIPT_DIR}/../../build/coverage/motor-servo/coverage_filtered.info"
-    PERSISTENT_SPEED_SENSOR="${SCRIPT_DIR}/../../build/coverage/speed-sensor/coverage_filtered.info"
-    
-    # Use persistent locations if they exist, otherwise try original locations
->>>>>>> 71916d8 (refactor: standardize directory naming to industry conventions)
     if [[ -f "${PERSISTENT_MOTOR_SERVO}" ]]; then
         MOTOR_SERVO_COVERAGE="${PERSISTENT_MOTOR_SERVO}"
     fi
     if [[ -f "${PERSISTENT_SPEED_SENSOR}" ]]; then
         SPEED_SENSOR_COVERAGE="${PERSISTENT_SPEED_SENSOR}"
     fi
-<<<<<<< HEAD
 
-=======
-    
-    # If speed-sensor coverage is not found, check alternative names
-    if [[ ! -f "${SPEED_SENSOR_COVERAGE}" ]] && [[ -f "${SPEED_SENSOR_DIR}/build/artifacts/gcov/coverage_combined.info" ]]; then
-        SPEED_SENSOR_COVERAGE="${SPEED_SENSOR_DIR}/build/artifacts/gcov/coverage_combined.info"
-    fi
-    if [[ ! -f "${SPEED_SENSOR_COVERAGE}" ]] && [[ -f "$(dirname "${PERSISTENT_SPEED_SENSOR}")/coverage_combined.info" ]]; then
-        SPEED_SENSOR_COVERAGE="$(dirname "${PERSISTENT_SPEED_SENSOR}")/coverage_combined.info"
-    fi
-    
->>>>>>> 71916d8 (refactor: standardize directory naming to industry conventions)
     if [[ -f "${MOTOR_SERVO_COVERAGE}" && -f "${SPEED_SENSOR_COVERAGE}" ]]; then
         log_info "Motor Servo coverage found: ${MOTOR_SERVO_COVERAGE}"
         log_info "Speed Sensor coverage found: ${SPEED_SENSOR_COVERAGE}"
@@ -168,7 +141,6 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
         log_info "Merging tracefiles to ${COMBINED}..."
         lcov -a "${MOTOR_SERVO_COVERAGE}" -a "${SPEED_SENSOR_COVERAGE}" \
              -o "${COMBINED}" \
-<<<<<<< HEAD
              --rc lcov_branch_coverage=1
 
         if [[ -f "${COMBINED}" ]]; then
@@ -197,35 +169,6 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
                 fi
             else
                 log_warn "genhtml not found"
-=======
-             --rc lcov_branch_coverage=1 2>/dev/null || true
-        
-        # Extract source files only (no vendor, test runners, mocks, etc.)
-        lcov --extract "${COMBINED}" \
-             "*/motor-servo/src/*" "*/speed-sensor/src/*" \
-             -o "${FILTERED}" \
-             --rc lcov_branch_coverage=1 2>/dev/null || \
-        # Fallback: comprehensive removal
-        lcov -r "${COMBINED}" \
-             '/usr/*' '*vendor*' '*cmock*' '*unity*' '*c_exception*' \
-             '*build/test/*' '*test/runners*' '*test/mocks*' '/var/lib/gems/*' \
-             -o "${FILTERED}" \
-             --rc lcov_branch_coverage=1 2>/dev/null || \
-        cp "${COMBINED}" "${FILTERED}"
-        
-        # Generate HTML
-        if command -v genhtml &> /dev/null; then
-            HTML="${MASTER_COVERAGE_DIR}/html"
-            genhtml -o "${HTML}" "${FILTERED}" \
-                --title "DrivaPi - Unified Test Coverage" \
-                --branch-coverage \
-                --function-coverage \
-                --rc genhtml_branch_coverage=1 \
-                --demangle-cpp > /dev/null 2>&1 || true
-            
-            if [[ -f "${HTML}/index.html" ]]; then
-                log_pass "Coverage report: ${HTML}/index.html"
->>>>>>> 71916d8 (refactor: standardize directory naming to industry conventions)
             fi
 
             echo ""
