@@ -15,13 +15,13 @@
 * @param v
 * @return uint16_t
 */
-static inline uint16_t ClampU16(int32_t v) // Refactor: wtf is v??
+static inline uint16_t ClampU16(int32_t computedValue)
 {
-	if (v < 0)
+	if (computedValue < 0)
 		return 0;
-	if (v >= (int32_t)PCA9685_COUNTS) 
+	if (computedValue >= (int32_t)PCA9685_COUNTS) 
 		return (uint16_t)(PCA9685_COUNTS - 1u);
-	return (uint16_t)v;
+	return (uint16_t)computedValue;
 }
 
 /**
