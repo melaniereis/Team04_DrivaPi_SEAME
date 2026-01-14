@@ -223,7 +223,6 @@ VOID DcMotor(ULONG initial_input)
 
 	while (1)
 	{
-		MotorTestHigh(0.6);
 		tx_event_flags_get(&event_flags, FLAG_CAN_SPEED_CMD,
 		TX_OR_CLEAR, &actual_flags, TX_NO_WAIT);
 
