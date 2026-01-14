@@ -15,7 +15,6 @@ extern "C" {
 #include "pca9685.h"
 #include "app_threadx.h"
 
-/* Default servo configuration (override as needed) */
 #ifndef PCA9685_COUNTS
 #define PCA9685_COUNTS 4096u
 #endif
@@ -23,25 +22,14 @@ extern "C" {
 #define PCA9685_ADDR_SERVO 0x40u
 #define SERVO_CH 0u
 
-/* Default pulse width (in PCA9685 counts) for 0..180 degree mapping. These
-* are defaults; callers may pass explicit min/max counts to Servo_SetAngle
-* and Servo_Sweep to support different servos.
-*/
 #define SERVO_DEFAULT_MIN_PULSE_COUNTS 200u
 #define SERVO_DEFAULT_MAX_PULSE_COUNTS 500u
 #define SERVO_DEFAULT_FREQ_HZ 50u
 
-/* Function prototypes
-* - Servo_SetAngle: set a servo to an angle (0..180). Caller provides I2C
-*   handle, device 7-bit address, PCA9685 channel, and optional min/max
-*   pulse counts for mapping. Returns 0 on success, negative on error.
-* - Servo_Sweep: sweep servo between start and end angles stepping by
-*   angle_step_deg and pausing delay_ms between steps. Returns 0 on success.
-*/
-int SetServoAngle(I2C_HandleTypeDef *hi2c, uint8_t addr7, uint8_t channel, uint16_t angle_deg, uint16_t min_pulse,
+int	SetServoAngle(I2C_HandleTypeDef *hi2c, uint8_t addr7, uint8_t channel, uint16_t angle_deg, uint16_t min_pulse,
 	uint16_t max_pulse);
 
-int ServoSweep(I2C_HandleTypeDef *hi2c, uint8_t addr7, uint8_t channel, uint16_t angleStartDeg, uint16_t angleEndDeg,
+int	ServoSweep(I2C_HandleTypeDef *hi2c, uint8_t addr7, uint8_t channel, uint16_t angleStartDeg, uint16_t angleEndDeg,
 uint16_t angleStepDeg, uint32_t delay_ms, uint16_t min_pulse, uint16_t max_pulse);
 
 extern I2C_HandleTypeDef hi2c3;
@@ -49,5 +37,4 @@ extern I2C_HandleTypeDef hi2c3;
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* __SERVO_MOTOR_H */
+#endif
