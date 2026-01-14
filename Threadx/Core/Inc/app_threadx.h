@@ -100,14 +100,14 @@ UINT App_ThreadX_Init(VOID *memory_ptr);
 void MX_ThreadX_Init(void);
 
 /* USER CODE BEGIN EFP */
-VOID ld1_ThreadEntry(ULONG initial_input);
-VOID DcMotor(ULONG initial_input);
-VOID ServoMotor(ULONG initial_input);
-VOID CanRx(ULONG initial_input);
-VOID CanTx(ULONG initial_input);
-VOID SpeedSensor(ULONG initial_input);
-void ThreadInit(void);
-int CanSend(t_can_message* msg);
+VOID	ld1_ThreadEntry(ULONG initial_input);
+VOID	DcMotor(ULONG initial_input);
+VOID	ServoMotor(ULONG initial_input);
+VOID	CanRx(ULONG initial_input);
+VOID	CanTx(ULONG initial_input);
+VOID	SpeedSensor(ULONG initial_input);
+void	ThreadInit(void);
+int		CanSend(t_can_message* msg);
 /* USER CODE END EFP */
 
 /* USER CODE BEGIN 1 */
@@ -123,3 +123,4 @@ extern float				g_vehicleSpeed;
 }
 #endif
 #endif /* __APP_THREADX_H */
+
