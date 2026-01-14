@@ -111,11 +111,11 @@ int CanSend(t_can_message* msg);
 /* USER CODE END EFP */
 
 /* USER CODE BEGIN 1 */
-extern thread_t				threads[6];
-extern TX_QUEUE             queue_speed_cmd;
-extern TX_QUEUE             queue_steer_cmd;
-extern TX_EVENT_FLAGS_GROUP	event_flags;
-extern TX_MUTEX             speed_data_mutex;
+extern thread_t				g_threads[6];
+extern TX_QUEUE             g_queueSpeedCmd;
+extern TX_QUEUE             g_queueSteerCmd;
+extern TX_EVENT_FLAGS_GROUP	g_eventFlags;
+extern TX_MUTEX             g_speedDataMutex;
 extern float				g_vehicleSpeed;
 /* USER CODE END 1 */
 

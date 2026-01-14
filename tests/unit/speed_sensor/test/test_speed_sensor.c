@@ -13,8 +13,8 @@
 // GLOBAL VARIABLES DEFINITION
 // (The Linker needs these to exist in memory)
 // --------------------------------------------------------
-TX_MUTEX speed_data_mutex;
-TX_EVENT_FLAGS_GROUP event_flags;
+TX_MUTEX g_speedDataMutex;
+TX_EVENT_FLAGS_GROUP g_eventFlags;
 float g_vehicle_speed;
 static jmp_buf test_break_jump;
 
@@ -379,16 +379,16 @@ void test_SpeedSensor_Thread_Should_LoopTwice(void)
     // --- PASS 1 ---
     tx_thread_sleep_ExpectAndReturn(100, TX_SUCCESS);
     tx_time_get_ExpectAndReturn(1000);
-    tx_mutex_get_ExpectAndReturn(&speed_data_mutex, TX_WAIT_FOREVER, TX_SUCCESS);
-    tx_mutex_put_ExpectAndReturn(&speed_data_mutex, TX_SUCCESS);
+    tx_mutex_get_ExpectAndReturn(&g_speedDataMutex, TX_WAIT_FOREVER, TX_SUCCESS);
+    tx_mutex_put_ExpectAndReturn(&g_speedDataMutex, TX_SUCCESS);
 
     // [CRITICAL] NO tx_event_flags_set_Expect HERE! Delete it if it exists.
 
     // --- PASS 2 ---
     tx_thread_sleep_ExpectAndReturn(100, TX_SUCCESS);
     tx_time_get_ExpectAndReturn(1100);
-    tx_mutex_get_ExpectAndReturn(&speed_data_mutex, TX_WAIT_FOREVER, TX_SUCCESS);
-    tx_mutex_put_ExpectAndReturn(&speed_data_mutex, TX_SUCCESS);
+    tx_mutex_get_ExpectAndReturn(&g_speedDataMutex, TX_WAIT_FOREVER, TX_SUCCESS);
+    tx_mutex_put_ExpectAndReturn(&g_speedDataMutex, TX_SUCCESS);
 
     // --- Stub Register ---
     // This handles ALL calls. It doesn't check arguments unless you code it to.

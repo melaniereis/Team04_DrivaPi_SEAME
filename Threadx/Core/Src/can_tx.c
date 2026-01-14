@@ -90,12 +90,12 @@ VOID CanTx(ULONG initial_input)
 	{
 		HAL_UART_Transmit(&huart1, (uint8_t*)msg_tick, strlen(msg_tick), 10);
 
-		tx_event_flags_get(&event_flags, FLAG_SENSOR_UPDATE, TX_OR_CLEAR, &actual_flags, TX_NO_WAIT);
+		tx_event_flags_get(&g_eventFlags, FLAG_SENSOR_UPDATE, TX_OR_CLEAR, &actual_flags, TX_NO_WAIT);
 
 
-		tx_mutex_get(&speed_data_mutex, TX_WAIT_FOREVER);
+		tx_mutex_get(&g_speedDataMutex, TX_WAIT_FOREVER);
 		float speed = g_vehicleSpeed;
-		tx_mutex_put(&speed_data_mutex);
+		tx_mutex_put(&g_speedDataMutex);
 
 		CraftSpeedMessage(&msg, speed);
 

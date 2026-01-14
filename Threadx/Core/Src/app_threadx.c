@@ -43,11 +43,11 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-thread_t				threads[6];
-TX_QUEUE                queue_speed_cmd; // Refactor: What is this variable? Should be g_queueSpeedCmd
-TX_QUEUE                queue_steer_cmd; // Refactor: What is this variable? Should be g_queueSteerCmd
-TX_EVENT_FLAGS_GROUP    event_flags;//      Refactor: What is this variable? Should be g_eventFlags
-TX_MUTEX                speed_data_mutex;// Refactor: What is this variable? Should be g_SpeedDataMutex
+thread_t				g_threads[6];
+TX_QUEUE                g_queueSpeedCmd;
+TX_QUEUE                g_queueSteerCmd;
+TX_EVENT_FLAGS_GROUP    g_eventFlags;
+TX_MUTEX                g_speedDataMutex;
 float                   g_vehicleSpeed;
 /* USER CODE END PV */
 
@@ -74,15 +74,15 @@ UINT App_ThreadX_Init(void *memory_ptr)
 	const char *msg = "\r\n=== DrivaPi ThreadX Init ===\r\n";
 	HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
 
-	tx_queue_create(&queue_speed_cmd, "Speed Queue", sizeof(t_can_message)/sizeof(ULONG),
+	tx_queue_create(&g_queueSpeedCmd, "Speed Queue", sizeof(t_can_message)/sizeof(ULONG),
 	memory_ptr, QUEUE_SIZE * sizeof(t_can_message));
 	memory_ptr += QUEUE_SIZE * sizeof(t_can_message);
 
-	tx_queue_create(&queue_steer_cmd, "Steering Queue", sizeof(t_can_message)/sizeof(ULONG),
+	tx_queue_create(&g_queueSteerCmd, "Steering Queue", sizeof(t_can_message)/sizeof(ULONG),
 	memory_ptr, QUEUE_SIZE * sizeof(t_can_message));
 	memory_ptr += QUEUE_SIZE * sizeof(t_can_message);
 
-	tx_event_flags_create(&event_flags, "System Events");
+	tx_event_flags_create(&g_eventFlags, "System Events");
 
 	msg = "Initializing PCA9685 devices...\r\n";
 	HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);

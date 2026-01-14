@@ -54,12 +54,12 @@ void CanRx(ULONG initial_input)
 			switch (msg.id)
 			{
 				case CMD_SPEED:
-					tx_queue_send(&queue_speed_cmd, &msg, TX_NO_WAIT);
-					tx_event_flags_set(&event_flags, FLAG_CAN_SPEED_CMD, TX_OR);
+					tx_queue_send(&g_queueSpeedCmd, &msg, TX_NO_WAIT);
+					tx_event_flags_set(&g_eventFlags, FLAG_CAN_SPEED_CMD, TX_OR);
 
 				case CMD_STEERING:
-					tx_queue_send(&queue_steer_cmd, &msg, TX_NO_WAIT);
-					tx_event_flags_set(&event_flags, FLAG_CAN_STEER_CMD, TX_OR);
+					tx_queue_send(&g_queueSteerCmd, &msg, TX_NO_WAIT);
+					tx_event_flags_set(&g_eventFlags, FLAG_CAN_STEER_CMD, TX_OR);
 			}
 		}
 		tx_thread_sleep(100);

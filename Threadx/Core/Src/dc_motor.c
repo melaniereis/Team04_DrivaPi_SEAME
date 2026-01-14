@@ -223,10 +223,10 @@ VOID DcMotor(ULONG initial_input)
 
 	while (1)
 	{
-		tx_event_flags_get(&event_flags, FLAG_CAN_SPEED_CMD,
+		tx_event_flags_get(&g_eventFlags, FLAG_CAN_SPEED_CMD,
 		TX_OR_CLEAR, &actual_flags, TX_NO_WAIT);
 
-		while (tx_queue_receive(&queue_speed_cmd, &msg, TX_NO_WAIT) == TX_SUCCESS)
+		while (tx_queue_receive(&g_queueSpeedCmd, &msg, TX_NO_WAIT) == TX_SUCCESS)
 		{
 
 			if (msg.len >= 8)

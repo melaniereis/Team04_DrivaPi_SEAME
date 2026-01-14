@@ -89,10 +89,10 @@ VOID SpeedSensor(ULONG initial_input)
 		HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), 100);
 
 
-		tx_mutex_get(&speed_data_mutex, TX_WAIT_FOREVER);
+		tx_mutex_get(&g_speedDataMutex, TX_WAIT_FOREVER);
 		g_vehicleSpeed = current_speed;
-		tx_mutex_put(&speed_data_mutex);
+		tx_mutex_put(&g_speedDataMutex);
 
-		tx_event_flags_set(&event_flags, FLAG_SENSOR_UPDATE, TX_OR);
+		tx_event_flags_set(&g_eventFlags, FLAG_SENSOR_UPDATE, TX_OR);
 	}
 }
