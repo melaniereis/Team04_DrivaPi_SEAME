@@ -1,5 +1,5 @@
 ---
-id: LLTC-SPEEDSENSORSTATICANALYSIS
+id: LLTC-SPEED_SENSOR_STATIC
 header: "Static Code Analysis (CodeQL)"
 text: |
   "Source code must pass CodeQL queries with zero high-severity errors."
@@ -8,7 +8,7 @@ text: |
 verification_method: "Static Analysis (GitHub CodeQL)"
 
 parents:
-  - id: SWD-SPEED
+  - id: SWD-SPEED_SENSOR
 
 reviewers:
   - name: "Hugo Lopes"

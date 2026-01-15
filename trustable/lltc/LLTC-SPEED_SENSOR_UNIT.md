@@ -1,5 +1,5 @@
 ---
-id: LLTC-SPEEDSENSORUNITTESTS
+id: LLTC-SPEED_SENSOR_UNIT
 header: "Unit Test Verification for Speed Logic"
 text: |
   "Speed sensor unit tests must pass (100%) covering movement, overflows, and edge cases."
@@ -8,7 +8,7 @@ text: |
 verification_method: "Automated Unit Testing (CTest/Unity)"
 
 parents:
-  - id: SWD-SPEED
+  - id: SWD-SPEED_SENSOR
 
 reviewers:
   - name: "Bernardo Esteves"

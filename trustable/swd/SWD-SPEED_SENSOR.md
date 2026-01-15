@@ -1,5 +1,5 @@
 ---
-id: SWD-SPEED
+id: SWD-SPEED_SENSOR
 header: "Speed Sensor Logic Implementation"
 text: |
   "The 'speed_sensor' software component shall implement 'read_speed_sensor()' to:
@@ -13,12 +13,12 @@ ASIL: "A"
 verification_method: "Unit Testing, Code Coverage, Static Analysis"
 
 parents:
-  - id: SRD-SPEED
+  - id: SRD-SPEED_SENSOR
 
 children:
-  - id: LLTC-SPEEDSENSORUNITTESTS
-  - id: LLTC-SPEEDSENSORCOVERAGE
-  - id: LLTC-SPEEDSENSORSTATICANALYSIS
+  - id: LLTC-SPEED_SENSOR_UNIT
+  - id: LLTC-SPEED_SENSOR_COV
+  - id: LLTC-SPEED_SENSOR_STATIC
 
 reviewers:
   - name: "Bernardo Esteves"
@@ -31,7 +31,7 @@ references:
     path: "Threadx/Core/Src/speed_sensor.c"
     description: "Source code implementation"
   - type: "file"
-    path: "docs/standards/iso26262/asil-justification-SWD-SPEEDSENSOR.md"
+    path: "docs/standards/iso26262/asil-justification-SWD-SPEED_SENSOR.md"
     description: "ASIL A Justification"
 
 active: true

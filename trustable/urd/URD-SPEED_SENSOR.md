@@ -1,5 +1,5 @@
 ---
-id: URD-SPEED
+id: URD-SPEED_SENSOR
 header: "Vehicle Speed Monitoring"
 text: |
   "The system shall display current linear speed to enable operator monitoring during autonomous operation."
@@ -8,7 +8,7 @@ text: |
 verification_method: "System Testing"
 
 children:
-  - id: SRD-SPEED
+  - id: SRD-SPEED_SENSOR
 
 reviewers:
   - name: "Melanie Reis"

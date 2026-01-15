@@ -1,5 +1,5 @@
 ---
-id: LLTC-SPEEDSENSORCOVERAGE
+id: LLTC-SPEED_SENSOR_COV
 header: "Code Coverage for Speed Sensor"
 text: |
   "Unit tests must achieve >90% line coverage for 'speed_sensor.c' to verify safety-critical branches."
@@ -8,7 +8,7 @@ text: |
 verification_method: "Code Coverage Analysis (LCOV/GCOVR)"
 
 parents:
-  - id: SWD-SPEED
+  - id: SWD-SPEED_SENSOR
 
 reviewers:
   - name: "Bernardo Esteves"
