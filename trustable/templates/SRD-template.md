@@ -5,8 +5,6 @@ text: |
   "Detailed requirement statement here"
 
 # TSF Type: Assertion (Both a Request and a Claim)
-
-ASIL: "ASIL level here (QM/A/B/C/D)"
 verification_method: "Verification method here"
 
 # Links: Connects to parent Expectation
