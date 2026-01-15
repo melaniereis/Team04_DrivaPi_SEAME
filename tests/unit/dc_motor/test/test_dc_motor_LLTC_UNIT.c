@@ -14,8 +14,8 @@
 #include "../vendor/unity/src/unity.h"
 #include "../src/dc_motor.h"
 #include "../src/dc_motor_testable.c"
-#include "../src/pca9685_testable.c"
-#include "../src/mock_stm32u5xx_hal.c"
+#include "../../common/src/pca9685_testable.c"
+#include "../../common/src/mock_stm32u5xx_hal.c"
 #include <string.h>
 #include <stdint.h>
 
