@@ -4,6 +4,7 @@ header: "Code Coverage for DC Motor"
 text: |
   "Unit tests must achieve >90% Branch Coverage for `dc_motor.c`."
 
+# TSF Type: Evidence/Premise (A Claim, but not a Request)
 verification_method: "Code Coverage (LCOV)"
 
 parents:
