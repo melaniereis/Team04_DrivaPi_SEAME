@@ -2,7 +2,7 @@
 #ifndef PCA9685_TESTABLE_H
 #define PCA9685_TESTABLE_H
 
-#include "../test/mocks/stm32_hal_i2c.h"
+#include "../mocks/stm32_hal_i2c.h"
 #include <stdint.h>
 
 #define LED0_ON_L 0x06
