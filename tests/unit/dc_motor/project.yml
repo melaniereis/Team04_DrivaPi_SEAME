@@ -5,11 +5,8 @@
   :use_auxiliary_dependencies: TRUE
   :build_root: build
   :test_file_prefix: test_
-  :which_ceedling: gem
-  :ceedling_version: 1.0.1
   :default_tasks:
     - test:all
-    - gcov:all
 
 :extension:
   :executable: .out
@@ -17,14 +14,15 @@
 :paths:
   :test:
     - +:test/**
-    - -:test/support
   :source:
     - src
+    - ../common/src
   :include:
-    - test/support
+    - ../common/support
+    - ../common/src
     - src
   :support:
-    - test/support
+    - ../common/support
   :libraries: []
 
 :defines:
@@ -78,12 +76,6 @@
   :enabled:
     - gcov
     - module_generator
-    - report_tests_log_factory
-
-:report_tests_log_factory:
-  :reports:
-    - junit
-    - html
 
 :gcov:
   :summaries: TRUE
@@ -98,8 +90,3 @@
 
 :libraries:
   :placement: :end
-  :flag: "-l${1}"
-  :path_flag: "-L ${1}"
-  :system: []
-  :test: []
-  :release: []

@@ -194,10 +194,10 @@ generate_coverage() {
          --rc lcov_branch_coverage=1 \
          --ignore-errors source,gcov 2>&1 | grep -v "WARNING" || true
 
-    # Filter - Remove vendor/framework/test files
+    # Filter - Remove vendor/framework/test files and common/
     lcov --remove "${COVERAGE_DIR}/coverage.info" \
          '/usr/*' '*/test/*' '*/mock_*' '*/unity/*' '*/cmock/*' '*vendor*' \
-         '*c_exception*' '*build/test/*' '*test/runners*' '*test/mocks*' '/var/lib/gems/*' \
+         '*c_exception*' '*build/test/*' '*test/runners*' '*test/mocks*' '/var/lib/gems/*' '*/common/*' \
          --output-file "${COVERAGE_DIR}/coverage_filtered.info" \
          --rc lcov_branch_coverage=1 \
          --ignore-errors unused 2>&1 | grep -v "WARNING" || true
@@ -264,9 +264,9 @@ save_coverage_for_aggregation() {
 
     # Save to persistent location (outside build/ to survive cleanup)
     # Use absolute path to ensure it goes to the right place
-    # PROJECT_ROOT is set to motor_servo dir, so we need to go up 3 levels to reach drivapi/
+    # PROJECT_ROOT is set to dc_motor dir, so we need to go up 3 levels to reach drivapi/
     ABSOLUTE_PROJECT_ROOT="$(cd "${PROJECT_ROOT}/../.." && pwd)"
-    PERSISTENT_COVERAGE_DIR="${ABSOLUTE_PROJECT_ROOT}/build/coverage/motor_servo"
+    PERSISTENT_COVERAGE_DIR="${ABSOLUTE_PROJECT_ROOT}/build/coverage/dc_motor"
 
     mkdir -p "${PERSISTENT_COVERAGE_DIR}"
 

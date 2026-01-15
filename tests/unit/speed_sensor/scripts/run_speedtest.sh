@@ -23,20 +23,26 @@ ceedling gcov:all
 # We search the entire 'build' folder to find the hidden .gcda files
 echo ""
 echo "📸 Capturing Coverage Data..."
-lcov --capture --directory build --output-file coverage.info --rc branch_coverage=1 --quiet
+lcov --capture --directory build --output-file coverage.info --rc lcov_branch_coverage=1 --quiet
 
-# 3b. Filter coverage data to remove system and vendor code
-echo "📋 Filtering coverage data..."
-lcov -r coverage.info '/usr/*' '*vendor*' '*cmock*' '*unity*' '*c_exception*' \
-         '*build/test/*' '*test/runners*' '*test/mocks*' '/var/lib/gems/*' \
-         --ignore-errors unused \
-         -o coverage_filtered.info --rc branch_coverage=1 --quiet || \
-  cp coverage.info coverage_filtered.info
+# 3b. Filter coverage data to include only src/ and remove system/vendor code
+echo "📋 Filtering coverage data (src/ only)..."
+lcov --extract coverage.info '*/src/*' \
+     -o coverage_src_only.info --rc lcov_branch_coverage=1 --quiet || \
+  cp coverage.info coverage_src_only.info
+
+lcov -r coverage_src_only.info '/usr/*' '*vendor*' '*cmock*' '*unity*' '*c_exception*' \
+     '*build/test/*' '*test/runners*' '*test/mocks*' '/var/lib/gems/*' '*test/*' \
+     --ignore-errors unused \
+     -o coverage_filtered.info --rc lcov_branch_coverage=1 --quiet || \
+  cp coverage_src_only.info coverage_filtered.info
 
 # 4. Generate the HTML Report (with error tolerance)
 echo ""
-echo "📊 Generating HTML Report..."
-if ! genhtml coverage.info --output-directory coverage_report --branch-coverage --quiet 2>/dev/null; then
+echo "📊 Generating HTML Report with Branch Coverage..."
+if ! genhtml coverage_filtered.info --output-directory coverage_report \
+     --branch-coverage --function-coverage \
+     --rc genhtml_branch_coverage=1 --quiet 2>/dev/null; then
   # If genhtml fails (e.g., in headless CI), try without quiet or just warn
   mkdir -p coverage_report
   echo "⚠️ genhtml had issues, but coverage files are saved"
@@ -58,8 +64,8 @@ if [[ "${CI:-false}" == "true" || "${CALLED_FROM_MASTER:-0}" == "1" ]]; then
 else
   echo ""
   echo "🧹 Cleaning up..."
-  echo "Removing coverage.info..."
-  rm -f coverage.info || true
+  echo "Removing coverage files..."
+  rm -f coverage.info coverage_src_only.info || true
   echo "Running clobber.."
   ceedling clobber || true
   echo ""

@@ -6,7 +6,7 @@
 extern "C" {
 #endif
 
-#include "../test/mocks/stm32_hal_i2c.h"
+#include "../../common/mocks/stm32_hal_i2c.h"
 #include <stdint.h>
 
 /* PCA9685 PWM controller configuration */

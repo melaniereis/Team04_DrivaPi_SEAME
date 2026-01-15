@@ -2,7 +2,7 @@
 #ifndef DC_MOTOR_TESTABLE_H
 #define DC_MOTOR_TESTABLE_H
 
-#include "../test/mocks/stm32_hal_i2c.h"
+#include "../../common/mocks/stm32_hal_i2c.h"
 #include "pca9685_testable.h"
 #include <stdint.h>
 #include <math.h>
