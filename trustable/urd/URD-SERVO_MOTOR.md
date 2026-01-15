@@ -14,7 +14,7 @@ reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
 
-reviewed: '2026-01-14 - Approved by Melanie Reis'
+reviewed: '2026-01-14 - Approved by Melanie Reis <melanie.reis@seame.pt>'
 
 references:
   - type: "file"

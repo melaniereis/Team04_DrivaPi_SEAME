@@ -13,7 +13,7 @@ parents:
 reviewers:
   - name: "Miguel Cardoso"
     email: "miguel.cardoso@seame.pt"
-reviewed: '2026-01-14 - Approved by Miguel Cardoso'
+reviewed: '2026-01-14 - Approved by Miguel Cardoso <miguel.cardoso@seame.pt>'
 
 references:
   - type: "file"
