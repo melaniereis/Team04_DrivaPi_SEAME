@@ -1,25 +1,33 @@
-# HARA: Vehicle Actuation (Servo/Motor)
-
+# HARA: Vehicle Actuation System
 
 ## 1. Item Definition
-- **Item:** Vehicle Actuation System (Propulsion & Steering).
+- **Item:** Vehicle Actuation System.
 - **Function:** Converts digital control commands into physical movement via PWM signals.
 
 ## 2. Hazard Analysis
+
 | ID | Hazard | Situation | Cause |
 |:---|:---|:---|:---|
-| **H-02** | **Unintended Actuation** | Vehicle in motion. | Software calculates invalid PWM pulse, causing unintended acceleration or steering lock. |
+| **H-02** | **Unintended Acceleration** | Vehicle stopped or moving. | Software calculates invalid DC Motor PWM, causing uncommanded motion. |
+| **H-03** | **Unintended Steering** | Vehicle moving at speed. | Software calculates invalid Servo PWM, causing sudden steering lock. |
 
 ## 3. Risk Assessment (ISO 26262)
-* **Severity (S): S1** (Light to moderate injury). The vehicle is small-scale; impact is painful but not life-threatening.
-* **Exposure (E): E4** (High probability). Actuation logic runs continuously during operation.
-* **Controllability (C): C2** (Normally controllable). Operator can use E-Stop, but a run-away vehicle requires faster reaction than a passive failure.
 
-### Calculation
-**S1 + E4 + C2 = ASIL A**
-*(Source: ISO 26262-3:2018 Table 4)*
+### H-02: Unintended Acceleration
+* **S1 (Light Injury):** Small scale vehicle, low mass.
+* **E4 (High Exposure):** Propulsion is used continuously.
+* **C2 (Normally Controllable):** Operator can use E-Stop or brake.
+* **Result:** **ASIL A**
+
+### H-03: Unintended Steering
+* **S1 (Light Injury):** potential collision with obstacles.
+* **E4 (High Exposure):** Steering active continuously.
+* **C2 (Normally Controllable):** Visual feedback allows operator reaction.
+* **Result:** **ASIL A**
 
 ## 4. Safety Goals (SG)
-| SG ID | ASIL | Description |
-|:---|:---|:---|
-| **SG-02** | **A** | **Safe Actuation Ranges:** The software must clamp all actuation commands to defined safe physical limits (0-100% or 0-180°) before signal generation. |
+
+| SG ID | Linked Hazard | ASIL | Description |
+|:---|:---|:---|:---|
+| **SG-02** | H-02 | **A** | **Safe Propulsion:** The DC Motor logic must clamp speed requests to +/- 100% and map 0.0 to a guaranteed stop state. |
+| **SG-03** | H-03 | **A** | **Safe Steering:** The Servo logic must clamp angle requests to [0, 180] degrees to prevent mechanical binding/locking. |
