@@ -4,6 +4,7 @@ header: "Unit Tests for DC Motor"
 text: |
   "All unit tests for the DC Motor module shall pass, verifying forward/reverse logic and PWM calculations."
 
+# TSF Type: Evidence/Premise (A Claim, but not a Request)
 verification_method: "Automated Unit Testing"
 
 parents:
