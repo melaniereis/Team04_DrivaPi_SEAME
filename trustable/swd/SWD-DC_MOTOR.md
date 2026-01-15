@@ -24,8 +24,8 @@ reviewed: '2026-01-14 - Approved by Miguel Cardoso'
 
 references:
   - type: "file"
-    path: "tests/unit/dc_motor/src/dc_motor.c"
-    description: "Motor Implementation"
+    path: "Threadx/Core/Src/dc_motor.c"
+    description: "Motor Implementation (production source)"
   - type: "file"
     path: "docs/standards/iso26262/asil-justification-SWD-DC_MOTOR.md"
     description: "ASIL Justification for SWD-DC_MOTOR"

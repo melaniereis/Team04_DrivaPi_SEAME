@@ -20,8 +20,8 @@ reviewed: '2026-01-14 - Approved by Melanie Reis'
 
 references:
   - type: "file"
-    path: "tests/unit/dc_motor/src/dc_motor.h"
-    description: "Motor Interface Definition"
+    path: "Threadx/Core/Inc/dc_motor.h"
+    description: "Motor Interface Definition (production header)"
 
 active: true
 derived: false

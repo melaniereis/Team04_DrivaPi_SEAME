@@ -20,8 +20,8 @@ reviewed: '2026-01-14 - Approved by Melanie Reis'
 
 references:
   - type: "file"
-    path: "tests/unit/servo_motor/src/servo_motor.h"
-    description: "Servo Interface Definition"
+    path: "Threadx/Core/Inc/servo_motor.h"
+    description: "Servo Interface Definition (production header)"
 
 active: true
 derived: false
