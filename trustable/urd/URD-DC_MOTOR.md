@@ -1,5 +1,5 @@
 ---
-id: URD-DC-MOTOR
+id: URD-DC_MOTOR
 header: "Propulsion Control"
 text: |
   "The system shall provide propulsion control to move the vehicle forward and backward at requested speeds."
@@ -8,7 +8,7 @@ text: |
 verification_method: "System Testing"
 
 children:
-  - id: SRD-DC-MOTOR
+  - id: SRD-DC_MOTOR
 
 reviewers:
   - name: "Melanie Reis"
