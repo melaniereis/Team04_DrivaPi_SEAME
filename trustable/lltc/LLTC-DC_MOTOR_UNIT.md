@@ -21,7 +21,7 @@ references:
   - type: "file"
     path: "tests/unit/dc_motor/test/test_threadx_dc_motor_with_mocks.c"
   - type: "file"
-    path: "tests/unit/dc_motor/test/test_dc_motor_REAL_SRD_MOTOR_001.c"
+    path: "tests/unit/dc_motor/test/test_dc_motor_LLTC_UNIT.c"
 
 evidence:
   type: junit_pass_rate_validator
