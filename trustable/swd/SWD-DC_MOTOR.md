@@ -26,6 +26,9 @@ references:
   - type: "file"
     path: "tests/unit/dc_motor/src/dc_motor.c"
     description: "Motor Implementation"
+  - type: "file"
+    path: "docs/standards/iso26262/asil-justification-SWD-DC_MOTOR.md"
+    description: "ASIL Justification for SWD-DC_MOTOR"
 
 active: true
 derived: false

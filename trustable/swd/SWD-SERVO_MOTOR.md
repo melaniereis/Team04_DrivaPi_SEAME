@@ -25,6 +25,9 @@ references:
   - type: "file"
     path: "tests/unit/servo_motor/src/servo_motor.c"
     description: "Servo Implementation"
+  - type: "file"
+    path: "docs/standards/iso26262/asil-justification-SWD-SERVO_MOTOR.md"
+    description: "ASIL Justification for SWD-SERVO_MOTOR"
 
 active: true
 derived: false
