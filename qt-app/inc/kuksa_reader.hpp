@@ -3,12 +3,11 @@
 
 #include <QObject>
 #include <QDebug>
-#include <iomanip>
 #include <grpcpp/grpcpp.h>
-#include "val.grpc.pb.h"
+#include "kuksa/val/v2/val.grpc.pb.h"
 
-// KUKSA Val gRPC namespace to avoid long names
-using namespace kuksa::val::v1;
+// KUKSA Val v2 gRPC namespace
+using namespace kuksa::val::v2;
 
 class KUKSAReader : public QObject
 {
