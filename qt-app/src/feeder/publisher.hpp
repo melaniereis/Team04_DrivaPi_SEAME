@@ -17,6 +17,15 @@ namespace kuksa {
 /**
  * @brief Simple KUKSA VAL v2 publisher client
  */
+struct PublisherOptions {
+    std::string address = "localhost:55555";
+    bool use_ssl = false;                 // false = insecure
+    std::string root_ca_path;             // optional
+    std::string client_cert_path;         // optional (for mTLS)
+    std::string client_key_path;          // optional (for mTLS)
+    std::string token;                    // optional JWT token ("Bearer <token>")
+};
+
 class Publisher {
 public:
     /**
@@ -24,6 +33,11 @@ public:
      * @param address Databroker address (e.g., "localhost:55555")
      */
     explicit Publisher(const std::string& address);
+
+    /**
+     * @brief Construct with options (TLS and auth)
+     */
+    explicit Publisher(const PublisherOptions& opts);
     ~Publisher();
 
     /**
@@ -60,6 +74,13 @@ public:
     bool publishString(const std::string& path, const std::string& value);
 
 private:
+    // Attach authorization metadata if token present
+    void attachAuth(grpc::ClientContext& ctx);
+
+    // Load file contents into string (returns empty if path empty or read fails)
+    static std::string loadFile(const std::string& path);
+
+    PublisherOptions opts_;
     std::shared_ptr<grpc::Channel> channel_;
     std::unique_ptr<kuksa::val::v2::VAL::Stub> stub_;
 };

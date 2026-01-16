@@ -4,9 +4,16 @@
  * 
  * Reads CAN frames from SocketCAN and publishes VSS signals to KUKSA databroker
  * 
- * Usage: kuksa_feeder [can_interface] [kuksa_address]
+ * Usage: kuksa_feeder [can_interface] [kuksa_address] [options]
  *   can_interface: CAN interface name (default: can0)
  *   kuksa_address: KUKSA databroker address (default: localhost:55555)
+ *   options:
+ *     --insecure            Use insecure channel (default)
+ *     --tls                 Use TLS channel
+ *     --ca <path>           Root CA certificate path
+ *     --cert <path>         Client certificate (for mTLS)
+ *     --key <path>          Client private key (for mTLS)
+ *     --token <jwt>         Authorization token (adds Authorization: Bearer <jwt>)
  */
 
 #include "publisher.hpp"
@@ -93,12 +100,35 @@ int main(int argc, char** argv) {
     // Parse command-line arguments
     std::string can_interface = "can0";
     std::string kuksa_address = "localhost:55555";
+    kuksa::PublisherOptions popts;
+    popts.address = kuksa_address;
 
     if (argc >= 2) {
         can_interface = argv[1];
     }
     if (argc >= 3) {
         kuksa_address = argv[2];
+        popts.address = kuksa_address;
+    }
+
+    // Parse optional flags from argv[3..]
+    for (int i = 3; i < argc; ++i) {
+        std::string arg = argv[i];
+        if (arg == "--insecure") {
+            popts.use_ssl = false;
+        } else if (arg == "--tls") {
+            popts.use_ssl = true;
+        } else if (arg == "--ca" && i + 1 < argc) {
+            popts.root_ca_path = argv[++i];
+        } else if (arg == "--cert" && i + 1 < argc) {
+            popts.client_cert_path = argv[++i];
+        } else if (arg == "--key" && i + 1 < argc) {
+            popts.client_key_path = argv[++i];
+        } else if (arg == "--token" && i + 1 < argc) {
+            popts.token = argv[++i];
+        } else {
+            std::cerr << "[Args] Unknown or incomplete option: " << arg << std::endl;
+        }
     }
 
     std::cout << "========================================" << std::endl;
@@ -106,10 +136,15 @@ int main(int argc, char** argv) {
     std::cout << "========================================" << std::endl;
     std::cout << "CAN Interface: " << can_interface << std::endl;
     std::cout << "KUKSA Address: " << kuksa_address << std::endl;
+    std::cout << "Security: " << (popts.use_ssl ? "TLS" : "insecure") << std::endl;
+    if (!popts.root_ca_path.empty()) std::cout << "CA: " << popts.root_ca_path << std::endl;
+    if (!popts.client_cert_path.empty()) std::cout << "Cert: " << popts.client_cert_path << std::endl;
+    if (!popts.client_key_path.empty()) std::cout << "Key: " << popts.client_key_path << std::endl;
+    if (!popts.token.empty()) std::cout << "Auth: Bearer <token>" << std::endl;
     std::cout << "========================================" << std::endl;
 
     // Connect to KUKSA databroker
-    kuksa::Publisher publisher(kuksa_address);
+    kuksa::Publisher publisher(popts);
 
     // Open CAN socket
     const int can_sock = openCanSocket(can_interface);
