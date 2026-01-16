@@ -10,7 +10,7 @@
 namespace vss {
 
 // VSS signal paths (must exist in KUKSA databroker's vss.json)
-constexpr const char* VEHICLE_SPEED = "Vehicle.Speed";  // Unit: m/s, Type: float
+constexpr const char* VEHICLE_SPEED = "Vehicle.Speed";  // Unit: km/h, Type: float
 
 // Additional paths can be added here:
 // constexpr const char* VEHICLE_EXTERIOR_TEMP = "Vehicle.Exterior.AirTemperature";

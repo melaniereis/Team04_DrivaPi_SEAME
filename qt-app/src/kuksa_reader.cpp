@@ -70,7 +70,7 @@ void KUKSAReader::start()
                     speed = static_cast<float>(value.double_());
                 }
                 
-                qDebug() << "KuksaReader: Received Vehicle.Speed =" << speed << "m/s";
+                qDebug() << "KuksaReader: Received Vehicle.Speed =" << speed << "km/h";
                 emit speedReceived(speed);
             }
         }
