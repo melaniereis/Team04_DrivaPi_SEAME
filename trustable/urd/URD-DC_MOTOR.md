@@ -18,7 +18,7 @@ reviewed: '2026-01-14 - Approved by Melanie Reis <melanie.reis@seame.pt>'
 
 references:
   - type: "file"
-    path: "docs/standards/iso26262/hara-actuation.md"
+    path: "docs/standards/iso26262/hara_actuation.md"
     description: "Mitigates Hazard H-02 (Unintended Acceleration)"
 
 active: true

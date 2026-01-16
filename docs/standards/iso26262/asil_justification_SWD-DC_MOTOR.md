@@ -7,7 +7,7 @@
 
 ## 2. ASIL Decomposition
 - **Assigned ASIL:** **A**
-- **Rationale:** Failure of this component directly leads to Hazard H-02 (Unintended Acceleration). As derived in `hara-actuation.md`, this risk is classified as ASIL A.
+- **Rationale:** Failure of this component directly leads to Hazard H-02 (Unintended Acceleration). As derived in `hara_actuation.md`, this risk is classified as ASIL A.
 
 ## 3. Verification Strategy
 To meet ASIL A for Propulsion Control:

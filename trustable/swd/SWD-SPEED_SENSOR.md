@@ -31,7 +31,7 @@ references:
     path: "Threadx/Core/Src/speed_sensor.c"
     description: "Source code implementation"
   - type: "file"
-    path: "docs/standards/iso26262/asil-justification-SWD-SPEED_SENSOR.md"
+    path: "docs/standards/iso26262/asil_justification_SWD-SPEED_SENSOR.md"
     description: "ASIL A Justification"
 
 active: true

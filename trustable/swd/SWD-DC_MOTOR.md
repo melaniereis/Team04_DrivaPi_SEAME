@@ -27,7 +27,7 @@ references:
     path: "Threadx/Core/Src/dc_motor.c"
     description: "Motor Implementation (production source)"
   - type: "file"
-    path: "docs/standards/iso26262/asil-justification-SWD-DC_MOTOR.md"
+    path: "docs/standards/iso26262/asil_justification_SWD-DC_MOTOR.md"
     description: "ASIL Justification for SWD-DC_MOTOR"
 
 active: true

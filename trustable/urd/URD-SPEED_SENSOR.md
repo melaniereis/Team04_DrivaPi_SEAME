@@ -18,7 +18,7 @@ reviewed: '2026-01-09 - Approved by Melanie Reis <melanie.reis@seame.pt>'
 
 references:
   - type: "file"
-    path: "docs/standards/iso26262/hara-motor-speed.md"
+    path: "docs/standards/iso26262/hara_motor_speed.md"
     description: "HARA Hazard H-01"
 
 active: true
