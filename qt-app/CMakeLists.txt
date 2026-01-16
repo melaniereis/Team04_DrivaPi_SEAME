@@ -43,16 +43,16 @@ file(GLOB_RECURSE APP_SOURCES
 add_executable(myqtapp ${APP_SOURCES})
 
 target_include_directories(myqtapp PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/inc
     ${GEN_DIR}
 )
 
 target_sources(myqtapp PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/resources/qml.qrc"
     "${CMAKE_CURRENT_SOURCE_DIR}/resources/resources.qrc"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/vehicledata.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/canreader.hpp"  
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/kuksareader.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/vehicle_data.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/can_reader.hpp"  
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/kuksa_reader.hpp"
     "${GEN_DIR}/val.pb.cc"
     "${GEN_DIR}/val.grpc.pb.cc"
     "${GEN_DIR}/types.pb.cc"

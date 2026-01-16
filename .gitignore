@@ -154,3 +154,5 @@ secrets.yml
 # CMake build directories
 tests/build/
 build/
+CMakeCache.txt
+CMakeFiles/
