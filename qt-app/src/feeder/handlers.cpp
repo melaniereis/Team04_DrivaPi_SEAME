@@ -20,11 +20,13 @@ void handleSpeed(const can_frame& frame, kuksa::Publisher& publisher) {
     }
 
     // Decode float from CAN payload (little-endian)
-    float speed_mps = can_decode::float_le(frame.data);
+    float speed_mps = can_decode::float_le(frame.data);  // STM32 sends m/s
+    float speed_kmh = speed_mps * 3.6f;  // Convert to km/h for VSS compliance
 
     // Publish to KUKSA
-    if (publisher.publishFloat(vss::VEHICLE_SPEED, speed_mps)) {
-        std::cout << "[Handler] Published Vehicle.Speed = " << speed_mps << " m/s" << std::endl;
+    if (publisher.publishFloat(vss::VEHICLE_SPEED, speed_kmh)) {
+        std::cout << "[Handler] Published Vehicle.Speed = " << speed_kmh << " km/h (" 
+                  << speed_mps << " m/s)" << std::endl;
     }
 }
 
