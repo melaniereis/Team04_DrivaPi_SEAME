@@ -8,7 +8,7 @@
 # Version: 2.1.4
 #
 # Features:
-# - Run motor_servo and speed_sensor tests sequentially
+# - Run motor-servo and speed-sensor tests sequentially
 # - Aggregate LCOV coverage reports into single report (source only)
 # - Overall test result summary
 # - Color-coded output
@@ -21,8 +21,8 @@ set -o pipefail
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly PROJECT_ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
-readonly MOTOR_SERVO_DIR="${SCRIPT_DIR}/motor_servo"
-readonly SPEED_SENSOR_DIR="${SCRIPT_DIR}/speed_sensor"
+readonly MOTOR_SERVO_DIR="${SCRIPT_DIR}/motor-servo"
+readonly SPEED_SENSOR_DIR="${SCRIPT_DIR}/speed-sensor"
 
 if [[ -n "${COVERAGE_DIR:-}" ]]; then
     if [[ "$COVERAGE_DIR" == /* ]]; then
@@ -121,8 +121,8 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
         SPEED_SENSOR_COVERAGE="${SPEED_SENSOR_DIR}/build/artifacts/gcov/coverage_filtered.info"
     fi
 
-    PERSISTENT_MOTOR_SERVO="${SCRIPT_DIR}/../../build/coverage/motor_servo/coverage_filtered.info"
-    PERSISTENT_SPEED_SENSOR="${SCRIPT_DIR}/../../build/coverage/speed_sensor/coverage_filtered.info"
+    PERSISTENT_MOTOR_SERVO="${SCRIPT_DIR}/../../build/coverage/motor-servo/coverage_filtered.info"
+    PERSISTENT_SPEED_SENSOR="${SCRIPT_DIR}/../../build/coverage/speed-sensor/coverage_filtered.info"
 
     if [[ -f "${PERSISTENT_MOTOR_SERVO}" ]]; then
         MOTOR_SERVO_COVERAGE="${PERSISTENT_MOTOR_SERVO}"
@@ -206,8 +206,8 @@ if [[ $MOTOR_SERVO_PASSED -eq 1 && $SPEED_SENSOR_PASSED -eq 1 ]]; then
     fi
 
     XML_TEST_OUT="artifacts/verification/tests/junit_results.xml"
-    JUNIT_1="tests/unit/motor_servo/build/artifacts/gcov/junit_tests_report.xml"
-    JUNIT_2="tests/unit/speed_sensor/build/artifacts/gcov/junit_tests_report.xml"
+    JUNIT_1="tests/unit/motor-servo/build/artifacts/gcov/junit_tests_report.xml"
+    JUNIT_2="tests/unit/speed-sensor/build/artifacts/gcov/junit_tests_report.xml"
 
     echo '<?xml version="1.0" encoding="UTF-8" ?>' > "$XML_TEST_OUT"
     echo '<testsuites>' >> "$XML_TEST_OUT"

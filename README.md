@@ -3,7 +3,7 @@
 Autonomous vehicle using PiRacer as part of the SEAME automotive program.
 
 ## Team: DrivaPi (Team04)
-Hugo, João, Bernardo, Miguel, Melanie
+Bernardo, Gaspar, Hugo, Melanie, Miguel
 
 ---
 
@@ -36,35 +36,48 @@ Hugo, João, Bernardo, Miguel, Melanie
 
 ```
 .
-├── reqs/                  # TSF Requirements
-│   ├── urd/              # User Requirements
-│   ├── srd/              # System Requirements
-│   ├── swd/              # Software Design
-│   └── lltc/             # Test Cases
+├── TSF/                   # Trustable Software Framework
+│   ├── reqs/             # TSF Requirements
+│   │   ├── urd/         # User Requirements
+│   │   ├── srd/         # System Requirements
+│   │   ├── swd/         # Software Design
+│   │   └── lltc/        # Low-Level Test Cases
+│   ├── artifacts/       # Evidence & reports
+│   └── .dotstop.dot     # TSF traceability graph
 │
-├── src/                  # Source code
-├── tests/                # Unit/integration/system tests
-├── docs/                 # Documentation
-│   ├── standups/        # Daily stand-ups
-│   └── tsf/             # TSF docs
+├── qt-app/               # Qt-based GUI application
+│   ├── src/             # Application source code
+│   ├── include/         # Header files
+│   ├── resources/       # UI resources
+│   └── proto/           # Protocol buffers
 │
-├── artifacts/
-│   ├── trustable-report/ # TSF reports
-│   ├── verification/     # Test results, analysis
-│   └── baselines/        # Release snapshots
+├── rust/                 # Rust implementations
+├── Threadx/             # ThreadX RTOS integration
+├── meta-cross/          # Cross-compilation & build system
 │
-└── .dotstop.dot          # TSF traceability graph
+├── docs/                # Documentation
+│   ├── standups/       # Daily stand-up logs
+│   ├── sprints/        # Sprint planning & retrospectives
+│   ├── hardware/       # Hardware documentation
+│   ├── software/       # Software documentation
+│   ├── standards/      # Standards & compliance
+│   ├── presentations/  # Team presentations
+│   └── TSF/            # TSF workflow documentation
+│
+├── tests/              # Test suites
+├── scripts/            # Automation scripts
+└── archive/            # Historical work & labs
 ```
 
 ## 📋 TSF Documentation
 
 | Doc | When to Use | Time |
 |-----|-------------|------|
-| **[start.md](docs/tsf/start.md)** | First time, setup | 15 min |
-| **[reference.md](docs/tsf/reference.md)** | Cheat sheet, commands | Reference |
-| **[workflow.md](docs/tsf/workflow.md)** | Create requirements, review | Reference |
-| **[training.md](docs/tsf/training.md)** | Understand TSF/ISO 26262 theory | 1-2h |
-| **[evidence.md](docs/tsf/evidence.md)** | Link artifacts | Reference |
+| **[start.md](docs/TSF/start.md)** | First time, setup | 15 min |
+| **[reference.md](docs/TSF/reference.md)** | Cheat sheet, commands | Reference |
+| **[workflow.md](docs/TSF/workflow.md)** | Create requirements, review | Reference |
+| **[training.md](docs/TSF/training.md)** | Understand TSF/ISO 26262 theory | 1-2h |
+| **[evidence.md](docs/TSF/evidence.md)** | Link artifacts | Reference |
 
 ---
 
@@ -73,52 +86,123 @@ Hugo, João, Bernardo, Miguel, Melanie
 ### Daily Stand-Ups
 
 - **Morning:** Quick sync (~10 min)
-- **Evening:** Progress review (~15 min)
 - **Facilitator:** Melanie
-- **Docs:** [documents/standups/](documents/standups/)
+- **Docs:** [docs/standups/](docs/standups/)
+
+### Agile/Scrum Process
+
+- **Sprint Duration:** 2 weeks
+- **Sprint Planning:** Start of each sprint
+- **Sprint Review:** End of sprint demo
+- **Sprint Retrospective:** Continuous improvement
+- **Project Board:** GitHub Projects with automated workflows
+- **Issue Tracking:** GitHub Issues linked to requirements
+
+### Code Review Standards
+
+- **Minimum Approvals:** 2 required for merge
+- **Review Checklist:**
+  - Code follows naming conventions
+  - Tests pass locally and in CI
+  - Documentation updated
+  - TSF requirements linked (if applicable)
+  - No secrets or sensitive data
+- **PR Template:** Enforced via `.github/PULL_REQUEST_TEMPLATE.md`
+
+### Quality Gates
+
+All PRs must pass:
+- Unit tests (90% coverage minimum)
+- Static analysis (CodeQL)
+- TSF validation
+- 2 peer reviews
 
 ### Workflow
 
-1. Create branch
-2. Create requirements (`trudag manage create-item`)
-3. Implement (code, tests, docs)
-4. Link artifacts to requirements
-5. Validate (`trudag manage lint`)
-6. Create PR (2 reviews for ASIL B)
-7. Merge
+**Branch naming:** `<type>/<issue-number>-<description>`
+- Types: `feat/`, `fix/`, `docs/`, `test/`, `refactor/`, `chore/`, `spike/`
+- Example: `feat/316-integrate-unit-test-coverage`
+
+**Development Process:**
+1. **Start Work**: Create/assign GitHub issue → Move to "In Progress"
+2. **Create Branch**: `git checkout -b <type>/<issue-number>-<description>`
+3. **Develop**: Implement changes, write tests, update documentation
+4. **TSF Integration** (if applicable):
+   - Create/update requirements in `TSF/requirements/`
+   - Link evidence to requirements
+   - Validate with CI/CD pipeline
+5. **Local Testing**: Run unit tests, static analysis locally
+6. **Push & PR**: 
+   - Push to GitHub
+   - Create Pull Request using template
+   - Link issue with "closes #<issue-number>"
+7. **Review**: Minimum **2 approvals** required
+8. **CI/CD Validation**:
+   - Unit tests (`unit_tests.yml`)
+   - Static analysis (`firmware_static.yml`)
+   - TSF validation (`tsf_validation.yml`)
+   - Doxygen documentation (`doxygen_documentation.yml`)
+9. **Merge**: Squash and merge → Delete feature branch
 
 **Commit format:** `<type>(<scope>): <description>`
-- Types: `feat`, `fix`, `docs`, `test`, `review`
-- Scopes: `urd`, `srd`, `swd`, `lltc`, `hmi`, `sensor`
+- Types: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`, `ci`, `revert`
+- Scopes: `reqs`, `tsf`, `firmware`, `qt-app`, `ci`, `hardware`, etc.
+- Examples:
+  - `feat(reqs): add motor control requirements`
+  - `fix(firmware): correct servo calibration logic`
+  - `docs(tsf): update workflow documentation`
+  - `test(unit): add speed sensor test coverage`
 
 ---
 
-## 📈 Progress
+## 📈 Progress & Status
 
-| Date | Achievement |
-|------|-------------|
-| Oct 8 | Hardware setup initiated |
-| Oct 9 | Assembly finalized with custom parts |
-| Oct 10 | Qt app created, ThreadX selected |
-| Oct 13 | Sprint 1 starts, AGL deployment |
-| Oct 14 | TSF framework integrated |
+### Completed
+- ✅ Hardware assembly and integration
+- ✅ PiRacer setup with Raspberry Pi 5
+- ✅ Qt application foundation
+- ✅ ThreadX RTOS integration
+- ✅ AGL deployment
+- ✅ TSF framework integrated
+- ✅ Unit test framework with 90% coverage minimum
+- ✅ CI/CD pipeline with automated validation
+- ✅ Static analysis with CodeQL
+- ✅ Automated evidence generation
+- ✅ Doxygen documentation generation
 
-**Current Sprint:** Sprint 1 (Oct 13-25)
-**Status:** ~90% hardware, dev environment setup, TSF operational
+### In Progress
+- 🔄 Firmware refactoring and naming conventions
+- 🔄 Motor/servo requirements and test suites
+- 🔄 Qt application development
+- 🔄 Computer vision integration
+- 🔄 Autonomous driving capabilities
 
 ---
 
 ## 📊 Traceability Status
 
-**Current baseline:** Sprint 1
-- 1 example URD (User Requirements) ✅
-- 1 example SRD (System Requirements) ✅
-- 1 example SWD (Software Design) ✅
-- 1 example LLTC (Test Cases) ✅
-- 100% reviewed ✅
-- Complete V-Model chain ✅
+**TSF Framework:** Fully operational with automated validation
 
-**View report:** [artifacts/trustable-report/dashboard.md](artifacts/trustable-report/dashboard.md)
+### Requirements Structure
+- **URD** (User Requirements): L0 level requirements from product backlog
+- **SRD** (System Requirements): L1 level system decomposition
+- **SWD** (Software Design): L2 level detailed design
+- **LLTC** (Low-Level Test Cases): L3 level unit/integration tests
+
+### Automated CI/CD Pipeline
+- ✅ Unit tests with code coverage (90% minimum)
+- ✅ Static analysis with CodeQL
+- ✅ TSF validation and traceability checks
+- ✅ Automated evidence generation and linking
+- ✅ Doxygen documentation generation
+
+### Current Coverage
+- Motor control requirements fully traced
+- Servo control requirements fully traced
+- Speed sensor unit tests implemented
+- Automated traceability updates via CI
+
+**View detailed report:** [TSF/artifacts/trustable-report/dashboard.md](TSF/artifacts/trustable-report/dashboard.md)
 
 ---
 
@@ -138,13 +222,13 @@ Hugo, João, Bernardo, Miguel, Melanie
 
 ## 👤 Team Roles
 
-| Member | Focus |
-|--------|-------|
-| **Hugo** | Hardware, fabrication, QT deployment |
-| **João** | OS, dev environment |
-| **Bernardo** | Hardware integration, testing |
-| **Miguel** | GitHub, Agile/Scrum |
-| **Melanie** | GUI, coordination, requirements |
+| Member | Primary Focus | Responsibilities |
+|--------|--------------|------------------|
+| **Bernardo** | Hardware Integration & Testing | PiRacer integration, hardware validation, system testing |
+| **Gaspar** | OS & Development Environment | AGL setup, build systems, cross-compilation, toolchain |
+| **Hugo** | Hardware & Fabrication | Mechanical design, 3D printing, custom parts, assembly |
+| **Melanie** | GUI & Team Coordination | Qt application, HMI design, stand-up facilitation, documentation |
+| **Miguel** | GitHub Project & Agile/Scrum | Project management, GitHub workflows, sprint planning, CI/CD |
 
 ---
 
@@ -154,4 +238,4 @@ Educational project - SEAME Automotive Program
 
 ---
 
-*Last update: Oct 21, 2025 | Sprint 1 | Active development*
+*Last update: January 14, 2025 | Active development*
