@@ -106,6 +106,28 @@ Default values:
 
 ```bash
 ./kuksa_feeder vcan0 192.168.1.100:55555
+### TLS and Authorization
+
+The feeder supports TLS and optional mTLS, plus JWT-based authorization.
+
+Flags:
+- `--tls` / `--insecure`: Enable TLS or use insecure mode (default: insecure)
+- `--ca <path>`: Root CA certificate
+- `--cert <path>`: Client certificate (for mTLS)
+- `--key <path>`: Client private key (for mTLS)
+- `--token <jwt>`: Authorization token (sends `Authorization: Bearer <jwt>`)
+
+Examples:
+
+```bash
+# TLS with root CA
+./kuksa_feeder vcan0 kuksa.local:55555 --tls --ca /etc/kuksa/ca.crt
+
+# mTLS with token
+./kuksa_feeder vcan0 kuksa.local:55555 --tls --ca /etc/kuksa/ca.crt \
+  --cert /etc/kuksa/client.crt --key /etc/kuksa/client.key \
+  --token eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
 ```
 
 ### Expected Output
