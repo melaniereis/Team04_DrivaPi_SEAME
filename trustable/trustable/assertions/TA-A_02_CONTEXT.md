@@ -2,11 +2,13 @@
 active: true
 derived: false
 level: 1.2.1
-links: []
-normative: false
+links:
+- TA-A_02: bc316cdf87432159ae6eb8e3b184686b88a938d5f8398ffdc05afa35d37e6b4a
+normative: true
 ref: ''
 reviewed: fa2b4344d8d00a6c69c3077d54effb284062ff87878aa911e9ee7f0648c37f2f
 ---
+
 
 **Guidance**
 
