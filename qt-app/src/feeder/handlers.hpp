@@ -16,8 +16,8 @@ namespace handlers {
 /**
  * @brief Handle speed CAN frame (ID 0x100)
  * 
- * Payload: 4-byte float (little-endian) representing speed in m/s
- * Publishes to: Vehicle.Speed
+ * Payload: 4-byte float (little-endian) representing speed in m/s from STM32
+ * Publishes to: Vehicle.Speed (converted to km/h for VSS compliance)
  * 
  * @param frame The CAN frame
  * @param publisher KUKSA publisher instance

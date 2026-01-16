@@ -12,7 +12,7 @@
 namespace can {
 
 // CAN IDs from STM32 ThreadX firmware
-constexpr uint32_t ID_SPEED = 0x100;  // Speed telemetry (float m/s, 4 bytes)
+constexpr uint32_t ID_SPEED = 0x100;  // Speed telemetry (float m/s from STM32, 4 bytes)
 
 // Additional IDs can be added here as needed:
 // constexpr uint32_t ID_TEMPERATURE = 0x200;
