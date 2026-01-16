@@ -34,7 +34,7 @@
  * @param ifname Interface name (e.g., "can0", "vcan0")
  * @return Socket file descriptor, or -1 on error
  */
-static int openCanSocket(const std::string& ifname) {
+static int OpenCanSocket(const std::string& ifname) {
     // Create CAN socket
     int sock = socket(PF_CAN, SOCK_RAW, CAN_RAW);
     if (sock < 0) {
@@ -76,12 +76,12 @@ static int openCanSocket(const std::string& ifname) {
  * @param frame The received CAN frame
  * @param publisher KUKSA publisher instance
  */
-static void dispatchFrame(const can_frame& frame, kuksa::Publisher& publisher) {
+static void DispatchFrame(const can_frame& frame, kuksa::Publisher& publisher) {
     const uint32_t can_id = frame.can_id & CAN_SFF_MASK;  // Mask to standard frame ID
 
     switch (can_id) {
         case can::ID_SPEED:
-            handlers::handleSpeed(frame, publisher);
+            handlers::HandleSpeed(frame, publisher);
             break;
 
         // Add additional CAN IDs here:
@@ -147,7 +147,7 @@ int main(int argc, char** argv) {
     kuksa::Publisher publisher(popts);
 
     // Open CAN socket
-    const int can_sock = openCanSocket(can_interface);
+    const int can_sock = OpenCanSocket(can_interface);
     if (can_sock < 0) {
         std::cerr << "[Error] Failed to open CAN interface. Is it up?" << std::endl;
         std::cerr << "        Try: sudo ip link set " << can_interface << " up" << std::endl;
@@ -175,7 +175,7 @@ int main(int argc, char** argv) {
         }
 
         // Dispatch to handler
-        dispatchFrame(frame, publisher);
+        DispatchFrame(frame, publisher);
     }
 
     close(can_sock);

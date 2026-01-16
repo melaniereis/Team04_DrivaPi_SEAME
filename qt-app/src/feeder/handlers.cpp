@@ -11,7 +11,7 @@
 
 namespace handlers {
 
-void handleSpeed(const can_frame& frame, kuksa::Publisher& publisher) {
+void HandleSpeed(const can_frame& frame, kuksa::Publisher& publisher) {
     // Validate payload size (expect 4 bytes for float)
     if (frame.can_dlc < 4) {
         std::cerr << "[Handler] Speed frame too short: " << static_cast<int>(frame.can_dlc) 
@@ -20,11 +20,11 @@ void handleSpeed(const can_frame& frame, kuksa::Publisher& publisher) {
     }
 
     // Decode float from CAN payload (little-endian)
-    float speed_mps = can_decode::float_le(frame.data);  // STM32 sends m/s
+    float speed_mps = can_decode::FloatLe(frame.data);  // STM32 sends m/s
     float speed_kmh = speed_mps * 3.6f;  // Convert to km/h for VSS compliance
 
     // Publish to KUKSA
-    if (publisher.publishFloat(vss::VEHICLE_SPEED, speed_kmh)) {
+    if (publisher.PublishFloat(vss::VEHICLE_SPEED, speed_kmh)) {
         std::cout << "[Handler] Published Vehicle.Speed = " << speed_kmh << " km/h (" 
                   << speed_mps << " m/s)" << std::endl;
     }

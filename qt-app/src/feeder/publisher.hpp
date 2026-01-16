@@ -46,39 +46,39 @@ public:
      * @param value The value to publish
      * @return true if publish succeeded, false otherwise
      */
-    bool publishDouble(const std::string& path, double value);
+    bool PublishDouble(const std::string& path, double value);
 
     /**
      * @brief Publish a float value to a VSS path
      */
-    bool publishFloat(const std::string& path, float value);
+    bool PublishFloat(const std::string& path, float value);
 
     /**
      * @brief Publish an int32 value to a VSS path
      */
-    bool publishInt32(const std::string& path, int32_t value);
+    bool PublishInt32(const std::string& path, int32_t value);
 
     /**
      * @brief Publish a uint32 value to a VSS path
      */
-    bool publishUint32(const std::string& path, uint32_t value);
+    bool PublishUint32(const std::string& path, uint32_t value);
 
     /**
      * @brief Publish a boolean value to a VSS path
      */
-    bool publishBool(const std::string& path, bool value);
+    bool PublishBool(const std::string& path, bool value);
 
     /**
      * @brief Publish a string value to a VSS path
      */
-    bool publishString(const std::string& path, const std::string& value);
+    bool PublishString(const std::string& path, const std::string& value);
 
 private:
     // Attach authorization metadata if token present
-    void attachAuth(grpc::ClientContext& ctx);
+    void AttachAuth(grpc::ClientContext& ctx);
 
     // Load file contents into string (returns empty if path empty or read fails)
-    static std::string loadFile(const std::string& path);
+    static std::string LoadFile(const std::string& path);
 
     PublisherOptions opts_;
     std::shared_ptr<grpc::Channel> channel_;

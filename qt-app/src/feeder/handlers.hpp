@@ -22,7 +22,7 @@ namespace handlers {
  * @param frame The CAN frame
  * @param publisher KUKSA publisher instance
  */
-void handleSpeed(const can_frame& frame, kuksa::Publisher& publisher);
+void HandleSpeed(const can_frame& frame, kuksa::Publisher& publisher);
 
 // Additional handlers can be added here:
 // void handleTemperature(const can_frame& frame, kuksa::Publisher& publisher);
