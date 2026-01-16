@@ -1,7 +1,5 @@
 ---
 :project:
-  :which_ceedling: gem
-  :ceedling_version: 1.0.1
   :use_mocks: TRUE
   :use_test_preprocessor: :none
   :use_deep_preprocessor: :none
@@ -37,7 +35,6 @@
 :report_tests_log_factory:
   :reports:
     - junit
-    - html
 
 :extension:
   :executable: .out
@@ -126,3 +123,7 @@
   :gcovr:
     :html_medium_threshold: 75
     :html_high_threshold: 90
+  :report_generator: :gcovr
+  :gcov_reports:
+    - HtmlDetailed
+  :branch_coverage: TRUE

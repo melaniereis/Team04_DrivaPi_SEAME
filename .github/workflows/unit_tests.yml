@@ -38,7 +38,7 @@ jobs:
       - name: Install Ceedling and gcovr
         run: |
           sudo gem install ceedling
-          pip3 install lcov_cobertura gcovr
+          pip3 install gcovr
 
       - name: Verify tool versions
         run: |
@@ -80,7 +80,8 @@ jobs:
             // Extract test results
             let testPassed = 0;
             let testFailed = 0;
-            let motorServoCount = 0;
+            let dcMotorCount = 0;
+            let servoMotorCount = 0;
             let speedSensorCount = 0;
             let testSummary = '';
 
@@ -88,33 +89,36 @@ jobs:
               const logContent = fs.readFileSync('test_output.log', 'utf8');
 
               // Extract test counts from [TEST_COUNT] markers
-              const motorServoCountMatch = logContent.match(/\[TEST_COUNT\] Motor Servo:\s*(\d+)\s*tests/i);
+              const dcMotorCountMatch = logContent.match(/\[TEST_COUNT\] DC Motor:\s*(\d+)\s*tests/i);
+              const servoMotorCountMatch = logContent.match(/\[TEST_COUNT\] Servo Motor:\s*(\d+)\s*tests/i);
               const speedSensorCountMatch = logContent.match(/\[TEST_COUNT\] Speed Sensor:\s*(\d+)\s*tests/i);
 
-              if (motorServoCountMatch) {
-                motorServoCount = parseInt(motorServoCountMatch[1]);
+              if (dcMotorCountMatch) {
+                dcMotorCount = parseInt(dcMotorCountMatch[1]);
+              }
+              if (servoMotorCountMatch) {
+                servoMotorCount = parseInt(servoMotorCountMatch[1]);
               }
               if (speedSensorCountMatch) {
                 speedSensorCount = parseInt(speedSensorCountMatch[1]);
               }
 
-              // Fallback: if markers not found, use defaults
-              if (motorServoCount === 0) motorServoCount = 168;
-              if (speedSensorCount === 0) speedSensorCount = 11;
-
-              testPassed = motorServoCount + speedSensorCount;
+              testPassed = dcMotorCount + servoMotorCount + speedSensorCount;
 
               // Check for failure indicators in status lines
-              const motorServoFailed = logContent.match(/\[INFO\] Motor Servo:\s+FAILED/i);
+              const dcMotorFailed = logContent.match(/\[INFO\] DC Motor:\s+FAILED/i);
+              const servoMotorFailed = logContent.match(/\[INFO\] Servo Motor:\s+FAILED/i);
               const speedSensorFailed = logContent.match(/\[INFO\] Speed Sensor:\s+FAILED/i);
-              testFailed = (motorServoFailed || speedSensorFailed) ? 1 : 0;
+              testFailed = (dcMotorFailed || servoMotorFailed || speedSensorFailed) ? 1 : 0;
 
               // Extract test status (PASSED or FAILED)
-              const motorServoMatch = logContent.match(/\[INFO\] Motor Servo:\s+(PASSED|FAILED)/i);
+              const dcMotorMatch = logContent.match(/\[INFO\] DC Motor:\s+(PASSED|FAILED)/i);
+              const servoMotorMatch = logContent.match(/\[INFO\] Servo Motor:\s+(PASSED|FAILED)/i);
               const speedSensorMatch = logContent.match(/\[INFO\] Speed Sensor:\s+(PASSED|FAILED)/i);
 
               // Test status based on output
-              const motorServoStatus = motorServoMatch ? motorServoMatch[1] : (testFailed === 0 ? 'PASSED' : 'FAILED');
+              const dcMotorStatus = dcMotorMatch ? dcMotorMatch[1] : (testFailed === 0 ? 'PASSED' : 'FAILED');
+              const servoMotorStatus = servoMotorMatch ? servoMotorMatch[1] : (testFailed === 0 ? 'PASSED' : 'FAILED');
               const speedSensorStatus = speedSensorMatch ? speedSensorMatch[1] : (testFailed === 0 ? 'PASSED' : 'FAILED');
 
               // Check for coverage summary
@@ -128,8 +132,10 @@ jobs:
 
             **Overall Status**: ${testPassed > 0 && testFailed === 0 ? '✅ PASSED' : '❌ FAILED'}
 
-            - **Motor Servo Tests**: ${motorServoStatus} (${motorServoCount} tests)
+            - **DC Motor Tests**: ${dcMotorStatus} (${dcMotorCount} tests)
+            - **Servo Motor Tests**: ${servoMotorStatus} (${servoMotorCount} tests)
             - **Speed Sensor Tests**: ${speedSensorStatus} (${speedSensorCount} tests)
+            - **Total**: ${testPassed} tests
             ${coverageInfo}
             ---
             Full coverage reports available in workflow artifacts

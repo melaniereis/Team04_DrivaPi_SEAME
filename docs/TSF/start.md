@@ -24,7 +24,6 @@ pip install --upgrade pip pyyaml
 # Install trudag (official TSF tool)
 git clone https://gitlab.com/CodethinkLabs/trustable/trustable.git /tmp/trustable
 cd /tmp/trustable
-git checkout v2025.09.16
 pip install .
 cd -
 
