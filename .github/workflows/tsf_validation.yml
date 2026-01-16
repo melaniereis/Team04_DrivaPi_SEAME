@@ -104,6 +104,14 @@ jobs:
             echo "score_ok=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Generate traceability graph
+        id: graph
+        continue-on-error: true
+        run: |
+          mkdir -p artifacts/tsf
+          dot -Tsvg .dotstop.dot -o artifacts/tsf/traceability_graph.svg
+          echo "graph_generated=true" >> $GITHUB_OUTPUT
+
       - name: Generate Trustable report (publish)
         id: publish
         continue-on-error: true
@@ -146,5 +154,8 @@ jobs:
             ```
             ${{ steps.summary.outputs.lint_summary }}
             ```
-
+            ### 📊 Traceability Graph
+            ```
+            ${{ steps.graph.outputs.graph_generated == 'true' && '[View Traceability Graph](artifacts/tsf/traceability_graph.svg)' || '❌ Graph generation failed' }}
+            ```
             **Artifacts**: [TSF Validation Results](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
