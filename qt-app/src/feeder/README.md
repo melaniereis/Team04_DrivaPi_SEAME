@@ -21,7 +21,7 @@ A C++ daemon that reads CAN frames from SocketCAN and publishes vehicle signals 
 
 | CAN ID | Payload | VSS Path | Unit | Type |
 |--------|---------|----------|------|------|
-| 0x100 | 4-byte float (LE) | `Vehicle.Speed` | m/s | float |
+| 0x100 | 4-byte float (LE) m/s | `Vehicle.Speed` | km/h | float |
 
 ## Building
 
@@ -64,7 +64,7 @@ Your `vss.json` **must** include the signals you publish. At minimum:
   "Vehicle.Speed": {
     "datatype": "float",
     "type": "sensor",
-    "unit": "m/s",
+    "unit": "km/h",
     "description": "Vehicle speed"
   }
 }
@@ -142,8 +142,8 @@ KUKSA Address: localhost:55555
 [Publisher] Connected to KUKSA databroker at localhost:55555
 [CAN] Listening on interface: can0
 [Feeder] Running. Press Ctrl+C to stop.
-[Handler] Published Vehicle.Speed = 5.3 m/s
-[Handler] Published Vehicle.Speed = 5.8 m/s
+[Handler] Published Vehicle.Speed = 19.08 km/h (5.3 m/s)
+[Handler] Published Vehicle.Speed = 20.88 km/h (5.8 m/s)
 ```
 
 ## Testing
@@ -154,7 +154,7 @@ KUKSA Address: localhost:55555
 # Install can-utils if needed
 sudo apt-get install can-utils
 
-# Send a speed frame (0x100) with float value 12.5 m/s
+# Send a speed frame (0x100) with float value 12.5 m/s (45.0 km/h)
 # Convert 12.5 to little-endian hex: 0x41480000
 cansend vcan0 100#00004841
 ```

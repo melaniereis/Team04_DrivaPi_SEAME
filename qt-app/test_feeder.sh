@@ -50,10 +50,10 @@ echo "   cd build"
 echo "   ./kuksa_feeder vcan0"
 echo
 echo "2. Send test CAN frames in another terminal:"
-echo "   # Speed = 10.5 m/s (0x41280000 in LE float)"
+echo "   # Speed = 10.5 m/s (37.8 km/h) - 0x41280000 in LE float"
 echo "   cansend vcan0 100#00002841"
 echo
-echo "   # Speed = 25.3 m/s (0x41CA6666 in LE float)"
+echo "   # Speed = 25.3 m/s (91.08 km/h) - 0x41CA6666 in LE float"
 echo "   cansend vcan0 100#6666CA41"
 echo
 echo "3. Verify in KUKSA CLI (if installed):"
