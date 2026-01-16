@@ -155,6 +155,7 @@ secrets.yml
 # CMake build directories
 tests/build/
 build/
+/CMakeLists.txt
 
 # Dotstop state file
 /.dotstop.dot
