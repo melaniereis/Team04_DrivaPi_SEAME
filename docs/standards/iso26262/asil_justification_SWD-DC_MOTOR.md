@@ -21,5 +21,5 @@ To meet ASIL A for Propulsion Control:
    - Zero High-Severity alerts in `dc_motor.c`.
 
 ## 4. Traceability
-- **Source:** `tests/unit/dc_motor/src/dc_motor.c`
-- **Tests:** `tests/unit/dc_motor/test/test_dc_motor_functions.c`
+- **Source:** `tests/unit/dc-motor/src/dc_motor.c`
+- **Tests:** `tests/unit/dc-motor/test/test_dc_motor_functions.c`

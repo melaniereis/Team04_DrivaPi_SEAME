@@ -1,7 +1,7 @@
 #include "../mocks/stm32_hal_i2c.h"
 #include <string.h>
 
-/* Simple HAL mock used by dc_motor and servo_motor unit tests */
+/* Simple HAL mock used by dc-motor and servo-motor unit tests */
 
 static HAL_StatusTypeDef mock_i2c_write_return = HAL_OK;
 static HAL_StatusTypeDef mock_i2c_read_return = HAL_OK;

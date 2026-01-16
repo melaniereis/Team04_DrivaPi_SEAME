@@ -21,5 +21,5 @@ To meet ASIL A for Steering Control:
    - Zero High-Severity alerts in `servo_motor.c`.
 
 ## 4. Traceability
-- **Source:** `tests/unit/servo_motor/src/servo_motor.c`
-- **Tests:** `tests/unit/servo_motor/test/test_servo_functions.c`
+- **Source:** `tests/unit/servo-motor/src/servo_motor.c`
+- **Tests:** `tests/unit/servo-motor/test/test_servo_functions.c`

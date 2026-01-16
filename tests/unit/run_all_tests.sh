@@ -8,7 +8,7 @@
 # Version: 2.1.4
 #
 # Features:
-# - Run dc_motor, servo_motor and speed_sensor tests sequentially
+# - Run dc-motor, servo-motor and speed-sensor tests sequentially
 # - Aggregate LCOV coverage reports into single report (source only)
 # - Overall test result summary
 # - Color-coded output
@@ -21,9 +21,9 @@ set -o pipefail
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly PROJECT_ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
-readonly DC_MOTOR_DIR="${SCRIPT_DIR}/dc_motor"
-readonly SERVO_MOTOR_DIR="${SCRIPT_DIR}/servo_motor"
-readonly SPEED_SENSOR_DIR="${SCRIPT_DIR}/speed_sensor"
+readonly DC_MOTOR_DIR="${SCRIPT_DIR}/dc-motor"
+readonly SERVO_MOTOR_DIR="${SCRIPT_DIR}/servo-motor"
+readonly SPEED_SENSOR_DIR="${SCRIPT_DIR}/speed-sensor"
 
 if [[ -n "${COVERAGE_DIR:-}" ]]; then
     if [[ "$COVERAGE_DIR" == /* ]]; then
@@ -153,9 +153,9 @@ if [[ $DC_MOTOR_PASSED -eq 1 && $SERVO_MOTOR_PASSED -eq 1 && $SPEED_SENSOR_PASSE
         SPEED_SENSOR_COVERAGE="${SPEED_SENSOR_DIR}/build/artifacts/gcov/coverage_filtered.info"
     fi
 
-    PERSISTENT_DC_MOTOR="${SCRIPT_DIR}/../../build/coverage/dc_motor/coverage_filtered.info"
-    PERSISTENT_SERVO_MOTOR="${SCRIPT_DIR}/../../build/coverage/servo_motor/coverage_filtered.info"
-    PERSISTENT_SPEED_SENSOR="${SCRIPT_DIR}/../../build/coverage/speed_sensor/coverage_filtered.info"
+    PERSISTENT_DC_MOTOR="${SCRIPT_DIR}/../../build/coverage/dc-motor/coverage_filtered.info"
+    PERSISTENT_SERVO_MOTOR="${SCRIPT_DIR}/../../build/coverage/servo-motor/coverage_filtered.info"
+    PERSISTENT_SPEED_SENSOR="${SCRIPT_DIR}/../../build/coverage/speed-sensor/coverage_filtered.info"
 
     if [[ -f "${PERSISTENT_DC_MOTOR}" ]]; then
         DC_MOTOR_COVERAGE="${PERSISTENT_DC_MOTOR}"
@@ -241,9 +241,9 @@ if [[ $DC_MOTOR_PASSED -eq 1 && $SERVO_MOTOR_PASSED -eq 1 && $SPEED_SENSOR_PASSE
     fi
 
     XML_TEST_OUT="artifacts/verification/tests/junit_results.xml"
-    JUNIT_1="tests/unit/dc_motor/build/artifacts/gcov/junit_tests_report.xml"
-    JUNIT_2="tests/unit/servo_motor/build/artifacts/gcov/junit_tests_report.xml"
-    JUNIT_3="tests/unit/speed_sensor/build/artifacts/gcov/junit_tests_report.xml"
+    JUNIT_1="tests/unit/dc-motor/build/artifacts/gcov/junit_tests_report.xml"
+    JUNIT_2="tests/unit/servo-motor/build/artifacts/gcov/junit_tests_report.xml"
+    JUNIT_3="tests/unit/speed-sensor/build/artifacts/gcov/junit_tests_report.xml"
 
     echo '<?xml version="1.0" encoding="UTF-8" ?>' > "$XML_TEST_OUT"
     echo '<testsuites>' >> "$XML_TEST_OUT"

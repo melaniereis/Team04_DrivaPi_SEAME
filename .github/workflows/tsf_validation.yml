@@ -73,10 +73,10 @@ jobs:
           cd -
 
       - name: Install local validators
-        run: pip install -e Dotstop
+        run: pip install -e dotstop
 
       - name: Create temporary symlink to .dotstop.dot
-        run: ln -sf Dotstop/.dotstop.dot .dotstop.dot
+        run: ln -sf dotstop/.dotstop.dot .dotstop.dot
 
       - name: Run trudag lint
         id: lint
@@ -164,7 +164,7 @@ jobs:
 
             ### 📊 Traceability Graph
             ${{ steps.graph.outputs.graph_generated == 'true' && '✅ Graph generated successfully' || '❌ Graph generation failed' }}
-            
+
             **Download artifacts to view**: [TSF Validation Results](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
             - Traceability graph: `tsf-validation-artifacts/traceability_graph.svg`
             - Full TSF reports in artifact archive
