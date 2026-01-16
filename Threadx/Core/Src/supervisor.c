@@ -1,12 +1,28 @@
+/**
+  ******************************************************************************
+  * @file    Threadx/Core/Src/supervisor.c
+  * @author  DrivaPi Team
+  * @brief   This file contains the supervisor thread function.
+  ******************************************************************************
+  * @attention
+  *
+  */
 
 #include "app_threadx.h"
 
-VOID ld1_thread_entry(ULONG initial_input)
+/**
+ * @brief
+ *
+ * @param initial_input
+ * @return VOID
+ */
+void ld1_ThreadEntry(ULONG initial_input)
 {
 	const char *msg_tick = "Supervising\r\n";
 
-		while (1){
-			HAL_UART_Transmit(&huart1, (uint8_t*)msg_tick, strlen(msg_tick), 10);
-			tx_thread_sleep(50);
-		}
+	while (1)
+	{
+		HAL_UART_Transmit(&huart1, (uint8_t *)msg_tick, strlen(msg_tick), 10);
+		tx_thread_sleep(50);
+	}
 }

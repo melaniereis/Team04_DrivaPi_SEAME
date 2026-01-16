@@ -5,8 +5,8 @@
 #include "app_threadx.h"
 
 // Example of globals usually found in main
-extern TX_MUTEX speed_data_mutex;
-extern TX_EVENT_FLAGS_GROUP event_flags;
+extern TX_MUTEX g_speedDataMutex;
+extern TX_EVENT_FLAGS_GROUP g_eventFlags;
 extern float g_vehicle_speed;
 
 // Defines
