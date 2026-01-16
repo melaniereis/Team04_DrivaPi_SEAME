@@ -236,12 +236,8 @@ if [[ $DC_MOTOR_PASSED -eq 1 && $SERVO_MOTOR_PASSED -eq 1 && $SPEED_SENSOR_PASSE
     XML_OUT="artifacts/verification/coverage/coverage.xml"
 
     if [[ -f "$LCOV_INFO" ]]; then
-        if command -v lcov_cobertura &> /dev/null; then
-            lcov_cobertura "$LCOV_INFO" --output "$XML_OUT"
-            log_pass "Coverage XML saved: $XML_OUT"
-        else
-            gcovr --root . --xml-pretty --output "$XML_OUT" .
-        fi
+        gcovr --root . --xml-pretty --output "$XML_OUT" .
+        log_pass "Coverage XML saved: $XML_OUT"
     fi
 
     XML_TEST_OUT="artifacts/verification/tests/junit_results.xml"
