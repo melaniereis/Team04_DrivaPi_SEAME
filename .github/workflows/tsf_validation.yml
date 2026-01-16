@@ -161,8 +161,10 @@ jobs:
             ```
             ${{ steps.summary.outputs.lint_summary }}
             ```
+
             ### 📊 Traceability Graph
-            ```
-            ${{ steps.graph.outputs.graph_generated == 'true' && '[View Traceability Graph](artifacts/tsf/traceability_graph.svg)' || '❌ Graph generation failed' }}
-            ```
-            **Artifacts**: [TSF Validation Results](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            ${{ steps.graph.outputs.graph_generated == 'true' && '✅ Graph generated successfully' || '❌ Graph generation failed' }}
+            
+            **Download artifacts to view**: [TSF Validation Results](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            - Traceability graph: `tsf-validation-artifacts/traceability_graph.svg`
+            - Full TSF reports in artifact archive
