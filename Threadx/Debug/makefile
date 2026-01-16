@@ -81,7 +81,7 @@ Threadx.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 
 # Other Targets
 clean:
-	-$(RM) Threadx.elf Threadx.list Threadx.map default.size.stdout
+	-$(RM) Threadx.elf Threadx.list Threadx.map Threadx.bin default.size.stdout
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)

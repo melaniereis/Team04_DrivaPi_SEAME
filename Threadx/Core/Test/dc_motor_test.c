@@ -1,41 +1,42 @@
-/* Test harness for DC motor (test-only)
- */
-
-#include "app_threadx.h"
-#include "main.h"
-#include "dc_motor.h"
+/**
+  ******************************************************************************
+  * @file    dc_motor_test.c
+  * @author  Team04 DrivaPi
+  * @brief   This file contains the implementation of DC motor test functions.
+  ******************************************************************************
+  * @attention
+  *
+*/
 #include "dc_motor_test.h"
-#include <stdio.h>
-#include <string.h>
 
-static void UART_Print(const char *s)
-{
-    HAL_UART_Transmit(&huart1, (uint8_t*)s, strlen(s), HAL_MAX_DELAY);
-}
+/**
+ * @brief
+ *
+ * @param speed
+ */
+void MotorTestHigh(double speed) {
 
-void Motor_Test_High(double speed) {
-
-    UART_Print("-> FORWARD (1.5s)...\r\n");
-    Motor_Forward(speed);
+    UartPrint("-> FORWARD (1.5s)...\r\n");
+    MotorForward(speed);
     tx_thread_sleep(150);
     tx_thread_sleep(30);
 
-    UART_Print("-> BACKWARD (1.5s)...\r\n");
-    Motor_Backward(speed);
+    UartPrint("-> BACKWARD (1.5s)...\r\n");
+    MotorBackward(speed);
     tx_thread_sleep(150);
-    Motor_Stop();
+    MotorStop();
     tx_thread_sleep(30);
 
-    UART_Print("-> LEFT (1.2s)...\r\n");
-    Motor_Left(speed);
+    UartPrint("-> LEFT (1.2s)...\r\n");
+    MotorLeft(speed);
     tx_thread_sleep(120);
-    Motor_Stop();
+    MotorStop();
     tx_thread_sleep(30);
 
-    UART_Print("-> RIGHT (1.2s)...\r\n");
-    Motor_Right(speed);
+    UartPrint("-> RIGHT (1.2s)...\r\n");
+    MotorRight(speed);
     tx_thread_sleep(120);
-    Motor_Stop();
+    MotorStop();
 
-    UART_Print("Motor_Test_High: complete\r\n");
+    UartPrint("Motor_Test_High: complete\r\n");
 }
