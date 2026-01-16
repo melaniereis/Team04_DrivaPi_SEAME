@@ -1,4 +1,4 @@
-#include "kuksareader.hpp"
+#include "kuksa_reader.hpp"
 
 KUKSAReader::KUKSAReader(QObject *parent)
     : QObject(parent)

@@ -7,9 +7,9 @@
 #include <QPointer>
 #include <QCommandLineParser>
 #include <QCommandLineOption>
-#include "vehicledata.hpp"
-#include "canreader.hpp"
-#include "kuksareader.hpp"
+#include "vehicle_data.hpp"
+#include "can_reader.hpp"
+#include "kuksa_reader.hpp"
 
 int main(int argc, char *argv[])
 {
