@@ -208,3 +208,95 @@ int SerialSendString(char* payload) {
 ```
 
 ---
+
+## 8. C++ / Qt Framework Exceptions
+
+This standard is primarily designed for **C codebases**. When working with **C++ and Qt framework**, the following exceptions apply:
+
+### 8.1 Qt Classes and Methods
+
+Qt framework follows its own established conventions. **Qt-related code should follow Qt style**:
+
+* **Qt Class Methods:** `camelCase` (Qt standard convention)
+* **Qt Signals/Slots:** `camelCase`
+* **Qt Member Variables:** `m_camelCase` or `m_snake_case` (Qt uses `m_` prefix)
+* **Qt Class Names:** `PascalCase` (matches our convention)
+
+**Example (Qt Code):**
+```cpp
+// inc/vehicle_data.hpp - Qt Class
+class VehicleData : public QObject {
+    Q_OBJECT
+public:
+    float getSpeed() const;      // Qt style: camelCase
+    void setSpeed(float value);  // Qt style: camelCase
+    
+signals:
+    void speedReceived(float speed);  // Qt style: camelCase
+    
+private:
+    float m_speed;               // Qt style: m_ prefix
+    QTimer* m_watchdogTimer;     // Qt style: m_ + camelCase
+};
+```
+
+### 8.2 Pure C++ Modules (Non-Qt)
+
+For **pure C++ code that doesn't use Qt** (e.g., the feeder module), apply the C conventions with C++ adaptations:
+
+* **Free Functions:** `PascalCase` with module prefix
+* **Namespaces:** `snake_case` (lowercase)
+* **Class Methods:** `PascalCase` (without module prefix, class name provides namespace)
+* **Member Variables:** `snake_case` with optional trailing underscore `variable_name_`
+* **Local Variables:** `snake_case`
+
+**Example (Pure C++ Code):**
+```cpp
+// src/feeder/can_decode.hpp - Pure C++
+namespace can_decode {
+
+inline uint8_t U8(const uint8_t* data) {
+    return data[0];
+}
+
+inline float FloatLe(const uint8_t* data) {
+    float result;
+    std::memcpy(&result, data, sizeof(float));
+    return result;
+}
+
+} // namespace can_decode
+
+// src/feeder/publisher.hpp - Pure C++ Class
+namespace kuksa {
+
+class Publisher {
+public:
+    bool PublishFloat(const std::string& path, float value);
+    bool PublishInt32(const std::string& path, int32_t value);
+    
+private:
+    void AttachAuth(grpc::ClientContext& ctx);
+    PublisherOptions opts_;
+    std::unique_ptr<VAL::Stub> stub_;
+};
+
+} // namespace kuksa
+```
+
+### 8.3 Decision Matrix
+
+| Code Type | File Extension | Naming Style | Example |
+|-----------|---------------|--------------|---------|
+| **C Code** | `.c`, `.h` | This standard | `MotorSetSpeed()` |
+| **Qt C++** | `.cpp`, `.hpp` with Qt | Qt conventions | `getSpeed()`, `m_speed` |
+| **Pure C++** | `.cpp`, `.hpp` without Qt | C conventions adapted | `PublishFloat()`, `opts_` |
+
+### 8.4 Rationale
+
+* **Consistency within framework:** Qt code should look like Qt code
+* **Team familiarity:** Qt developers expect Qt conventions
+* **Interoperability:** Qt MOC (Meta-Object Compiler) expects certain patterns
+* **C++ namespaces:** Class names provide scoping, eliminating need for function prefixes
+
+---

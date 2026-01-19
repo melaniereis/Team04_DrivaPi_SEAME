@@ -1,0 +1,67 @@
+{
+  "$schema": "https://github.com/COVESA/vehicle_signal_specification/raw/master/vss-tools/vspec/vss_rel_4.0.json#",
+  "Vehicle": {
+    "children": {
+      "Speed": {
+        "datatype": "float",
+        "type": "sensor",
+        "unit": "km/h",
+        "description": "Vehicle speed measured by the drivetrain",
+        "comment": "This is the actual speed of the vehicle as measured by the drivetrain"
+      },
+      "Exterior": {
+        "type": "branch",
+        "description": "Exterior environment signals",
+        "children": {
+          "AirTemperature": {
+            "datatype": "float",
+            "type": "sensor",
+            "unit": "celsius",
+            "description": "Ambient air temperature outside the vehicle"
+          }
+        }
+      },
+      "Powertrain": {
+        "type": "branch",
+        "description": "Powertrain signals",
+        "children": {
+          "TractionBattery": {
+            "type": "branch",
+            "description": "Traction battery signals",
+            "children": {
+              "StateOfCharge": {
+                "type": "branch",
+                "description": "State of charge information",
+                "children": {
+                  "Current": {
+                    "datatype": "float",
+                    "type": "sensor",
+                    "unit": "percent",
+                    "description": "Physical state of charge of the traction battery (0-100%)"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "ECU": {
+        "type": "branch",
+        "description": "Electronic Control Unit signals",
+        "children": {
+          "SafetyCritical": {
+            "type": "branch",
+            "description": "Safety-critical ECU (STM32)",
+            "children": {
+              "Heartbeat": {
+                "datatype": "int32",
+                "type": "sensor",
+                "description": "Heartbeat counter from STM32"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
