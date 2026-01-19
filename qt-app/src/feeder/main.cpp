@@ -98,7 +98,7 @@ static void DispatchFrame(const can_frame& frame, kuksa::Publisher& publisher) {
 
 int main(int argc, char** argv) {
     // Parse command-line arguments
-    std::string can_interface = "can0";
+    std::string can_interface = "vcan0";
     std::string kuksa_address = "localhost:55555";
     kuksa::PublisherOptions popts;
     popts.address = kuksa_address;
