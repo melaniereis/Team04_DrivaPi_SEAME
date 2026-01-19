@@ -20,7 +20,7 @@ reviewed: '2026-01-05 - Approved by Melanie Reis <melanie.reis@seame.pt>'
 
 references:
   - type: "file"
-    path: "Threadx/Core/Inc/speed_sensor.h"
+    path: "firmware/Core/Inc/speed_sensor.h"
     description: "Header definitions for wheel constants"
 
 active: true

@@ -28,7 +28,7 @@ reviewed: '2026-01-09 - Approved by Bernardo Esteves <bernardo.esteves@seame.pt>
 
 references:
   - type: "file"
-    path: "Threadx/Core/Src/speed_sensor.c"
+    path: "firmware/Core/Src/speed_sensor.c"
     description: "Source code implementation"
   - type: "file"
     path: "docs/standards/iso26262/asil_justification_SWD-SPEED_SENSOR.md"
