@@ -28,6 +28,11 @@
 #include <net/if.h>
 #include <linux/can.h>
 #include <linux/can/raw.h>
+#include <signal.h>
+#include <sys/wait.h>
+#include <vector>
+#include <mutex>
+#include <algorithm>
 
 /**
  * @brief Open SocketCAN interface
@@ -96,6 +101,57 @@ static void DispatchFrame(const can_frame& frame, kuksa::Publisher& publisher) {
     }
 }
 
+static volatile sig_atomic_t g_stop_requested = 0;
+
+static void signal_handler(int /*signum*/) {
+    g_stop_requested = 1;
+}
+
+// Reap child processes to avoid zombies. Keep this handler minimal.
+static void sigchld_handler(int /*signum*/) {
+    int saved_errno = errno;
+    // Reap all dead children
+    while (true) {
+        pid_t pid = waitpid(-1, nullptr, WNOHANG);
+        if (pid <= 0) break;
+    }
+    errno = saved_errno;
+}
+
+// Optional registry for child PIDs spawned by this process. Use
+// `RegisterChildPid(pid)` after fork/exec so the shutdown routine can
+// attempt to terminate them. This registry is NOT modified in signal
+// handlers.
+static std::vector<pid_t> g_child_pids;
+static std::mutex g_child_pids_mutex;
+
+static void RegisterChildPid(pid_t pid) {
+    if (pid <= 0) return;
+    std::lock_guard<std::mutex> lk(g_child_pids_mutex);
+    if (std::find(g_child_pids.begin(), g_child_pids.end(), pid) == g_child_pids.end()) {
+        g_child_pids.push_back(pid);
+    }
+}
+
+static void KillRegisteredChildren() {
+    std::lock_guard<std::mutex> lk(g_child_pids_mutex);
+    for (pid_t pid : g_child_pids) {
+        if (pid <= 0) continue;
+        // First try polite termination
+        kill(pid, SIGTERM);
+    }
+    // Give them a short chance to exit
+    const int wait_ms = 200;
+    struct timespec ts{0, wait_ms * 1000000};
+    nanosleep(&ts, nullptr);
+
+    for (pid_t pid : g_child_pids) {
+        if (pid <= 0) continue;
+        // If still alive, force kill
+        kill(pid, SIGKILL);
+    }
+}
+
 int main(int argc, char** argv) {
     // Parse command-line arguments
     std::string can_interface = "vcan0";
@@ -156,6 +212,23 @@ int main(int argc, char** argv) {
 
     std::cout << "[Feeder] Running. Press Ctrl+C to stop." << std::endl;
 
+    // Install signal handlers for graceful shutdown
+    struct sigaction sa;
+    std::memset(&sa, 0, sizeof(sa));
+    sa.sa_handler = signal_handler;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0; // do not set SA_RESTART so read() is interrupted by signals
+    sigaction(SIGINT, &sa, nullptr);
+    sigaction(SIGTERM, &sa, nullptr);
+
+    // Install SIGCHLD handler to reap children and avoid zombies
+    struct sigaction sa_chld;
+    std::memset(&sa_chld, 0, sizeof(sa_chld));
+    sa_chld.sa_handler = sigchld_handler;
+    sigemptyset(&sa_chld.sa_mask);
+    sa_chld.sa_flags = SA_NOCLDSTOP;
+    sigaction(SIGCHLD, &sa_chld, nullptr);
+
     // Main read loop
     while (true) {
         can_frame frame;
@@ -163,7 +236,12 @@ int main(int argc, char** argv) {
 
         if (nbytes < 0) {
             if (errno == EINTR) {
-                continue;  // Interrupted by signal, retry
+                if (g_stop_requested) {
+                    // Received SIGINT/SIGTERM: break out to shutdown gracefully
+                    break;
+                }
+                // Interrupted by other signal, retry
+                continue;
             }
             std::cerr << "[CAN] Read error: " << std::strerror(errno) << std::endl;
             break;
@@ -177,6 +255,9 @@ int main(int argc, char** argv) {
         // Dispatch to handler
         DispatchFrame(frame, publisher);
     }
+
+    // Attempt to terminate any registered child processes
+    KillRegisteredChildren();
 
     close(can_sock);
     std::cout << "[Feeder] Stopped." << std::endl;
