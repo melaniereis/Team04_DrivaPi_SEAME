@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    Threadx/Core/Src/can_rx.c
+  * @file    firmware/Core/Src/can_rx.c
   * @author  DrivaPi Team
   * @brief   This file contains the CAN RX thread code. This thread is responsible
   *          for receiving CAN messages and dispatching them to the appropriate

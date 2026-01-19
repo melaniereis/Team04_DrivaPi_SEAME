@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    Threadx/Core/Src/speed_sensor.c
+  * @file    firmware/Core/Src/speed_sensor.c
   * @author  DrivaPi Team
   * @brief   This file contains the speed sensor reading functions.
   ******************************************************************************

@@ -50,13 +50,13 @@ jobs:
       - name: Build project for CodeQL
         run: |
           set -e
-          cd Threadx/Debug
+          cd firmware/Debug
 
           echo "🔨 Building firmware for CodeQL..."
 
           make -f makefile main-build
 
-          test -f Threadx.elf
+          test -f firmware.elf
 
           echo "✅ Build successful"
 

@@ -20,7 +20,7 @@ reviewed: '2026-01-14 - Approved by Melanie Reis <melanie.reis@seame.pt>'
 
 references:
   - type: "file"
-    path: "Threadx/Core/Inc/dc_motor.h"
+    path: "firmware/Core/Inc/dc_motor.h"
     description: "Motor Interface Definition (production header)"
 
 active: true

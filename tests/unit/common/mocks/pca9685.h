@@ -1,7 +1,7 @@
 /**
  * @file pca9685.h
  * @brief PCA9685 PWM Driver Mock Header for Unit Testing
- * @note MATCHES THE REAL HEADER from Threadx/Core/Inc/pca9685.h
+ * @note MATCHES THE REAL HEADER from firmware/Core/Inc/pca9685.h
  */
 
 #ifndef __PCA9685_H

@@ -10,10 +10,10 @@ This document provides a comprehensive analysis of the ThreadX real-time operati
 
 ### 2.1 Project Structure
 
-The ThreadX implementation is located in `/Threadx` directory with the following structure:
+The ThreadX implementation is located in `/firmware` directory with the following structure:
 
 ```
-Threadx/
+firmware/
 ├── Core/
 │   ├── Inc/          # Header files
 │   ├── Src/          # Source implementation files
@@ -268,7 +268,7 @@ tx_mutex_put(&speed_data_mutex);
 
 ### 7.1 Doxyfile Location and Purpose
 
-**File Path:** `/Threadx/Doxyfile`
+**File Path:** `/firmware/Doxyfile`
 
 **Purpose:** Configuration file for Doxygen documentation generation system. Doxygen parses C/C++ source code and automatically generates comprehensive API documentation.
 
@@ -380,7 +380,7 @@ Clones the repository code into the CI/CD environment
 #### Step 3: Generate Documentation
 **Generated Output Structure:**
 ```
-Threadx/html/
+firmware/html/
 ├── index.html              # Main documentation page
 ├── annotated.html          # Class/struct list
 ├── files.html              # File listing
@@ -411,7 +411,7 @@ Threadx/html/
 ### 9.1 Generated Documentation Types
 
 #### 1. **HTML Documentation** (Primary Output)
-- **Location:** `Threadx/html/`
+- **Location:** `firmware/html/`
 - **Access:** Open `index.html` in web browser
 - **Features:**
   - Full-text search capabilities
