@@ -88,7 +88,7 @@ Window {
                 }
 
                 // Gear selector (center) - COMPONENT
-                GearSelector {
+                gear_selector {
                     id: gearSelector
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.top: parent.top
@@ -140,7 +140,7 @@ Window {
             // ============================================
             // LEFT - Speed Display - COMPONENT
             // ============================================
-            SpeedDisplay {
+            speed_display {
                 id: speedDisplay
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.horizontalCenterOffset: -metricOffsetX
@@ -173,7 +173,7 @@ Window {
             // ============================================
             // RIGHT - Energy Display - COMPONENT
             // ============================================
-            EnergyDisplay {
+            energy_display {
                 id: energyDisplay
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.horizontalCenterOffset: metricOffsetX
@@ -192,7 +192,7 @@ Window {
                 anchors.bottom: parent.bottom
 
                 // Battery indicator (left) - COMPONENT
-                BatteryIndicator {
+                battery_indicator {
                     id: batteryIndicator
                     anchors.left: parent.left
                     anchors.leftMargin: 50
