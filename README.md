@@ -52,7 +52,7 @@ Bernardo, Gaspar, Hugo, Melanie, Miguel
 │   └── proto/           # Protocol buffers
 │
 ├── rust/                 # Rust implementations
-├── Threadx/             # ThreadX RTOS integration
+├── firmware/             # ThreadX RTOS integration
 ├── meta-cross/          # Cross-compilation & build system
 │
 ├── docs/                # Documentation
