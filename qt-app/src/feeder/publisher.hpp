@@ -11,6 +11,11 @@
 #include <string>
 #include <grpcpp/grpcpp.h>
 #include "kuksa/val/v2/val.grpc.pb.h"
+#include <map>
+#include <thread>
+#include <mutex>
+#include <atomic>
+#include <set>
 
 namespace kuksa {
 
@@ -73,6 +78,10 @@ public:
      */
     bool PublishString(const std::string& path, const std::string& value);
 
+    // Provider-stream publishing helpers (used internally)
+    bool EnsureProviderStream();
+    int32_t LookupSignalId(const std::string& path);
+
 private:
     // Attach authorization metadata if token present
     void AttachAuth(grpc::ClientContext& ctx);
@@ -83,6 +92,16 @@ private:
     PublisherOptions opts_;
     std::shared_ptr<grpc::Channel> channel_;
     std::unique_ptr<kuksa::val::v2::VAL::Stub> stub_;
+    // Provider stream objects
+    std::shared_ptr<grpc::ClientReaderWriter<kuksa::val::v2::OpenProviderStreamRequest,
+                                              kuksa::val::v2::OpenProviderStreamResponse>> stream_;
+    std::unique_ptr<grpc::ClientContext> stream_ctx_;
+    std::thread stream_reader_thread_;
+    std::mutex stream_mutex_;
+    std::atomic<bool> stream_stop_ {false};
+    std::atomic<uint32_t> next_request_id_ {1};
+    std::map<std::string,int32_t> signal_id_cache_;
+    std::set<int32_t> provided_signals_;
 };
 
 } // namespace kuksa
