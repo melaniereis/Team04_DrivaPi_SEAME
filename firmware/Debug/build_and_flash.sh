@@ -2,8 +2,8 @@
 set -e
 
 # ==== CONFIG ====
-ELF="Threadx.elf"
-BIN="Threadx.bin"
+ELF="firmware.elf"
+BIN="firmware.bin"
 FLASH_ADDR="0x08000000"
 BUILD_CMD="make all"        # <-- always run make all
 # =================

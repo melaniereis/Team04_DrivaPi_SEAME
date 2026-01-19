@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    Threadx/Core/Inc/dc_motor_test.h
+  * @file    firmware/Core/Inc/dc_motor_test.h
   * @author  DrivaPi Team
   * @brief   This file contains the DC motor test function prototype.
   ******************************************************************************
