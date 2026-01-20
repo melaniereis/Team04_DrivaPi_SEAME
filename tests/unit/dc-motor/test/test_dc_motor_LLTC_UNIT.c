@@ -1,6 +1,6 @@
 /**
  * @file test_dc_motor_LLTC_UNIT.c
- * @brief Unit Tests for REAL dc_motor.c from Threadx/Core/Src/
+ * @brief Unit Tests for REAL dc_motor.c from firmware/Core/Src/
  *
  * @req LLTC-DC_MOTOR_UNIT: All unit tests for the DC Motor module shall pass, verifying forward/reverse logic and PWM calculations.
  * @asil ASIL-A
@@ -8,7 +8,7 @@
  * @coverage_requirement 100% Branch Coverage
  *
  * This test validates THE REAL production code from:
- * ../Threadx/Core/Src/dc_motor.c via wrapper mapping in dc_motor.h
+ * ../firmware/Core/Src/dc_motor.c via wrapper mapping in dc_motor.h
  */
 
 #include "../vendor/unity/src/unity.h"

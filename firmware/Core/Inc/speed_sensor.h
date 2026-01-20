@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    Threadx/Core/Inc/speed_sensor.h
+  * @file    firmware/Core/Inc/speed_sensor.h
   * @author  DrivaPi Team
   * @brief   This file contains the speed sensor definitions.
   ******************************************************************************

@@ -20,20 +20,20 @@ jobs:
 
       - name: Generate Doxygen Documentation
         run: |
-          cd Threadx
+          cd firmware
           doxygen Doxyfile
 
       - name: Upload documentation as artifact
         uses: actions/upload-artifact@v6
         with:
           name: doxygen-html-documentation
-          path: Threadx/html/
+          path: firmware/html/
           retention-days: 30
 
       - name: Archive documentation
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          cd Threadx
+          cd firmware
           tar -czf ../doxygen-docs.tar.gz html/
 
       - name: Upload release artifact

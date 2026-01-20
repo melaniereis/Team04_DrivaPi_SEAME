@@ -3,11 +3,11 @@ name: CodeQL Configuration for STM32 Firmware
 # Paths to exclude from CodeQL analysis
 # These are typically third-party, generated, or vendor code
 paths-ignore:
-  - Threadx/Drivers
-  - Threadx/Middlewares
-  - Threadx/AZURE_RTOS
-  - Threadx/Core/Startup
-  - Threadx/Core/Src/system_stm32u5xx.c
+  - firmware/Drivers
+  - firmware/Middlewares
+  - firmware/AZURE_RTOS
+  - firmware/Core/Startup
+  - firmware/Core/Src/system_stm32u5xx.c
   - build
   - Debug
   - Release

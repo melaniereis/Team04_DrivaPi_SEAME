@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    Threadx/Core/Src/thread_init.c
+  * @file    firmware/Core/Src/thread_init.c
   * @author  DrivaPi Team
   * @brief   This file contains the thread initialization function.
   ******************************************************************************

@@ -289,7 +289,7 @@ all: $(OBJS) makefile
 objdump --section-headers your_program.elf
 
 # Disassemble with source
-arm-none-eabi-objdump --source --disassemble --show-raw-insn Threadx.elf
+arm-none-eabi-objdump --source --disassemble --show-raw-insn firmware.elf
 ```
 
 ### **Library Building Best Practice**

@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    Threadx/Core/Src/dc_motor.c
+  * @file    firmware/Core/Src/dc_motor.c
   * @author  DrivaPi Team
   * @brief   This file contains the DC motor control functions.
   ******************************************************************************
