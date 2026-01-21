@@ -103,40 +103,54 @@ EOF
 
     log_success "Test reports generated: ${ARTIFACTS_DIR}/tests/"
 
-    # Aggregate coverage if all passed
+    # Generate coverage reports (regardless of test status)
+    local dc_cov="${DC_MOTOR_DIR}/build/artifacts/gcov/coverage_filtered.info"
+    local servo_cov="${SERVO_MOTOR_DIR}/build/artifacts/gcov/coverage_filtered.info"
+    local speed_cov="${SPEED_SENSOR_DIR}/coverage_filtered.info"
+
+    # Check persistent locations
+    [[ -f "${PROJECT_ROOT}/build/coverage/dc-motor/coverage_filtered.info" ]] && \
+        dc_cov="${PROJECT_ROOT}/build/coverage/dc-motor/coverage_filtered.info"
+    [[ -f "${PROJECT_ROOT}/build/coverage/servo-motor/coverage_filtered.info" ]] && \
+        servo_cov="${PROJECT_ROOT}/build/coverage/servo-motor/coverage_filtered.info"
+    [[ -f "${PROJECT_ROOT}/build/coverage/speed-sensor/coverage_filtered.info" ]] && \
+        speed_cov="${PROJECT_ROOT}/build/coverage/speed-sensor/coverage_filtered.info"
+
+    # Generate individual coverage XML files for each suite
+    mkdir -p "${ARTIFACTS_DIR}/coverage"
+    if [[ -f "$dc_cov" ]]; then
+        generate_coverage_xml "$dc_cov" "${ARTIFACTS_DIR}/coverage/dc-motor.xml" || true
+    fi
+    if [[ -f "$servo_cov" ]]; then
+        generate_coverage_xml "$servo_cov" "${ARTIFACTS_DIR}/coverage/servo-motor.xml" || true
+    fi
+    if [[ -f "$speed_cov" ]]; then
+        generate_coverage_xml "$speed_cov" "${ARTIFACTS_DIR}/coverage/speed-sensor.xml" || true
+    fi
+
+    # Aggregate coverage if files available
+    if [[ -f "$dc_cov" && -f "$servo_cov" && -f "$speed_cov" ]]; then
+        aggregate_coverage "${MASTER_COVERAGE_DIR}" "$dc_cov" "$servo_cov" "$speed_cov"
+        
+        # Copy aggregated coverage reports to artifacts
+        cp "${MASTER_COVERAGE_DIR}/coverage_filtered.info" "${ARTIFACTS_DIR}/coverage/coverage.info"
+        [[ -f "${MASTER_COVERAGE_DIR}/coverage.xml" ]] && cp "${MASTER_COVERAGE_DIR}/coverage.xml" "${ARTIFACTS_DIR}/coverage/coverage.xml"
+        log_success "Coverage reports saved: ${ARTIFACTS_DIR}/coverage/"
+    else
+        log_warn "Some coverage files not available for aggregation"
+    fi
+
+    echo ""
     if [[ $dc_pass -eq 0 && $servo_pass -eq 0 && $speed_pass -eq 0 ]]; then
-        local dc_cov="${DC_MOTOR_DIR}/build/artifacts/gcov/coverage_filtered.info"
-        local servo_cov="${SERVO_MOTOR_DIR}/build/artifacts/gcov/coverage_filtered.info"
-        local speed_cov="${SPEED_SENSOR_DIR}/coverage_filtered.info"
-
-        # Check persistent locations
-        [[ -f "${PROJECT_ROOT}/build/coverage/dc-motor/coverage_filtered.info" ]] && \
-            dc_cov="${PROJECT_ROOT}/build/coverage/dc-motor/coverage_filtered.info"
-        [[ -f "${PROJECT_ROOT}/build/coverage/servo-motor/coverage_filtered.info" ]] && \
-            servo_cov="${PROJECT_ROOT}/build/coverage/servo-motor/coverage_filtered.info"
-        [[ -f "${PROJECT_ROOT}/build/coverage/speed-sensor/coverage_filtered.info" ]] && \
-            speed_cov="${PROJECT_ROOT}/build/coverage/speed-sensor/coverage_filtered.info"
-
-        if [[ -f "$dc_cov" && -f "$servo_cov" && -f "$speed_cov" ]]; then
-            aggregate_coverage "${MASTER_COVERAGE_DIR}" "$dc_cov" "$servo_cov" "$speed_cov"
-            
-            # Copy aggregated coverage report to artifacts
-            cp "${MASTER_COVERAGE_DIR}/coverage_filtered.info" "${ARTIFACTS_DIR}/coverage/coverage.info"
-            log_success "Coverage report saved: ${ARTIFACTS_DIR}/coverage/"
-        else
-            log_warn "Some coverage files not available"
-        fi
-
-        echo ""
         log_section "✓ ALL TESTS PASSED - ISO 26262 COMPLIANT"
         log_info "Reports: ${ARTIFACTS_DIR}/"
         log_info "Test Results: ${ARTIFACTS_DIR}/tests/junit_results.xml"
         log_info "Coverage: ${MASTER_COVERAGE_DIR}/html/index.html"
         exit 0
     else
-        echo ""
         log_section "✗ SOME TESTS FAILED"
         log_info "Reports: ${ARTIFACTS_DIR}/"
+        log_info "Coverage reports still generated at: ${ARTIFACTS_DIR}/coverage/"
         exit 1
     fi
 }
