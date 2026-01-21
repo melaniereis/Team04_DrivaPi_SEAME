@@ -31,13 +31,13 @@ add_custom_command(
            "${GEN_DIR}/kuksa/val/v2/val.grpc.pb.cc" "${GEN_DIR}/kuksa/val/v2/val.grpc.pb.h"
            "${GEN_DIR}/kuksa/val/v2/types.pb.cc" "${GEN_DIR}/kuksa/val/v2/types.pb.h"
     # Step 1: Generate gRPC Network Stubs
-    COMMAND protobuf::protoc 
+    COMMAND ${Protobuf_PROTOC_EXECUTABLE} 
         --grpc_out=${GEN_DIR} 
         --plugin=protoc-gen-grpc=${gRPC_PLUGIN_EXECUTABLE} 
         -I${PROTO_DIR} 
         ${PROTO_V2_SRCS}
     # Step 2: Generate Data Serialization Classes
-    COMMAND protobuf::protoc 
+    COMMAND ${Protobuf_PROTOC_EXECUTABLE} 
         --cpp_out=${GEN_DIR} 
         -I${PROTO_DIR} 
         ${PROTO_V2_SRCS}
