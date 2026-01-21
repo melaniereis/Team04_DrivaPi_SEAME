@@ -70,7 +70,12 @@ main() {
         "${ARTIFACTS_DIR}/tests/servo-motor.xml" \
         "${ARTIFACTS_DIR}/tests/speed-sensor.xml"
 
-    # Generate test summary report
+        # Count tests for workflow parsing
+        local dc_tests=$(count_tests "$DC_MOTOR_OUTPUT")
+        local servo_tests=$(count_tests "$SERVO_MOTOR_OUTPUT")
+        local speed_tests=$(count_tests "$SPEED_SENSOR_OUTPUT")
+
+        # Generate test summary report
     cat > "${ARTIFACTS_DIR}/tests/summary.json" << EOF
 {
   "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
@@ -83,11 +88,17 @@ main() {
 }
 EOF
 
-        # Console summary
+        # Console summary + markers for workflow parsing
         local dc_status=$([ $dc_pass -eq 0 ] && echo "PASSED" || echo "FAILED")
         local servo_status=$([ $servo_pass -eq 0 ] && echo "PASSED" || echo "FAILED")
         local speed_status=$([ $speed_pass -eq 0 ] && echo "PASSED" || echo "FAILED")
         echo ""
+        echo "[TEST_COUNT] DC Motor: ${dc_tests} tests"
+        echo "[TEST_COUNT] Servo Motor: ${servo_tests} tests"
+        echo "[TEST_COUNT] Speed Sensor: ${speed_tests} tests"
+        echo "[INFO] DC Motor: ${dc_status}"
+        echo "[INFO] Servo Motor: ${servo_status}"
+        echo "[INFO] Speed Sensor: ${speed_status}"
         log_info "Summary: DC Motor=${dc_status}, Servo Motor=${servo_status}, Speed Sensor=${speed_status}"
 
     log_success "Test reports generated: ${ARTIFACTS_DIR}/tests/"
