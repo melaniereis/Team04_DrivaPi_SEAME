@@ -10,6 +10,10 @@
 set -e
 set -o pipefail
 
+# Source common library for logging functions
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../../common_test_lib.sh"
+
 # Cleanup intermediate files
 trap 'rm -f coverage.info coverage_src_only.info' EXIT INT TERM
 
@@ -25,32 +29,47 @@ ceedling clobber
 # 2. Run tests
 echo ""
 echo "🧪 Running Tests..."
-ceedling gcov:all
+test_output=$(mktemp)
+ceedling gcov:all > "$test_output" 2>&1
+
+# Check for failures - if the output does NOT contain "0 Failures", then we have failures
+if ! grep -q "0 Failures" "$test_output"; then
+    # Test failed - print output and exit
+    cat "$test_output"
+    rm -f "$test_output"
+    echo ""
+    echo "✗ Speed Sensor Tests FAILED"
+    exit 1
+else
+    # Test passed
+    cat "$test_output"
+    rm -f "$test_output"
+fi
 
 # 3. Capture coverage
 echo ""
 echo "📸 Capturing Coverage Data..."
 lcov --capture --directory build --output-file coverage.info \
-     --rc lcov_branch_coverage=1 --quiet
+    --rc branch_coverage=1 --quiet
 
 # 4. Filter coverage
 echo "📋 Filtering coverage data..."
 lcov --extract coverage.info '*/src/*' \
-     -o coverage_src_only.info --rc lcov_branch_coverage=1 --quiet || \
-    cp coverage.info coverage_src_only.info
+    -o coverage_src_only.info --rc branch_coverage=1 --quiet \
+    >/dev/null 2>&1 || cp coverage.info coverage_src_only.info
 
 lcov -r coverage_src_only.info '/usr/*' '*vendor*' '*cmock*' '*unity*' '*c_exception*' \
-     '*build/test/*' '*test/runners*' '*test/mocks*' '/var/lib/gems/*' '*test/*' \
-     --ignore-errors unused \
-     -o coverage_filtered.info --rc lcov_branch_coverage=1 --quiet || \
-    cp coverage_src_only.info coverage_filtered.info
+    '*build/test/*' '*test/runners*' '*test/mocks*' '/var/lib/gems/*' '*test/*' \
+    --ignore-errors unused \
+    -o coverage_filtered.info --rc branch_coverage=1 --quiet \
+    >/dev/null 2>&1 || cp coverage_src_only.info coverage_filtered.info
 
 # 5. Generate HTML
 echo ""
 echo "📊 Generating HTML Report..."
 if ! genhtml coverage_filtered.info --output-directory coverage_report \
-     --branch-coverage --function-coverage \
-     --rc genhtml_branch_coverage=1 --quiet 2>/dev/null; then
+    --branch-coverage --function-coverage \
+    --rc genhtml_branch_coverage=1 --quiet >/dev/null 2>&1; then
     mkdir -p coverage_report
     echo "⚠️ genhtml had issues, but coverage files saved"
 fi

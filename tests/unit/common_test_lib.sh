@@ -52,6 +52,10 @@ log_success() {
     echo -e "${BOLD}${GREEN}✓ $*${NC}"
 }
 
+log_pass() {
+    echo -e "${BOLD}${GREEN}✓ $*${NC}"
+}
+
 log_fail() {
     echo -e "${BOLD}${RED}✗ $*${NC}"
 }
@@ -137,6 +141,11 @@ run_ceedling_tests() {
     local exit_code=0
     ceedling gcov:all 2>&1 | tee "$log_file" || exit_code=$?
 
+    # Ceedling can return 0 even when tests fail; inspect log for failures
+    if [[ $exit_code -eq 0 ]] && grep -E "[1-9][0-9]* Failures" "$log_file" >/dev/null; then
+        exit_code=1
+    fi
+
     if [[ $exit_code -eq 0 ]]; then
         log_success "Tests PASSED"
         return 0
@@ -159,27 +168,27 @@ generate_lcov_coverage() {
     mkdir -p "$coverage_dir/html"
 
     # Capture coverage
-    lcov --capture \
-         --directory "$build_dir" \
-         --output-file "$coverage_dir/coverage.info" \
-         --rc lcov_branch_coverage=1 \
-         --ignore-errors source,gcov 2>&1 | grep -v "WARNING" || true
+        lcov --capture \
+            --directory "$build_dir" \
+            --output-file "$coverage_dir/coverage.info" \
+            --rc branch_coverage=1 \
+            --ignore-errors source,gcov 2>&1 | grep -v "WARNING" || true
 
     # Filter
-    lcov --remove "$coverage_dir/coverage.info" \
-         '/usr/*' '*/test/*' '*/mock_*' '*/unity/*' '*/cmock/*' '*vendor*' \
-         '*c_exception*' '*build/test/*' '*test/runners*' '*test/mocks*' '/var/lib/gems/*' '*/common/*' \
-         --output-file "$coverage_dir/coverage_filtered.info" \
-         --rc lcov_branch_coverage=1 \
-         --ignore-errors unused 2>&1 | grep -v "WARNING" || true
+        lcov --remove "$coverage_dir/coverage.info" \
+            '/usr/*' '*/test/*' '*/mock_*' '*/unity/*' '*/cmock/*' '*vendor*' \
+            '*c_exception*' '*build/test/*' '*test/runners*' '*test/mocks*' '/var/lib/gems/*' '*/common/*' \
+            --output-file "$coverage_dir/coverage_filtered.info" \
+            --rc branch_coverage=1 \
+            --ignore-errors unused >/dev/null 2>&1 || true
 
     # Generate HTML
-    genhtml "$coverage_dir/coverage_filtered.info" \
+        genhtml "$coverage_dir/coverage_filtered.info" \
             --output-directory "$coverage_dir/html" \
             --title "DrivaPi Coverage" \
             --branch-coverage \
             --function-coverage \
-            --rc genhtml_branch_coverage=1 2>/dev/null || true
+            --rc genhtml_branch_coverage=1 --quiet >/dev/null 2>&1 || true
 
     log_success "Coverage HTML: $coverage_dir/html/index.html"
 }
@@ -217,16 +226,17 @@ aggregate_coverage() {
         lcov_args+=(-a "$file")
     done
 
-    lcov "${lcov_args[@]}" \
-         -o "$output_dir/coverage_combined.info" \
-         --rc lcov_branch_coverage=1 || return 1
+        lcov "${lcov_args[@]}" \
+            -o "$output_dir/coverage_combined.info" \
+            --rc branch_coverage=1 || return 1
 
     # Filter
-    lcov -r "$output_dir/coverage_combined.info" \
-         '/usr/*' '*vendor*' '*cmock*' '*unity*' '*c_exception*' \
-         '*build/test/*' '*test/runners*' '*test/mocks*' '/var/lib/gems/*' '*/common/*' \
-         -o "$output_dir/coverage_filtered.info" \
-         --rc lcov_branch_coverage=1 2>&1 | grep -v "WARNING" || true
+        lcov -r "$output_dir/coverage_combined.info" \
+            '/usr/*' '*vendor*' '*cmock*' '*unity*' '*c_exception*' \
+            '*build/test/*' '*test/runners*' '*test/mocks*' '/var/lib/gems/*' '*/common/*' \
+            -o "$output_dir/coverage_filtered.info" \
+            --rc branch_coverage=1 \
+            --ignore-errors unused >/dev/null 2>&1 || true
 
     # Generate HTML
     if genhtml "$output_dir/coverage_filtered.info" \
@@ -234,13 +244,13 @@ aggregate_coverage() {
                --title "DrivaPi - Unified Coverage" \
                --branch-coverage \
                --function-coverage \
-               --rc genhtml_branch_coverage=1 2>/dev/null; then
+               --rc genhtml_branch_coverage=1 --quiet >/dev/null 2>&1; then
         log_success "Aggregated coverage: $output_dir/html/index.html"
     fi
 
     echo ""
     log_info "Coverage Summary:"
-    lcov --summary "$output_dir/coverage_filtered.info" --rc lcov_branch_coverage=1 || true
+    lcov --summary "$output_dir/coverage_filtered.info" --rc branch_coverage=1 || true
 }
 
 # ============================================================================

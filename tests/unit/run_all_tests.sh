@@ -48,16 +48,16 @@ main() {
     SERVO_MOTOR_OUTPUT=$(mktemp)
     SPEED_SENSOR_OUTPUT=$(mktemp)
 
-    cd "${DC_MOTOR_DIR}" && ./scripts/run_tests.sh 2>&1 | tee "$DC_MOTOR_OUTPUT" && dc_pass=1 || true
-    [[ $dc_pass -eq 1 ]] && log_pass "DC Motor: PASSED" || log_fail "DC Motor: FAILED"
+    (cd "${DC_MOTOR_DIR}" && ./scripts/run_tests.sh > >(tee "$DC_MOTOR_OUTPUT") 2>&1) || dc_pass=$?
+    [[ ${dc_pass:-0} -eq 0 ]] && log_pass "DC Motor: PASSED" || log_fail "DC Motor: FAILED"
     echo ""
 
-    cd "${SERVO_MOTOR_DIR}" && ./scripts/run_tests.sh 2>&1 | tee "$SERVO_MOTOR_OUTPUT" && servo_pass=1 || true
-    [[ $servo_pass -eq 1 ]] && log_pass "Servo Motor: PASSED" || log_fail "Servo Motor: FAILED"
+    (cd "${SERVO_MOTOR_DIR}" && ./scripts/run_tests.sh > >(tee "$SERVO_MOTOR_OUTPUT") 2>&1) || servo_pass=$?
+    [[ ${servo_pass:-0} -eq 0 ]] && log_pass "Servo Motor: PASSED" || log_fail "Servo Motor: FAILED"
     echo ""
 
-    cd "${SPEED_SENSOR_DIR}" && CALLED_FROM_MASTER=1 ./scripts/run_speedtest.sh 2>&1 | tee "$SPEED_SENSOR_OUTPUT" && speed_pass=1 || true
-    [[ $speed_pass -eq 1 ]] && log_pass "Speed Sensor: PASSED" || log_fail "Speed Sensor: FAILED"
+    (cd "${SPEED_SENSOR_DIR}" && CALLED_FROM_MASTER=1 ./scripts/run_speedtest.sh > >(tee "$SPEED_SENSOR_OUTPUT") 2>&1) || speed_pass=$?
+    [[ ${speed_pass:-0} -eq 0 ]] && log_pass "Speed Sensor: PASSED" || log_fail "Speed Sensor: FAILED"
     echo ""
 
     # Generate reports
@@ -75,18 +75,25 @@ main() {
 {
   "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
   "tests": {
-    "dc_motor": {"status": "$([ $dc_pass -eq 1 ] && echo 'PASSED' || echo 'FAILED')"},
-    "servo_motor": {"status": "$([ $servo_pass -eq 1 ] && echo 'PASSED' || echo 'FAILED')"},
-    "speed_sensor": {"status": "$([ $speed_pass -eq 1 ] && echo 'PASSED' || echo 'FAILED')"}
+        "dc_motor": {"status": "$([ $dc_pass -eq 0 ] && echo 'PASSED' || echo 'FAILED')"},
+        "servo_motor": {"status": "$([ $servo_pass -eq 0 ] && echo 'PASSED' || echo 'FAILED')"},
+        "speed_sensor": {"status": "$([ $speed_pass -eq 0 ] && echo 'PASSED' || echo 'FAILED')"}
   },
-  "overall_status": "$([ $dc_pass -eq 1 ] && [ $servo_pass -eq 1 ] && [ $speed_pass -eq 1 ] && echo 'PASSED' || echo 'FAILED')"
+    "overall_status": "$([ $dc_pass -eq 0 ] && [ $servo_pass -eq 0 ] && [ $speed_pass -eq 0 ] && echo 'PASSED' || echo 'FAILED')"
 }
 EOF
+
+        # Console summary
+        local dc_status=$([ $dc_pass -eq 0 ] && echo "PASSED" || echo "FAILED")
+        local servo_status=$([ $servo_pass -eq 0 ] && echo "PASSED" || echo "FAILED")
+        local speed_status=$([ $speed_pass -eq 0 ] && echo "PASSED" || echo "FAILED")
+        echo ""
+        log_info "Summary: DC Motor=${dc_status}, Servo Motor=${servo_status}, Speed Sensor=${speed_status}"
 
     log_success "Test reports generated: ${ARTIFACTS_DIR}/tests/"
 
     # Aggregate coverage if all passed
-    if [[ $dc_pass -eq 1 && $servo_pass -eq 1 && $speed_pass -eq 1 ]]; then
+    if [[ $dc_pass -eq 0 && $servo_pass -eq 0 && $speed_pass -eq 0 ]]; then
         local dc_cov="${DC_MOTOR_DIR}/build/artifacts/gcov/coverage_filtered.info"
         local servo_cov="${SERVO_MOTOR_DIR}/build/artifacts/gcov/coverage_filtered.info"
         local speed_cov="${SPEED_SENSOR_DIR}/coverage_filtered.info"
