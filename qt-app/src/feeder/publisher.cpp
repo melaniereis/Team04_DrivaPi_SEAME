@@ -12,6 +12,44 @@
 
 namespace kuksa {
 
+/**
+ * @brief Helper: Execute unary PublishValue RPC with generic value
+ * @param path Signal path
+ * @param value_setter Lambda to set the value in the request
+ * @return true on success, false on error (logs error)
+ */
+static bool PublishValueGeneric(
+    const std::shared_ptr<grpc::Channel>& channel,
+    const std::string& path,
+    const std::function<void(val::v2::Value&)>& value_setter,
+    const PublisherOptions& opts)
+{
+    auto stub = val::v2::VAL::NewStub(channel);
+    grpc::ClientContext context;
+    
+    // Attach auth if token provided
+    if (!opts.token.empty()) {
+        context.AddMetadata("authorization", std::string("Bearer ") + opts.token);
+    }
+    
+    val::v2::PublishValueRequest request;
+    val::v2::PublishValueResponse response;
+    
+    request.mutable_signal_id()->set_path(path);
+    value_setter(*request.mutable_data_point()->mutable_value());
+    
+    grpc::Status status = stub->PublishValue(&context, request, &response);
+    
+    if (!status.ok()) {
+        std::cerr << "[Publisher] PublishValue('" << path 
+                  << "') failed: code=" << status.error_code()
+                  << " msg='" << status.error_message() << "'" << std::endl;
+        return false;
+    }
+    
+    return true;
+}
+
 Publisher::Publisher(const std::string& address) {
     channel_ = grpc::CreateChannel(address, grpc::InsecureChannelCredentials());
     stub_ = val::v2::VAL::NewStub(channel_);
@@ -64,192 +102,30 @@ Publisher::~Publisher() {
 }
 
 bool Publisher::PublishDouble(const std::string& path, double value) {
-    grpc::ClientContext context;
-    AttachAuth(context);
-    val::v2::PublishValueRequest request;
-    val::v2::PublishValueResponse response;
-
-    request.mutable_signal_id()->set_path(path);
-    request.mutable_data_point()->mutable_value()->set_double_(value);
-
-    grpc::Status status = stub_->PublishValue(&context, request, &response);
-    
-    if (!status.ok()) {
-        std::cerr << "[Publisher] PublishValue(" << path << ", " << value
-                  << ") failed: code=" << status.error_code()
-                  << " msg='" << status.error_message() << "'" << std::endl;
-        return false;
-    }
-    
-    return true;
+    return PublishValueGeneric(channel_, path,
+        [value](val::v2::Value& v) { v.set_double_(value); },
+        opts_);
 }
 
 bool Publisher::PublishFloat(const std::string& path, float value) {
-    // Try provider-stream publishing first
-    int32_t sigid = LookupSignalId(path);
-    if (sigid >= 0) {
-        if (EnsureProviderStream()) {
-            std::shared_ptr<grpc::ClientReaderWriter<kuksa::val::v2::OpenProviderStreamRequest,
-                                                     kuksa::val::v2::OpenProviderStreamResponse>> local_stream;
-            {
-                std::lock_guard<std::mutex> lg(stream_mutex_);
-                local_stream = stream_;
-            }
-
-            if (local_stream) {
-                    stream_stop_.store(false);
-                    std::cerr << "[Publisher] Provider stream opened" << std::endl;
-                // Send ProvideSignalRequest once per signal
-                bool need_provide = false;
-                {
-                    std::lock_guard<std::mutex> lg(stream_mutex_);
-                    if (provided_signals_.find(sigid) == provided_signals_.end()) {
-                        need_provide = true;
-                    }
-                }
-                if (need_provide) {
-                    kuksa::val::v2::OpenProviderStreamRequest provideReq;
-                    auto* psr = provideReq.mutable_provide_signal_request();
-                    auto& mapRef = *psr->mutable_signals_sample_intervals();
-                    kuksa::val::v2::SampleInterval si;
-                    si.set_interval_ms(0);
-                    (*psr->mutable_signals_sample_intervals())[sigid] = si;
-
-                    try {
-                        if (!local_stream->Write(provideReq)) {
-                            std::cerr << "[Publisher] Failed to send ProvideSignalRequest for id=" << sigid << std::endl;
-                        } else {
-                            std::lock_guard<std::mutex> lg(stream_mutex_);
-                            provided_signals_.insert(sigid);
-                                std::cerr << "[Publisher] Sent ProvideSignalRequest for id=" << sigid << std::endl;
-                        }
-                    } catch (const std::exception& e) {
-                        std::cerr << "[Publisher] Exception writing ProvideSignalRequest: " << e.what() << std::endl;
-                    } catch (...) {
-                        std::cerr << "[Publisher] Unknown exception writing ProvideSignalRequest" << std::endl;
-                    }
-                }
-
-                // Build PublishValuesRequest
-                kuksa::val::v2::OpenProviderStreamRequest req;
-                auto* pvr = req.mutable_publish_values_request();
-                pvr->set_request_id(next_request_id_++);
-
-                kuksa::val::v2::Datapoint dp;
-                auto now = std::chrono::system_clock::now();
-                auto secs = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
-                auto nanos = std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count() - secs * 1000000000LL;
-                google::protobuf::Timestamp* ts = dp.mutable_timestamp();
-                ts->set_seconds(secs);
-                ts->set_nanos(static_cast<int>(nanos));
-                dp.mutable_value()->set_float_(value);
-
-                (*pvr->mutable_data_points())[sigid] = dp;
-
-                try {
-                    if (local_stream->Write(req)) {
-                            std::cerr << "[Publisher] Sent PublishValuesRequest for id=" << sigid << std::endl;
-                        return true;
-                    } else {
-                        std::cerr << "[Publisher] Provider stream write failed for " << path << std::endl;
-                        // fallthrough to unary fallback
-                    }
-                } catch (const std::exception& e) {
-                    std::cerr << "[Publisher] Exception writing PublishValuesRequest: " << e.what() << std::endl;
-                } catch (...) {
-                    std::cerr << "[Publisher] Unknown exception writing PublishValuesRequest" << std::endl;
-                }
-            }
-        }
-    }
-
-    // Fallback: unary PublishValue
-    grpc::ClientContext context;
-    AttachAuth(context);
-    val::v2::PublishValueRequest request;
-    val::v2::PublishValueResponse response;
-
-    request.mutable_signal_id()->set_path(path);
-    request.mutable_data_point()->mutable_value()->set_float_(value);
-
-    grpc::Status status = stub_->PublishValue(&context, request, &response);
-    
-    if (!status.ok()) {
-        std::cerr << "[Publisher] PublishValue(" << path << ", " << value
-                  << ") failed: code=" << status.error_code()
-                  << " msg='" << status.error_message() << "'" << std::endl;
-        return false;
-    }
-    
-    return true;
+    return PublishValueGeneric(channel_, path,
+        [value](val::v2::Value& v) { v.set_float_(value); },
+        opts_);
 }
 
 bool Publisher::PublishInt32(const std::string& path, int32_t value) {
-    grpc::ClientContext context;
-    AttachAuth(context);
-    val::v2::PublishValueRequest request;
-    val::v2::PublishValueResponse response;
-
-    request.mutable_signal_id()->set_path(path);
-    request.mutable_data_point()->mutable_value()->set_int32(value);
-
-    grpc::Status status = stub_->PublishValue(&context, request, &response);
-    
-    if (!status.ok()) {
-        std::cerr << "[Publisher] PublishValue(" << path << ", " << value
-                  << ") failed: code=" << status.error_code()
-                  << " msg='" << status.error_message() << "'" << std::endl;
-        return false;
-    }
-    
-    return true;
+    return PublishValueGeneric(channel_, path,
+        [value](val::v2::Value& v) { v.set_int32(value); },
+        opts_);
 }
 
 bool Publisher::PublishUint32(const std::string& path, uint32_t value) {
-    grpc::ClientContext context;
-    AttachAuth(context);
-    val::v2::PublishValueRequest request;
-    val::v2::PublishValueResponse response;
-
-    request.mutable_signal_id()->set_path(path);
-    request.mutable_data_point()->mutable_value()->set_uint32(value);
-
-    grpc::Status status = stub_->PublishValue(&context, request, &response);
-    
-    if (!status.ok()) {
-        std::cerr << "[Publisher] PublishValue(" << path << ", " << value 
-                  << ") failed: " << status.error_message() << std::endl;
-        return false;
-    }
-    
-    return true;
-}
-
-bool Publisher::PublishBool(const std::string& path, bool value) {
-    grpc::ClientContext context;
-    AttachAuth(context);
-    val::v2::PublishValueRequest request;
-    val::v2::PublishValueResponse response;
-
-    request.mutable_signal_id()->set_path(path);
-    request.mutable_data_point()->mutable_value()->set_bool_(value);
-
-    grpc::Status status = stub_->PublishValue(&context, request, &response);
-    
-    if (!status.ok()) {
-        std::cerr << "[Publisher] PublishValue(" << path << ", " << (value ? "true" : "false")
-                  << ") failed: code=" << status.error_code()
-                  << " msg='" << status.error_message() << "'" << std::endl;
-        return false;
-    }
-    
-    return true;
-}
-
-bool Publisher::PublishString(const std::string& path, const std::string& value) {
-    grpc::ClientContext context;
-    AttachAuth(context);
-    val::v2::PublishValueRequest request;
+    return PublishValueGeneric(channel_, path,
+        [value](val::v2::Value& v) { v.set_uint32(value); },
+        opts_);
+}return PublishValueGeneric(channel_, path,
+        [value](val::v2::Value& v) { v.set_float_(value); },
+        opts_)blishValueRequest request;
     val::v2::PublishValueResponse response;
 
     request.mutable_signal_id()->set_path(path);

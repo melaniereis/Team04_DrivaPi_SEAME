@@ -64,6 +64,9 @@ set(FEEDER_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/feeder/main.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/feeder/publisher.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/feeder/handlers.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/feeder/feeder_cli.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/feeder/feeder_signal.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/feeder/feeder_can.cpp"
 )
 
 # --- Qt Application Target ---
