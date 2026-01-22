@@ -45,12 +45,17 @@ add_custom_command(
 )
 
 # --- Qt Application Sources ---
+option(ENABLE_CAN_MODE "Enable CAN mode in the Qt app (off for production)" OFF)
+
 file(GLOB QT_APP_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/vehicle_data.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/can_reader.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/kuksa_reader.cpp"
 )
+
+if(ENABLE_CAN_MODE)
+    list(APPEND QT_APP_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/can_reader.cpp")
+endif()
 
 # --- Feeder Sources ---
 set(FEEDER_SOURCES
@@ -69,6 +74,10 @@ target_include_directories(myqtapp PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/inc
     ${GEN_DIR}
 )
+
+if(ENABLE_CAN_MODE)
+    target_compile_definitions(myqtapp PRIVATE ENABLE_CAN_MODE=1)
+endif()
 
 target_include_directories(kuksa_feeder PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/feeder

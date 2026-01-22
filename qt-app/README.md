@@ -97,17 +97,7 @@ cd qt-app
 
 ## Usage
 
-### CAN Mode (Default)
-# Bring up CAN interface
-```bash
-sudo ip link set can0 type can bitrate 500000
-sudo ip link set can0 up
-
-# Run dashboard
-./myqtapp
-```
-
-### KUKSA Mode
+### KUKSA Mode (Default)
 ```bash
 # Basic insecure connection
 ./myqtapp --kuksa --kuksa-addr localhost:55555
@@ -126,6 +116,18 @@ sudo ip link set can0 up
     --kuksa-cert /path/to/client.crt \
     --kuksa-key /path/to/client.key \
     --kuksa-token <jwt_token>
+```
+
+### CAN Mode (Fallback / Dev)
+Requires building with `-DENABLE_CAN_MODE=ON`.
+
+```bash
+# Bring up CAN interface
+sudo ip link set can0 type can bitrate 500000
+sudo ip link set can0 up
+
+# Run dashboard in CAN mode on can0
+./myqtapp --can --can-if can0
 ```
 
 ### KUKSA Feeder

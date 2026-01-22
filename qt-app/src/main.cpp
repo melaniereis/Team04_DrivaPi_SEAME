@@ -8,7 +8,9 @@
 #include <QCommandLineParser>
 #include <QCommandLineOption>
 #include "vehicle_data.hpp"
+#ifdef ENABLE_CAN_MODE
 #include "can_reader.hpp"
+#endif
 #include "kuksa_reader.hpp"
 
 int main(int argc, char *argv[])
@@ -18,13 +20,14 @@ int main(int argc, char *argv[])
 
     // --- 1. ARGUMENT PARSING ---
     QCommandLineParser parser;
-    parser.setApplicationDescription("Hybrid Dashboard (CAN / Kuksa)");
+    parser.setApplicationDescription("Hybrid Dashboard (KUKSA default, CAN optional)");
     parser.addHelpOption();
     
     // Define options
-    QCommandLineOption kuksaOption(QStringList() << "k" << "kuksa",
-        "Enable Kuksa mode (gRPC). Defaults to CAN if omitted.");
-    parser.addOption(kuksaOption);
+#ifdef ENABLE_CAN_MODE
+    QCommandLineOption canModeOption(QStringList() << "can",
+        "Force CAN mode (default is KUKSA)");
+#endif
 
     QCommandLineOption kuksaAddrOption(QStringList() << "kuksa-addr",
         "Kuksa databroker address (host:port)", "addr");
@@ -40,6 +43,13 @@ int main(int argc, char *argv[])
         "Client private key path (mTLS)", "path");
     QCommandLineOption kuksaTokenOption(QStringList() << "kuksa-token",
         "Authorization token (JWT)", "token");
+#ifdef ENABLE_CAN_MODE
+    QCommandLineOption canIfOption(QStringList() << "c" << "can-if",
+        "CAN interface name", "ifname", "can0");
+#endif
+#ifdef ENABLE_CAN_MODE
+    parser.addOption(canModeOption);
+#endif
     parser.addOption(kuksaAddrOption);
     parser.addOption(kuksaTlsOption);
     parser.addOption(kuksaInsecureOption);
@@ -47,11 +57,17 @@ int main(int argc, char *argv[])
     parser.addOption(kuksaCertOption);
     parser.addOption(kuksaKeyOption);
     parser.addOption(kuksaTokenOption);
+#ifdef ENABLE_CAN_MODE
+    parser.addOption(canIfOption);
+#endif
     
     parser.process(app);
     
     // Check if the user passed the argument
-    bool useKuksa = parser.isSet(kuksaOption);
+    bool useKuksa = true;
+#ifdef ENABLE_CAN_MODE
+    useKuksa = !parser.isSet(canModeOption);
+#endif
 
     // UI and Engine setup
     QQmlApplicationEngine engine;
@@ -63,12 +79,14 @@ int main(int argc, char *argv[])
     QThread *workerThread = new QThread(&app);
 
     // Pointers to readers for cleanup
-    CANReader *canReader = nullptr;
     KUKSAReader *kuksaReader = nullptr;
+#ifdef ENABLE_CAN_MODE
+    CANReader *canReader = nullptr;
+#endif
 
     if (useKuksa)
     {
-        qInfo() << "Starting in KUKSA mode";
+        qInfo() << "Starting in KUKSA mode (default)";
         // KUKSA Reader setup with options
         KuksaOptions ko;
         ko.address = parser.value(kuksaAddrOption).isEmpty()
@@ -90,9 +108,11 @@ int main(int argc, char *argv[])
         QObject::connect(kuksaReader, &KUKSAReader::speedReceived,
                          vehicleData.data(), &VehicleData::handleSpeedUpdate);
     } else {
-        qInfo() << "Starting in CAN mode";
+#ifdef ENABLE_CAN_MODE
+        const QString canInterface = parser.value(canIfOption);
+        qInfo() << "Starting in CAN mode on" << canInterface << "(--can)";
         // CAN Reader setup
-        canReader = new CANReader(QStringLiteral("vcan0"));
+        canReader = new CANReader(canInterface);
         canReader->moveToThread(workerThread);
         // Start CANReader when thread starts
         QObject::connect(workerThread, &QThread::started, canReader, &CANReader::start);
@@ -103,17 +123,27 @@ int main(int argc, char *argv[])
         QObject::connect(canReader, &CANReader::canMessageReceived,
                         vehicleData.data(), &VehicleData::handleCanMessage,
                         Qt::QueuedConnection);
+#else
+        qWarning() << "CAN mode requested but CAN support is disabled at build time (ENABLE_CAN_MODE=OFF). Falling back to KUKSA.";
+        useKuksa = true;
+#endif
     }
 
     workerThread->start();
 
     // CLEANUP HANDLING
-    QObject::connect(&app, &QCoreApplication::aboutToQuit, [workerThread, canReader, kuksaReader]() {
+    QObject::connect(&app, &QCoreApplication::aboutToQuit, [workerThread,
+#ifdef ENABLE_CAN_MODE
+        canReader,
+#endif
+        kuksaReader]() {
+#ifdef ENABLE_CAN_MODE
         if (canReader)
         {
             // ask CAN reader to stop
             QMetaObject::invokeMethod(canReader, "stop", Qt::QueuedConnection);
         }
+#endif
         if (workerThread)
         {
             workerThread->quit();

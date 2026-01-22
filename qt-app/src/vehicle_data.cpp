@@ -208,8 +208,8 @@ void VehicleData::markPropertyStale(const QString &propName)
 void VehicleData::handleCanMessage(const QByteArray &payload, uint32_t canId)
 {
     if (canId == SPEED_CAN_ID) {
-        // Expect 2 bytes: uint16_t big-endian = speed_mps_x100
-        if (payload.size() < 2) {
+        // Expect 4 bytes: little-endian float32 speed in m/s
+        if (payload.size() < 4) {
             qWarning() << "SPEED frame too short: " << payload.size();
             return;
         }
