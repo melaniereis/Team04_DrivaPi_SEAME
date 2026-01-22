@@ -23,7 +23,7 @@
   - Direct SocketCAN → gRPC publisher; removes extra container and Python deps; faster startup on RPi and simpler custom logic.
 - **Unit Compliance Fix**
   - Convert CAN payload m/s → km/h in feeder handlers (`speed_kmh = speed_mps * 3.6`).
-  - Update VSS metadata (`vss_minimal.json`) to `unit: "km/h"`.
+  - Update VSS metadata (`vss_v6.json`) to `unit: "km/h"`.
   - Reflect conversions in logs, tests, docs, and UI labels (KM/H).
 - **Security Hardening**
   - Added TLS/mTLS support via `SslCredentials` for feeder and Qt subscriber.
@@ -44,7 +44,7 @@
 ### Code References (what changed where)
 - **Speed conversion**: CAN float m/s is decoded and converted to km/h before publishing in [qt-app/src/feeder/handlers.cpp](qt-app/src/feeder/handlers.cpp#L14-L30); handler contract documented in [qt-app/src/feeder/handlers.hpp](qt-app/src/feeder/handlers.hpp#L16-L31). Dispatch wiring for CAN ID 0x100 routes here via [qt-app/src/feeder/main.cpp](qt-app/src/feeder/main.cpp#L74-L99).
 - **Security flags & broker connection**: CLI now accepts `--tls`, CA/cert/key, and JWT token flags, wiring into publisher options in [qt-app/src/feeder/main.cpp](qt-app/src/feeder/main.cpp#L99-L148). TLS credentials and token metadata are built in [qt-app/src/feeder/publisher.cpp](qt-app/src/feeder/publisher.cpp#L12-L44) with auth header injection in [qt-app/src/feeder/publisher.cpp](qt-app/src/feeder/publisher.cpp#L168-L171); option schema lives in [qt-app/src/feeder/publisher.hpp](qt-app/src/feeder/publisher.hpp#L20-L82).
-- **VSS metadata unit**: `Vehicle.Speed` now declares `km/h` in [qt-app/vss_minimal.json](qt-app/vss_minimal.json#L1-L10) so databroker schema matches the feeder conversion.
+- **VSS metadata unit**: `Vehicle.Speed` now declares `km/h` in [qt-app/vss_v6.json](qt-app/vss_v6.json) so databroker schema matches the feeder conversion.
 - **VAL publish wrappers**: Typed publish helpers stay in [qt-app/src/feeder/publisher.cpp](qt-app/src/feeder/publisher.cpp#L48-L165), reused by handlers to keep CAN→VSS logic minimal.
 
 ## 4) Why the New Approach Is Better
@@ -69,7 +69,7 @@
 - **Open Items**: Ensure downstream configs (e.g., any custom vss.json) are refreshed; rebuild on target to confirm includes/paths.
 
 ## 7) Recommended Next Steps
-1. **Push & Deploy**: Push to origin/test and deploy on RPi/AGL target; restart databroker with updated `vss_minimal.json`.
+1. **Push & Deploy**: Push to origin/test and deploy on RPi/AGL target; restart databroker with updated `vss_v6.json`.
 2. **Runtime Validation**: Send known m/s frames (e.g., 10 m/s) and verify 36 km/h in KUKSA and UI.
 3. **Security Verification**: Test TLS/mTLS and JWT paths end-to-end; confirm failure on missing/invalid creds.
 4. **Regression Sweep**: Re-run UI/QML asset load checks on case-sensitive FS; rebuild feeder with current toolchain.
