@@ -173,7 +173,7 @@ Window {
             // ============================================
             // RIGHT - Energy Display - COMPONENT
             // ============================================
-            energy_display {
+            EnergyDisplay {
                 id: energyDisplay
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.horizontalCenterOffset: metricOffsetX

@@ -5,7 +5,7 @@
 
         <!-- QML Components -->
         <file>qml/components/speed_display.qml</file>
-        <file>qml/components/energy_display.qml</file>
+        <file>qml/components/EnergyDisplay.qml</file>
         <file>qml/components/gear_selector.qml</file>
         <file>qml/components/battery_indicator.qml</file>
 

@@ -26,19 +26,19 @@ int main(int argc, char *argv[])
         "Enable Kuksa mode (gRPC). Defaults to CAN if omitted.");
     parser.addOption(kuksaOption);
 
-    QCommandLineOption kuksaAddrOption(QStringList() << "--kuksa-addr",
+    QCommandLineOption kuksaAddrOption(QStringList() << "kuksa-addr",
         "Kuksa databroker address (host:port)", "addr");
-    QCommandLineOption kuksaTlsOption(QStringList() << "--kuksa-tls",
+    QCommandLineOption kuksaTlsOption(QStringList() << "kuksa-tls",
         "Use TLS for Kuksa connection");
-    QCommandLineOption kuksaInsecureOption(QStringList() << "--kuksa-insecure",
+    QCommandLineOption kuksaInsecureOption(QStringList() << "kuksa-insecure",
         "Use insecure connection (default)");
-    QCommandLineOption kuksaCaOption(QStringList() << "--kuksa-ca",
+    QCommandLineOption kuksaCaOption(QStringList() << "kuksa-ca",
         "Root CA certificate path", "path");
-    QCommandLineOption kuksaCertOption(QStringList() << "--kuksa-cert",
+    QCommandLineOption kuksaCertOption(QStringList() << "kuksa-cert",
         "Client certificate path (mTLS)", "path");
-    QCommandLineOption kuksaKeyOption(QStringList() << "--kuksa-key",
+    QCommandLineOption kuksaKeyOption(QStringList() << "kuksa-key",
         "Client private key path (mTLS)", "path");
-    QCommandLineOption kuksaTokenOption(QStringList() << "--kuksa-token",
+    QCommandLineOption kuksaTokenOption(QStringList() << "kuksa-token",
         "Authorization token (JWT)", "token");
     parser.addOption(kuksaAddrOption);
     parser.addOption(kuksaTlsOption);
