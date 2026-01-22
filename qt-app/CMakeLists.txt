@@ -50,6 +50,7 @@ option(ENABLE_CAN_MODE "Enable CAN mode in the Qt app (off for production)" OFF)
 file(GLOB QT_APP_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/app_controller.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/cli_parser.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/vehicle_data.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/kuksa_reader.cpp"
 )
