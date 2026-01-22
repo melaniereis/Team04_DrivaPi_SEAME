@@ -48,15 +48,15 @@ add_custom_command(
 option(ENABLE_CAN_MODE "Enable CAN mode in the Qt app (off for production)" OFF)
 
 file(GLOB QT_APP_SOURCES
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/app_controller.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/cli_parser.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/vehicle_data.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/kuksa_reader.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/gui/main.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/gui/app_controller.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/gui/cli_parser.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/gui/vehicle_data.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/gui/kuksa_reader.cpp"
 )
 
 if(ENABLE_CAN_MODE)
-    list(APPEND QT_APP_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/can_reader.cpp")
+    list(APPEND QT_APP_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/gui/can_reader.cpp")
 endif()
 
 # --- Feeder Sources ---
@@ -85,20 +85,23 @@ if(ENABLE_CAN_MODE)
 endif()
 
 target_include_directories(kuksa_feeder PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/feeder
+    ${CMAKE_CURRENT_SOURCE_DIR}/inc/feeder
     ${GEN_DIR}
 )
 
 target_sources(myqtapp PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/resources/qml.qrc"
     "${CMAKE_CURRENT_SOURCE_DIR}/resources/resources.qrc"
-    "${CMAKE_CURRENT_SOURCE_DIR}/inc/vehicle_data.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/inc/can_reader.hpp"  
-    "${CMAKE_CURRENT_SOURCE_DIR}/inc/kuksa_reader.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/inc/gui/vehicle_data.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/inc/gui/kuksa_reader.hpp"
     "${GEN_DIR}/kuksa/val/v2/val.pb.cc"
     "${GEN_DIR}/kuksa/val/v2/val.grpc.pb.cc"
     "${GEN_DIR}/kuksa/val/v2/types.pb.cc"
 )
+
+if(ENABLE_CAN_MODE)
+    target_sources(myqtapp PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/inc/gui/can_reader.hpp")
+endif()
 
 target_sources(kuksa_feeder PRIVATE
     "${GEN_DIR}/kuksa/val/v2/val.pb.cc"

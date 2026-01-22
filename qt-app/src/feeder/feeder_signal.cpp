@@ -1,4 +1,5 @@
 #include "feeder_signal.hpp"
+#include <cstring>
 #include <signal.h>
 #include <sys/wait.h>
 #include <thread>

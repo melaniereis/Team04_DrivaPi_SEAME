@@ -1,6 +1,6 @@
 #include <QGuiApplication>
-#include "app_controller.hpp"
-#include "cli_parser.hpp"
+#include "gui/app_controller.hpp"
+#include "gui/cli_parser.hpp"
 
 int main(int argc, char *argv[])
 {

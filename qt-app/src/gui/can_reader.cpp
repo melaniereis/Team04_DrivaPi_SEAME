@@ -1,5 +1,7 @@
-#include "can_reader.hpp"
+#include "gui/can_reader.hpp"
 #include <cstring>
+
+namespace drivaui {
 
 CANReader::CANReader(const QString &ifname, QObject *parent)
     : QObject(parent)
@@ -95,3 +97,5 @@ void CANReader::handleErrorOccurred(QCanBusDevice::CanBusError error)
     qWarning() << errorMsg;
     emit errorOccurred(errorMsg);
 }
+
+}  // namespace driv aui

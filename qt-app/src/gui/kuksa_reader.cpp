@@ -1,6 +1,8 @@
-#include "kuksa_reader.hpp"
+#include "gui/kuksa_reader.hpp"
 #include <fstream>
 #include <atomic>
+
+namespace kuksa {
 
 KUKSAReader::KUKSAReader(QObject *parent)
     : QObject(parent)
@@ -144,3 +146,4 @@ std::string KUKSAReader::encodeBearerToken(const QString& token)
     return std::string("Bearer ") + validated.toStdString();
 }
 
+}  // namespace kuksa

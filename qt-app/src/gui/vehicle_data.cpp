@@ -1,4 +1,6 @@
-#include "vehicle_data.hpp"
+#include "gui/vehicle_data.hpp"
+
+namespace drivaui {
 
 // CAN ID that we agreed for speed
 static const uint32_t SPEED_CAN_ID = 0x100;
@@ -253,3 +255,4 @@ void VehicleData::handleSpeedUpdate(float speed)
     // debug
     // qDebug() << "Updated speed from KUKSA (m/s):" << speed;
 }
+}  // namespace drivaui

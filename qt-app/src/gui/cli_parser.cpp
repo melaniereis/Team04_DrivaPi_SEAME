@@ -1,4 +1,4 @@
-#include "cli_parser.hpp"
+#include "gui/cli_parser.hpp"
 #include <QDebug>
 
 namespace drivaui {

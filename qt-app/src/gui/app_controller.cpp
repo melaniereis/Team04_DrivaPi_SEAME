@@ -1,4 +1,4 @@
-#include "app_controller.hpp"
+#include "gui/app_controller.hpp"
 
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
@@ -11,10 +11,10 @@
 #include <QUrl>
 #include <QMetaObject>
 
-#include "vehicle_data.hpp"
-#include "kuksa_reader.hpp"
+#include "gui/vehicle_data.hpp"
+#include "gui/kuksa_reader.hpp"
 #ifdef ENABLE_CAN_MODE
-#include "can_reader.hpp"
+#include "gui/can_reader.hpp"
 #endif
 
 namespace drivaui {
