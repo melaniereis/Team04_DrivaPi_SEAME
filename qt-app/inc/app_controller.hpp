@@ -5,10 +5,12 @@
 
 class QGuiApplication;
 
+namespace drivaui {
+
 struct RunConfig {
     bool useKuksa{true};
     QString canInterface{QStringLiteral("can0")};
-    KuksaOptions kuksa{};
+    kuksa::KuksaOptions kuksa{};
 };
 
 class AppController {
@@ -19,3 +21,5 @@ public:
 private:
     RunConfig config_;
 };
+
+}  // namespace drivaui

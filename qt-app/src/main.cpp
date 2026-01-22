@@ -7,17 +7,17 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
     app.setApplicationName("DrivaPi Dashboard");
 
-    CliOptions opts;
+    drivaui::CliOptions opts;
     QCommandLineParser parser;
-    configureParser(parser, opts);
+    drivaui::configureParser(parser, opts);
     parser.process(app);
 
-    RunConfig config = buildRunConfig(parser, opts);
+    drivaui::RunConfig config = drivaui::buildRunConfig(parser, opts);
 
-    if (!validateOptions(parser, opts, config, app.arguments())) {
+    if (!drivaui::validateOptions(parser, opts, config, app.arguments())) {
         return 1;
     }
 
-    AppController controller(config);
+    drivaui::AppController controller(config);
     return controller.run(app);
 }

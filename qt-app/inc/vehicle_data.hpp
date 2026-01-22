@@ -10,6 +10,8 @@
 #include <QDateTime>
 #include <QtMath>
 
+namespace drivaui {
+
 class VehicleData : public QObject
 {
     Q_OBJECT
@@ -99,5 +101,7 @@ private:
     static constexpr qint64 SPEED_STALE_MS = 500;     // speed is high-rate -> short timeout
     static constexpr qint64 OTHER_STALE_MS = 2000;    // other properties slower
 };
+
+}  // namespace drivaui
 
 #endif // VEHICLEDATA_HPP

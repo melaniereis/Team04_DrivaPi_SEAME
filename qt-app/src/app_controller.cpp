@@ -17,6 +17,8 @@
 #include "can_reader.hpp"
 #endif
 
+namespace drivaui {
+
 AppController::AppController(const RunConfig& config)
     : config_(config) {}
 
@@ -27,7 +29,7 @@ int AppController::run(QGuiApplication& app)
     engine.rootContext()->setContextProperty("vehicleData", vehicleData.data());
 
     QThread* workerThread = new QThread(&app);
-    KUKSAReader* kuksaReader = nullptr;
+    kuksa::KUKSAReader* kuksaReader = nullptr;
 #ifdef ENABLE_CAN_MODE
     CANReader* canReader = nullptr;
 #endif
@@ -36,12 +38,12 @@ int AppController::run(QGuiApplication& app)
 
     if (config_.useKuksa) {
         qInfo() << "Starting in KUKSA mode (default)";
-        KuksaOptions ko = config_.kuksa;
-        kuksaReader = new KUKSAReader(ko);
+        kuksa::KuksaOptions ko = config_.kuksa;
+        kuksaReader = new kuksa::KUKSAReader(ko);
         kuksaReader->moveToThread(workerThread);
-        QObject::connect(workerThread, &QThread::started, kuksaReader, &KUKSAReader::start);
-        QObject::connect(workerThread, &QThread::finished, kuksaReader, &KUKSAReader::deleteLater);
-        QObject::connect(kuksaReader, &KUKSAReader::speedReceived,
+        QObject::connect(workerThread, &QThread::started, kuksaReader, &kuksa::KUKSAReader::start);
+        QObject::connect(workerThread, &QThread::finished, kuksaReader, &kuksa::KUKSAReader::deleteLater);
+        QObject::connect(kuksaReader, &kuksa::KUKSAReader::speedReceived,
                          vehicleData.data(), &VehicleData::handleSpeedUpdate);
     }
 #ifdef ENABLE_CAN_MODE
@@ -98,3 +100,5 @@ int AppController::run(QGuiApplication& app)
 
     return app.exec();
 }
+
+}  // namespace drivaui

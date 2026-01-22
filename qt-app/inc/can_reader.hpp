@@ -12,6 +12,8 @@
 
 class QSocketNotifier;
 
+namespace drivaui {
+
 class CANReader : public QObject
 {
     Q_OBJECT
@@ -38,5 +40,7 @@ private:
     QString m_ifname;
     QCanBusDevice *m_device;
 };
+
+}  // namespace drivaui
 
 #endif // CANREADER_HPP

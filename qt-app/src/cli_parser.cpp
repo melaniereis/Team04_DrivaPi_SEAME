@@ -1,6 +1,8 @@
 #include "cli_parser.hpp"
 #include <QDebug>
 
+namespace drivaui {
+
 QString buildDescription()
 {
     QString desc = "Hybrid Dashboard (KUKSA default, CAN optional)\n\nExamples:\n";
@@ -87,3 +89,5 @@ bool validateOptions(const QCommandLineParser& parser, const CliOptions& opts,
 
     return ok;
 }
+
+}  // namespace drivaui

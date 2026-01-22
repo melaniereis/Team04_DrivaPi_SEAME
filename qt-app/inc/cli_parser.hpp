@@ -6,6 +6,8 @@
 #include <QStringList>
 #include "app_controller.hpp"
 
+namespace drivaui {
+
 struct CliOptions {
 #ifdef ENABLE_CAN_MODE
     QCommandLineOption canModeOption{QStringList() << "can",
@@ -34,3 +36,5 @@ void configureParser(QCommandLineParser& parser, const CliOptions& opts);
 RunConfig buildRunConfig(const QCommandLineParser& parser, const CliOptions& opts);
 bool validateOptions(const QCommandLineParser& parser, const CliOptions& opts, 
                      const RunConfig& config, const QStringList& rawArgs);
+
+}  // namespace drivaui

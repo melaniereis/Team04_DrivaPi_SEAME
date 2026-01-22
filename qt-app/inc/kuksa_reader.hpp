@@ -6,6 +6,8 @@
 #include <grpcpp/grpcpp.h>
 #include "kuksa/val/v2/val.grpc.pb.h"
 
+namespace kuksa {
+
 // KUKSA Val v2 gRPC namespace
 using namespace kuksa::val::v2;
 
@@ -53,5 +55,7 @@ private:
     // Flag to signal graceful shutdown of subscription stream
     std::atomic<bool> m_stop_requested_{false};
 };
+
+}  // namespace kuksa
 
 #endif // KUKSAREADER_HPP
