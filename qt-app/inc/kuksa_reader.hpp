@@ -28,21 +28,30 @@ public:
 public slots:
     // Starts the data fetching process
     void start();
+    // Gracefully stops the subscription stream
+    void stop();
 
 signals:
     // Emitted when new speed data is received
     void speedReceived(float speed);
+    // Emitted on fatal connection or configuration errors
+    void errorOccurred(const QString& message);
 
 private:
     // Attach Authorization metadata if token present
     void attachAuth(grpc::ClientContext& ctx);
 
-    // Helper to load file contents
-    static std::string loadFile(const QString& path);
+    // Helper to load file contents with optional warning on failure
+    static std::string loadFile(const QString& path, bool warnOnMissing = false);
+
+    // Helper to validate and encode bearer token
+    static std::string encodeBearerToken(const QString& token);
 
     KuksaOptions m_opts_;
     // gRPC client stub -> used to communicate with KUKSA Val server
     std::unique_ptr<VAL::Stub> m_stub_;
+    // Flag to signal graceful shutdown of subscription stream
+    std::atomic<bool> m_stop_requested_{false};
 };
 
 #endif // KUKSAREADER_HPP
