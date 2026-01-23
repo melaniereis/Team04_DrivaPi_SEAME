@@ -51,9 +51,17 @@ sudo systemctl start kuksa-databroker
 ```
 
 Configuration (typically in `/etc/default/kuksa-databroker`):
+
+**Production (with TLS/authorization):**
+```bash
+EXTRA_ARGS="--address 0.0.0.0 --port 55555 --vss /etc/kuksa/vss.json --tls /etc/kuksa/server.crt --tls-key /etc/kuksa/server.key"
+```
+
+**Development/Testing ONLY (⚠️ INSECURE - exposes signals without credentials):**
 ```bash
 EXTRA_ARGS="--address 0.0.0.0 --port 55555 --vss /etc/kuksa/vss.json --insecure --disable-authorization"
 ```
+⚠️ **WARNING:** The test-only configuration above allows any local network client to read or actuate all vehicle signals without encryption or authentication. **Never use in production or on networked deployments.**
 
 ### 2. VSS Signal Definitions
 

@@ -160,10 +160,19 @@ cp vss_v6.json /etc/kuksa/vss.json
 chown -R kuksa:kuksa /etc/kuksa
 chmod 644 /etc/kuksa/vss.json
 
-# Configure service
+# Configure service (production: with TLS/authorization)
 cat > /etc/default/kuksa-databroker <<EOF
-EXTRA_ARGS="--address 0.0.0.0 --port 55555 --vss /etc/kuksa/vss.json --insecure --disable-authorization"
+EXTRA_ARGS="--address 0.0.0.0 --port 55555 --vss /etc/kuksa/vss.json --tls /etc/kuksa/server.crt --tls-key /etc/kuksa/server.key"
 EOF
+
+# For development/testing ONLY (no transport security or access control):
+# WARNING: The configuration below exposes all vehicle signals over unencrypted,
+# unauthenticated gRPC. This allows any process on the local network to read/actuate
+# signals without credentials. Use this ONLY in isolated test environments.
+#
+# cat > /etc/default/kuksa-databroker <<EOF
+# EXTRA_ARGS="--address 0.0.0.0 --port 55555 --vss /etc/kuksa/vss.json --insecure --disable-authorization"
+# EOF
 
 # Restart
 systemctl restart kuksa-databroker
