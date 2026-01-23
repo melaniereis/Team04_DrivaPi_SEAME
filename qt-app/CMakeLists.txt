@@ -47,7 +47,7 @@ add_custom_command(
 # --- Qt Application Sources ---
 option(ENABLE_CAN_MODE "Enable CAN mode in the Qt app (off for production)" OFF)
 
-file(GLOB QT_APP_SOURCES
+set(QT_APP_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/gui/main.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/gui/app_controller.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/gui/cli_parser.cpp"
