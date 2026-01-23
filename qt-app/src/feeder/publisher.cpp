@@ -355,8 +355,22 @@ void Publisher::AttachAuth(grpc::ClientContext& ctx) {
 
 std::string Publisher::LoadFile(const std::string& path) {
     if (path.empty()) return {};
+    
     std::ifstream ifs(path, std::ios::in | std::ios::binary);
     if (!ifs) return {};
+    
+    // Check file size to prevent excessive memory consumption
+    ifs.seekg(0, std::ios::end);
+    std::streamsize file_size = ifs.tellg();
+    const std::streamsize MAX_FILE_SIZE = 10 * 1024 * 1024;  // 10 MB limit for certificates
+    
+    if (file_size > MAX_FILE_SIZE) {
+        std::cerr << "[Publisher] File '" << path << "' exceeds maximum allowed size (" 
+                  << file_size << " > " << MAX_FILE_SIZE << " bytes)" << std::endl;
+        return {};
+    }
+    
+    ifs.seekg(0, std::ios::beg);
     std::string content((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
     return content;
 }
