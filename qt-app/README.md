@@ -135,21 +135,68 @@ sudo ip link set can0 up
 # Start with defaults (vcan0, localhost:55555, insecure)
 ./kuksa_feeder
 
-# Specify CAN interface and address
+# Specify CAN interface and address (positional)
 ./kuksa_feeder can0 192.168.1.100:55555
 
-# With TLS and JWT
-./kuksa_feeder can0 localhost:55555 \
-    --tls \
+# Or use named flags
+./kuksa_feeder --can-if can0 --address 192.168.1.100:55555
+
+# With TLS and mTLS
+./kuksa_feeder --tls \
     --ca /path/to/ca.crt \
     --cert /path/to/client.crt \
-    --key /path/to/client.key \
-    --token <jwt_token>
+    --key /path/to/client.key
 
----
+# With JWT authorization
+./kuksa_feeder --tls \
+    --ca /path/to/ca.crt \
+    --token <jwt_token>
 ```
 
+**CLI Options:**
+- `--tls` - Enable TLS encryption
+- `--ca <path>` - Root CA certificate for server verification
+- `--cert <path>` - Client certificate for mTLS
+- `--key <path>` - Client private key for mTLS
+- `--token <jwt>` - JWT bearer token for authorization
+- `--can-if <name>` - CAN interface name (default: vcan0)
+- `--address <addr>` - KUKSA databroker host:port (default: localhost:55555)
+- `--insecure` - Force insecure mode (default)
+
+---
+
 ## Configuration
+
+### TLS Certificates
+
+For production deployments, generate TLS certificates:
+
+```bash
+# Generate CA key and certificate
+openssl genrsa -out ca.key 2048
+openssl req -new -x509 -days 365 -key ca.key -out ca.crt -subj "/CN=KUKSA-CA"
+
+# Generate server key and CSR
+openssl genrsa -out server.key 2048
+openssl req -new -key server.key -out server.csr -subj "/CN=localhost"
+
+# Create extension file for subjectAltName
+cat > ext.cnf <<EOF
+subjectAltName = DNS:localhost,IP:127.0.0.1
+EOF
+
+# Sign server certificate
+openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial \
+    -out server.crt -days 365 -extfile ext.cnf
+
+# Generate client key and certificate (for mTLS)
+openssl genrsa -out client.key 2048
+openssl req -new -key client.key -out client.csr -subj "/CN=client"
+openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -CAcreateserial \
+    -out client.crt -days 365
+```
+
+### Databroker Setup
 
 On Raspberry Pi:
 
@@ -162,7 +209,7 @@ chmod 644 /etc/kuksa/vss.json
 
 # Configure service (production: with TLS/authorization)
 cat > /etc/default/kuksa-databroker <<EOF
-EXTRA_ARGS="--address 0.0.0.0 --port 55555 --vss /etc/kuksa/vss.json --tls /etc/kuksa/server.crt --tls-key /etc/kuksa/server.key"
+EXTRA_ARGS="--address 0.0.0.0 --port 55555 --vss /etc/kuksa/vss.json --tls-cert /etc/kuksa/server.crt --tls-private-key /etc/kuksa/server.key"
 EOF
 
 # For development/testing ONLY (no transport security or access control):
