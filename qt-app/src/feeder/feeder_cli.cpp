@@ -7,8 +7,8 @@ namespace feeder {
 FeederConfig ParseArgs(int argc, char** argv)
 {
     FeederConfig config;
-    config.publisher_opts.address = "localhost:55555";
-    config.publisher_opts.use_ssl = false;
+    config.publisher_options.address = "localhost:55555";
+    config.publisher_options.use_ssl = false;
 
     // Positional arguments: [can_interface] [kuksa_address]
     if (argc >= 2) {
