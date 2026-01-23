@@ -81,6 +81,7 @@ jobs:
             -**/Core/Startup/**
             -**/Debug/**
             -**/Release/**
+            -**/Core/Src/system_stm32u5xx.c/**
           input: results/cpp.sarif
           output: results/cpp.sarif
 
