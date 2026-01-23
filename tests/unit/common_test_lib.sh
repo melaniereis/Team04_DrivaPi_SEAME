@@ -261,11 +261,8 @@ run_test_suite() {
     echo ""
 
     local exit_code=0
-    if "$script" 2>&1 | tee "$output_file"; then
-        exit_code=$?
-    else
-        exit_code=$?
-    fi
+    "$script" 2>&1 | tee "$output_file"
+    exit_code=${PIPESTATUS[0]}
 
     if [[ $exit_code -eq 0 ]]; then
         log_pass "$test_name PASSED"
