@@ -9,17 +9,10 @@ FeederConfig ParseArgs(int argc, char** argv)
     FeederConfig config;
     config.publisher_options.address = "localhost:55555";
     config.publisher_options.use_ssl = false;
+    config.can_interface = "vcan0";
 
-    // Positional arguments: [can_interface] [kuksa_address]
-    if (argc >= 2) {
-        config.can_interface = argv[1];
-    }
-    if (argc >= 3) {
-        config.publisher_options.address = argv[2];
-    }
-
-    // Optional flags: --insecure, --tls, --ca, --cert, --key, --token
-    for (int i = 3; i < argc; ++i) {
+    // Parse options starting from index 1
+    for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
         
         if (arg == "--insecure") {
@@ -39,10 +32,27 @@ FeederConfig ParseArgs(int argc, char** argv)
         }
         else if (arg == "--token" && i + 1 < argc) {
             config.publisher_options.token = argv[++i];
+        }
+        else if (arg == "--can-if" && i + 1 < argc) {
+            config.can_interface = argv[++i];
+        }
+        else if (arg == "--address" && i + 1 < argc) {
+            config.publisher_options.address = argv[++i];
         } 
         else if (arg == "--help" || arg == "-h") {
             PrintUsage(argv[0]);
             exit(0);
+        }
+        else if (arg[0] != '-') {
+            // Treat as positional: first non-flag is interface, second is address
+            static int positionalCount = 0;
+            if (positionalCount == 0) {
+                config.can_interface = arg;
+                positionalCount++;
+            } else if (positionalCount == 1) {
+                config.publisher_options.address = arg;
+                positionalCount++;
+            }
         }
         else {
             std::cerr << "[CLI] Unknown option: " << arg << std::endl;
@@ -78,8 +88,8 @@ void PrintConfig(const FeederConfig& config)
 void PrintUsage(const std::string& program_name)
 {
     std::cout << "\nUsage: " << program_name 
-              << " [can_interface] [kuksa_address] [options]\n" 
-              << "\nPositional Arguments:\n"
+              << " [options] [can_interface] [kuksa_address]\n" 
+              << "\nPositional Arguments (optional):\n"
               << "  can_interface     CAN interface name (default: vcan0)\n"
               << "  kuksa_address     KUKSA databroker host:port (default: localhost:55555)\n"
               << "\nOptions:\n"
@@ -89,10 +99,13 @@ void PrintUsage(const std::string& program_name)
               << "  --cert <path>     Client certificate path (for mTLS)\n"
               << "  --key <path>      Client private key path (for mTLS)\n"
               << "  --token <jwt>     Authorization token (JWT)\n"
+              << "  --can-if <name>   CAN interface name\n"
+              << "  --address <addr>  KUKSA databroker host:port\n"
               << "  --help, -h        Show this help message\n"
               << "\nExamples:\n"
               << "  " << program_name << " vcan0 localhost:55555\n"
-              << "  " << program_name << " can0 databroker.local:55555 --tls --ca ca.crt --token mytoken\n"
+              << "  " << program_name << " --tls --ca ca.crt --cert client.crt --key client.key\n"
+              << "  " << program_name << " --can-if can0 --address databroker.local:55555 --tls\n"
               << std::endl;
 }
 
