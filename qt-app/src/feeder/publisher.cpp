@@ -153,7 +153,7 @@ bool Publisher::PublishFloat(const std::string& path, float value) {
 
                 try {
                     if (local_stream->Write(req)) {
-                            std::cerr << "[Publisher] Sent PublishValuesRequest for id=" << sigid << std::endl;
+                        std::cerr << "[Publisher] Sent PublishValuesRequest for id=" << sigid << std::endl;
                         return true;
                     } else {
                         std::cerr << "[Publisher] Provider stream write failed for " << path << std::endl;
