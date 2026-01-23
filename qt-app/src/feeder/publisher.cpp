@@ -39,6 +39,11 @@ Publisher::Publisher(const PublisherOptions& opts)
 
     channel_ = grpc::CreateChannel(opts_.address, creds);
     stub_ = val::v2::VAL::NewStub(channel_);
+    // Verify channel connectivity (blocks briefly)
+    if (!channel_->WaitForConnected(std::chrono::system_clock::now() + std::chrono::seconds(2))) {
+        std::cerr << "[Publisher] Warning: Channel not connected to " << opts_.address 
+                  << " (broker may be unreachable)" << std::endl;
+    }
     std::cout << "[Publisher] Connected to KUKSA databroker at " << opts_.address
               << (opts_.use_ssl ? " (TLS)" : " (insecure)") << std::endl;
     if (!opts_.token.empty()) {

@@ -36,11 +36,11 @@ VehicleData::~VehicleData()
 
 void VehicleData::setSpeed(float mps)
 {
-    // if (!qFuzzyCompare(1.0 + mps, 1.0 + m_speed)) {
+    if (!qFuzzyCompare(1.0 + mps, 1.0 + m_speed)) {
         m_speed = mps;
         qDebug() << "Speed set to (m/s):" << m_speed;
         emit speedChanged();
-    // }
+    }
     updateTimestamp(QStringLiteral("speed"));
 }
 
@@ -125,14 +125,14 @@ void VehicleData::resetTrip()
 
 int VehicleData::getGearIndex() const
 {
-    QStringList gears = {"P", "R", "N", "D"};
+    static const QStringList gears = {"P", "R", "N", "D"};
     return gears.indexOf(m_gear);
 }
 
 void VehicleData::changeGearUp()
 {
     int currentIndex = getGearIndex();
-    QStringList gears = {"P", "R", "N", "D"};
+    static const QStringList gears = {"P", "R", "N", "D"};
     if (currentIndex >= 0 && currentIndex < gears.length() - 1) {
         setGear(gears[currentIndex + 1]);
     }
@@ -141,7 +141,7 @@ void VehicleData::changeGearUp()
 void VehicleData::changeGearDown()
 {
     int currentIndex = getGearIndex();
-    QStringList gears = {"P", "R", "N", "D"};
+    static const QStringList gears = {"P", "R", "N", "D"};
     if (currentIndex > 0) {
         setGear(gears[currentIndex - 1]);
     }
@@ -237,7 +237,7 @@ void VehicleData::checkStaleProperties()
     // Speed (high-rate)
     qint64 lastSpeed = lastUpdate(QStringLiteral("speed"));
     if (lastSpeed == 0 || (now - lastSpeed) > SPEED_STALE_MS) {
-        // markPropertyStale(QStringLiteral("speed"));
+        markPropertyStale(QStringLiteral("speed"));
     }
 
     // Other properties: mark as stale only if very old

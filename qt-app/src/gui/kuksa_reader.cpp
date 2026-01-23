@@ -43,7 +43,12 @@ void KUKSAReader::start()
         auto channel = grpc::CreateChannel(addr, creds);
         m_stub_ = VAL::NewStub(channel);
         if (!m_stub_) {
-            throw std::runtime_error("Failed to create gRPC channel to " + addr);
+            throw std::runtime_error("Failed to create gRPC stub for " + addr);
+        }
+        // Verify channel connectivity (blocks briefly)
+        if (!channel->WaitForConnected(std::chrono::system_clock::now() + std::chrono::seconds(2))) {
+            qWarning() << "KuksaReader: Channel not connected to" << QString::fromStdString(addr) 
+                       << "(broker may be unreachable)";
         }
         qDebug() << "KuksaReader: Channel created to" << QString::fromStdString(addr);
     } catch (const std::exception& e) {

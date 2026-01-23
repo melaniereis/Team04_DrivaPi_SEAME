@@ -98,4 +98,4 @@ void CANReader::handleErrorOccurred(QCanBusDevice::CanBusError error)
     emit errorOccurred(errorMsg);
 }
 
-}  // namespace driv aui
+}  // namespace drivaui
