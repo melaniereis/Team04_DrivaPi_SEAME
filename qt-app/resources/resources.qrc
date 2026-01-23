@@ -27,6 +27,6 @@
         <file>assets/headphones.svg</file>
 
         <!-- Road Signs -->
-        <!-- Removed missing roadSigns asset to fix build on macOS -->
+        <!-- To be added -->
     </qresource>
 </RCC>
