@@ -68,9 +68,12 @@ int AppController::run(QGuiApplication& app)
         kuksaReader]() {
 #ifdef ENABLE_CAN_MODE
         if (canReader) {
-            QMetaObject::invokeMethod(canReader, "stop", Qt::QueuedConnection);
+            QMetaObject::invokeMethod(canReader, "stop", Qt::DirectConnection);
         }
 #endif
+        if (kuksaReader) {
+            QMetaObject::invokeMethod(kuksaReader, "stop", Qt::DirectConnection);
+        }
         if (workerThread) {
             workerThread->quit();
             if (!workerThread->wait(2000)) {

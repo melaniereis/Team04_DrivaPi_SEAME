@@ -68,6 +68,7 @@ private:
     KuksaOptions m_opts_;
     std::unique_ptr<VAL::Stub> m_stub_;
     std::atomic<bool> m_stop_requested_{false};
+    std::unique_ptr<grpc::ClientContext> m_context_;
 };
 
 }  // namespace kuksa

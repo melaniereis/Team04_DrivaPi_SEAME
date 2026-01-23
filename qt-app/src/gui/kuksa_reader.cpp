@@ -58,15 +58,15 @@ void KUKSAReader::start()
     }
 
     // 2. Subscribe to speed data using VAL v2 API
-    grpc::ClientContext context;
-    attachAuth(context);
+    m_context_ = std::make_unique<grpc::ClientContext>();
+    attachAuth(*m_context_);
     SubscribeRequest request;
     
     // Add Vehicle.Speed to subscription paths
     request.add_signal_paths("Vehicle.Speed");
 
     std::unique_ptr<grpc::ClientReader<SubscribeResponse>> reader(
-        m_stub_->Subscribe(&context, request));
+        m_stub_->Subscribe(m_context_.get(), request));
 
     SubscribeResponse response;
     qDebug() << "KuksaReader: Connected and Subscribed to Vehicle.Speed";
@@ -114,6 +114,9 @@ void KUKSAReader::stop()
 {
     qDebug() << "KuksaReader: Stop requested.";
     m_stop_requested_.store(true);
+    if (m_context_) {
+        m_context_->TryCancel();
+    }
 }
 
 void KUKSAReader::attachAuth(grpc::ClientContext& ctx)
