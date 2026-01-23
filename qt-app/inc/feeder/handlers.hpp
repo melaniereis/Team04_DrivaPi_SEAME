@@ -25,7 +25,7 @@ namespace handlers {
 void HandleSpeed(const can_frame& frame, kuksa::Publisher& publisher);
 
 // Additional handlers can be added here:
-// void handleTemperature(const can_frame& frame, kuksa::Publisher& publisher);
-// void handleBattery(const can_frame& frame, kuksa::Publisher& publisher);
+// void HandleTemperature(const can_frame& frame, kuksa::Publisher& publisher);
+// void HandleBattery(const can_frame& frame, kuksa::Publisher& publisher);
 
 } // namespace handlers

@@ -11,7 +11,7 @@
 
 namespace feeder {
 
-int OpenCanSocket(const std::string& ifname)
+int OpenCanSocket(const std::string& interface_name)
 {
     // Step 1: Create CAN socket
     int sock = socket(PF_CAN, SOCK_RAW, CAN_RAW);
@@ -21,31 +21,31 @@ int OpenCanSocket(const std::string& ifname)
     }
     
     // Step 2: Get interface index
-    struct ifreq ifr;
-    std::memset(&ifr, 0, sizeof(ifr));
-    std::strncpy(ifr.ifr_name, ifname.c_str(), IFNAMSIZ - 1);
+    struct ifreq interface_request;
+    std::memset(&interface_request, 0, sizeof(interface_request));
+    std::strncpy(interface_request.ifr_name, interface_name.c_str(), IFNAMSIZ - 1);
     
-    if (ioctl(sock, SIOCGIFINDEX, &ifr) < 0) {
-        std::cerr << "[CAN] Failed to get interface index for '" << ifname 
+    if (ioctl(sock, SIOCGIFINDEX, &interface_request) < 0) {
+        std::cerr << "[CAN] Failed to get interface index for '" << interface_name 
                   << "': " << std::strerror(errno) << std::endl;
         close(sock);
         return -1;
     }
     
     // Step 3: Bind socket to CAN interface
-    struct sockaddr_can addr;
-    std::memset(&addr, 0, sizeof(addr));
-    addr.can_family = AF_CAN;
-    addr.can_ifindex = ifr.ifr_ifindex;
+    struct sockaddr_can socket_address;
+    std::memset(&socket_address, 0, sizeof(socket_address));
+    socket_address.can_family = AF_CAN;
+    socket_address.can_ifindex = interface_request.ifr_ifindex;
     
-    if (bind(sock, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr)) < 0) {
-        std::cerr << "[CAN] Failed to bind socket to '" << ifname 
+    if (bind(sock, reinterpret_cast<struct sockaddr*>(&socket_address), sizeof(socket_address)) < 0) {
+        std::cerr << "[CAN] Failed to bind socket to '" << interface_name 
                   << "': " << std::strerror(errno) << std::endl;
         close(sock);
         return -1;
     }
     
-    std::cout << "[CAN] Listening on interface: " << ifname << std::endl;
+    std::cout << "[CAN] Listening on interface: " << interface_name << std::endl;
     return sock;
 }
 
@@ -63,9 +63,9 @@ bool ReadCanFrame(int sock, can_frame& frame)
         return false;
     }
     
-    const ssize_t nbytes = read(sock, &frame, sizeof(frame));
+    const ssize_t bytes_read = read(sock, &frame, sizeof(frame));
     
-    if (nbytes < 0) {
+    if (bytes_read < 0) {
         // Read interrupted by signal
         if (errno == EINTR) {
             // Check if we were asked to stop
@@ -82,8 +82,8 @@ bool ReadCanFrame(int sock, can_frame& frame)
         return false;
     }
     
-    if (nbytes != sizeof(frame)) {
-        std::cerr << "[CAN] Incomplete frame read: got " << nbytes 
+    if (bytes_read != static_cast<ssize_t>(sizeof(frame))) {
+        std::cerr << "[CAN] Incomplete frame read: got " << bytes_read 
                   << " bytes, expected " << sizeof(frame) << std::endl;
         return false;
     }

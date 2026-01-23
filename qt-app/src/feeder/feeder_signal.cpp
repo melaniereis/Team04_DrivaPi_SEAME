@@ -44,25 +44,25 @@ static void handle_child_exit(int /*signum*/) {
 
 void InstallSignalHandlers()
 {
-    struct sigaction sa;
+    struct sigaction signal_action;
     
     // --- SIGINT/SIGTERM: graceful shutdown ---
-    std::memset(&sa, 0, sizeof(sa));
-    sa.sa_handler = handle_termination;
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = 0;  // Don't set SA_RESTART so blocking read() gets EINTR
+    std::memset(&signal_action, 0, sizeof(signal_action));
+    signal_action.sa_handler = handle_termination;
+    sigemptyset(&signal_action.sa_mask);
+    signal_action.sa_flags = 0;  // Don't set SA_RESTART so blocking read() gets EINTR
     
-    sigaction(SIGINT, &sa, nullptr);
-    sigaction(SIGTERM, &sa, nullptr);
+    sigaction(SIGINT, &signal_action, nullptr);
+    sigaction(SIGTERM, &signal_action, nullptr);
     
     // --- SIGCHLD: reap children to avoid zombies ---
-    struct sigaction sa_chld;
-    std::memset(&sa_chld, 0, sizeof(sa_chld));
-    sa_chld.sa_handler = handle_child_exit;
-    sigemptyset(&sa_chld.sa_mask);
-    sa_chld.sa_flags = SA_NOCLDSTOP;  // Don't trigger for SIGSTOP/SIGCONT
+    struct sigaction child_signal_action;
+    std::memset(&child_signal_action, 0, sizeof(child_signal_action));
+    child_signal_action.sa_handler = handle_child_exit;
+    sigemptyset(&child_signal_action.sa_mask);
+    child_signal_action.sa_flags = SA_NOCLDSTOP;  // Don't trigger for SIGSTOP/SIGCONT
     
-    sigaction(SIGCHLD, &sa_chld, nullptr);
+    sigaction(SIGCHLD, &child_signal_action, nullptr);
 }
 
 void RegisterChildPid(pid_t pid)
@@ -92,10 +92,10 @@ void KillRegisteredChildren()
     
     // Step 2: Wait briefly for graceful shutdown
     const int wait_ms = 200;
-    struct timespec ts;
-    ts.tv_sec = 0;
-    ts.tv_nsec = wait_ms * 1000000;
-    nanosleep(&ts, nullptr);
+    struct timespec sleep_duration;
+    sleep_duration.tv_sec = 0;
+    sleep_duration.tv_nsec = wait_ms * 1000000;
+    nanosleep(&sleep_duration, nullptr);
     
     // Step 3: Force kill any stragglers
     for (pid_t pid : g_child_pids) {
