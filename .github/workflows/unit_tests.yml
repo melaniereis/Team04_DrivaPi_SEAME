@@ -184,10 +184,10 @@ for suite, path in inputs:
     summary.append((suite, score, [str(e) for e in issues]))
     if issues:
         overall_ok = False
-  # Write summary file for job summary consumption
-  with open('LLTC Coverage Validation Summary.txt','w') as f:
+# Write summary file for job summary consumption
+with open('LLTC Coverage Validation Summary.txt','w') as f:
     for s, sc, iss in summary:
-      f.write(f"- {s}: score={sc:.2f} issues={iss}\n")
+        f.write(f"- {s}: score={sc:.2f} issues={iss}\n")
 print('LLTC Coverage Validation Summary:')
 for s, sc, iss in summary:
     print(f"  - {s}: score={sc:.2f} issues={iss}")
