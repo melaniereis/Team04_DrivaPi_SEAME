@@ -102,8 +102,8 @@ bool Publisher::PublishFloat(const std::string& path, float value) {
             }
 
             if (local_stream) {
-                    stream_stop_.store(false);
-                    std::cerr << "[Publisher] Provider stream opened" << std::endl;
+                stream_stop_.store(false);
+                std::cout << "[Publisher] Provider stream opened" << std::endl;
                 // Send ProvideSignalRequest once per signal
                 bool need_provide = false;
                 {
