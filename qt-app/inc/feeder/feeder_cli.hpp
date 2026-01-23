@@ -11,7 +11,7 @@ namespace feeder {
  */
 struct FeederConfig {
     std::string can_interface = "vcan0";
-    kuksa::PublisherOptions publisher_opts;
+    kuksa::PublisherOptions publisher_options;
 };
 
 /**

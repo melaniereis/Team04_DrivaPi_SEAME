@@ -22,7 +22,7 @@ int main(int argc, char** argv)
     feeder::PrintConfig(config);
 
     // --- 2. Connect to KUKSA databroker ---
-    kuksa::Publisher publisher(config.publisher_opts);
+    kuksa::Publisher publisher(config.publisher_options);
     std::cout << "[Feeder] Connected to KUKSA databroker." << std::endl;
 
     // --- 3. Open CAN socket ---

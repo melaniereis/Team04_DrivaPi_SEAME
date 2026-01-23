@@ -15,7 +15,7 @@ FeederConfig ParseArgs(int argc, char** argv)
         config.can_interface = argv[1];
     }
     if (argc >= 3) {
-        config.publisher_opts.address = argv[2];
+        config.publisher_options.address = argv[2];
     }
 
     // Optional flags: --insecure, --tls, --ca, --cert, --key, --token
@@ -23,22 +23,22 @@ FeederConfig ParseArgs(int argc, char** argv)
         std::string arg = argv[i];
         
         if (arg == "--insecure") {
-            config.publisher_opts.use_ssl = false;
+            config.publisher_options.use_ssl = false;
         } 
         else if (arg == "--tls") {
-            config.publisher_opts.use_ssl = true;
+            config.publisher_options.use_ssl = true;
         } 
         else if (arg == "--ca" && i + 1 < argc) {
-            config.publisher_opts.root_ca_path = argv[++i];
-        } 
+            config.publisher_options.root_ca_path = argv[++i];
+        }
         else if (arg == "--cert" && i + 1 < argc) {
-            config.publisher_opts.client_cert_path = argv[++i];
-        } 
+            config.publisher_options.client_cert_path = argv[++i];
+        }
         else if (arg == "--key" && i + 1 < argc) {
-            config.publisher_opts.client_key_path = argv[++i];
-        } 
+            config.publisher_options.client_key_path = argv[++i];
+        }
         else if (arg == "--token" && i + 1 < argc) {
-            config.publisher_opts.token = argv[++i];
+            config.publisher_options.token = argv[++i];
         } 
         else if (arg == "--help" || arg == "-h") {
             PrintUsage(argv[0]);
@@ -58,18 +58,18 @@ void PrintConfig(const FeederConfig& config)
     std::cout << "  KUKSA CAN Feeder Configuration" << std::endl;
     std::cout << "========================================" << std::endl;
     std::cout << "CAN Interface:    " << config.can_interface << std::endl;
-    std::cout << "KUKSA Address:    " << config.publisher_opts.address << std::endl;
-    std::cout << "Security Mode:    " << (config.publisher_opts.use_ssl ? "TLS" : "Insecure") << std::endl;
-    if (!config.publisher_opts.root_ca_path.empty()) {
-        std::cout << "Root CA:          " << config.publisher_opts.root_ca_path << std::endl;
+    std::cout << "KUKSA Address:    " << config.publisher_options.address << std::endl;
+    std::cout << "Security Mode:    " << (config.publisher_options.use_ssl ? "TLS" : "Insecure") << std::endl;
+    if (!config.publisher_options.root_ca_path.empty()) {
+        std::cout << "Root CA:          " << config.publisher_options.root_ca_path << std::endl;
     }
-    if (!config.publisher_opts.client_cert_path.empty()) {
-        std::cout << "Client Cert:      " << config.publisher_opts.client_cert_path << std::endl;
+    if (!config.publisher_options.client_cert_path.empty()) {
+        std::cout << "Client Cert:      " << config.publisher_options.client_cert_path << std::endl;
     }
-    if (!config.publisher_opts.client_key_path.empty()) {
-        std::cout << "Client Key:       " << config.publisher_opts.client_key_path << std::endl;
+    if (!config.publisher_options.client_key_path.empty()) {
+        std::cout << "Client Key:       " << config.publisher_options.client_key_path << std::endl;
     }
-    if (!config.publisher_opts.token.empty()) {
+    if (!config.publisher_options.token.empty()) {
         std::cout << "Authorization:    Bearer <token>" << std::endl;
     }
     std::cout << "========================================" << std::endl;
