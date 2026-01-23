@@ -156,44 +156,44 @@ PY
         run: |
           echo "Validating per-suite coverage changes vs baseline (approval required on change)"
           python3 - << 'PY'
-import sys, json, os
-sys.path.insert(0, 'dotstop')
-from dotstop_extensions.validators import lltc_coverage_change_validator
-base_dir = 'artifacts/verification/coverage'
-inputs = [
-  ('dc-motor', os.path.join(base_dir,'dc-motor.xml')),
-  ('servo-motor', os.path.join(base_dir,'servo-motor.xml')),
-  ('speed-sensor', os.path.join(base_dir,'speed-sensor.xml')),
-]
-baseline = os.path.join(base_dir,'baseline.json')
-approvals = os.path.join(base_dir,'approvals.json')
-overall_ok = True
-summary = []
-for suite, path in inputs:
-    cfg = {
-      'path': path,
-      'suite': suite,
-      'baseline_path': baseline if os.path.exists(baseline) else None,
-      'approval_path': approvals if os.path.exists(approvals) else None,
-      'min_line_rate': 90,
-      'require_review_on_change': True,
-      'enforce_individual': True,
-    }
-    score, issues = lltc_coverage_change_validator(cfg)
-    suite_ok = (score >= 1.0) and (not issues)
-    summary.append((suite, score, [str(e) for e in issues]))
-    if issues:
-        overall_ok = False
-# Write summary file for job summary consumption
-with open('LLTC Coverage Validation Summary.txt','w') as f:
-    for s, sc, iss in summary:
-        f.write(f"- {s}: score={sc:.2f} issues={iss}\n")
-print('LLTC Coverage Validation Summary:')
-for s, sc, iss in summary:
-    print(f"  - {s}: score={sc:.2f} issues={iss}")
-if not overall_ok:
-    print('Blocking due to coverage change requiring approval or parse errors.')
-    sys.exit(1)
+          import sys, json, os
+          sys.path.insert(0, 'dotstop')
+          from dotstop_extensions.validators import lltc_coverage_change_validator
+          base_dir = 'artifacts/verification/coverage'
+          inputs = [
+            ('dc-motor', os.path.join(base_dir,'dc-motor.xml')),
+            ('servo-motor', os.path.join(base_dir,'servo-motor.xml')),
+            ('speed-sensor', os.path.join(base_dir,'speed-sensor.xml')),
+          ]
+          baseline = os.path.join(base_dir,'baseline.json')
+          approvals = os.path.join(base_dir,'approvals.json')
+          overall_ok = True
+          summary = []
+          for suite, path in inputs:
+              cfg = {
+                'path': path,
+                'suite': suite,
+                'baseline_path': baseline if os.path.exists(baseline) else None,
+                'approval_path': approvals if os.path.exists(approvals) else None,
+                'min_line_rate': 90,
+                'require_review_on_change': True,
+                'enforce_individual': True,
+              }
+              score, issues = lltc_coverage_change_validator(cfg)
+              suite_ok = (score >= 1.0) and (not issues)
+              summary.append((suite, score, [str(e) for e in issues]))
+              if issues:
+                  overall_ok = False
+          # Write summary file for job summary consumption
+          with open('LLTC Coverage Validation Summary.txt','w') as f:
+              for s, sc, iss in summary:
+                  f.write(f"- {s}: score={sc:.2f} issues={iss}\n")
+          print('LLTC Coverage Validation Summary:')
+          for s, sc, iss in summary:
+              print(f"  - {s}: score={sc:.2f} issues={iss}")
+          if not overall_ok:
+              print('Blocking due to coverage change requiring approval or parse errors.')
+              sys.exit(1)
 PY
 
       - name: Upload Verification Artifacts (TSF)
