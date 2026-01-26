@@ -3,7 +3,7 @@ id: SRD-PROP_001
 header: "DC Motor Propulsion Interface"
 text: |
   "Bridges user propulsion command to hardware PWM constraints."
-verification_method: "Integration Testing"
+verification_method: "Integration Testing + System Testing"
 parents:
   - id: URD-PROP_001
 children:

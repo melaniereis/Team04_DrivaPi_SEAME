@@ -5,7 +5,7 @@ text: |
   "The user expects the "Gas" and "Brake/Reverse" commands to translate into physical motion."
 verification_method: "System Testing"
 children:
-  - id: SRD-MOTOR_SPEED
+  - id: SRD-PROP_001
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
