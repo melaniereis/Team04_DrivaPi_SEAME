@@ -1,11 +1,11 @@
 ---
-id: URD-VISION-001
+id: URD-VISION_001
 header: "Lane Detection"
 text: |
   "Enables autonomous lane keeping for safe navigation."
 verification_method: "System Testing"
 children:
-  - id: SRD-VISION-LANE
+  - id: SRD-VISION_LANE
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
