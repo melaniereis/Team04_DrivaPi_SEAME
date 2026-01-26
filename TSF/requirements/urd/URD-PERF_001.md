@@ -5,7 +5,7 @@ text: |
   "Achieves stable autonomous operation."
 verification_method: "System Testing"
 children:
-  - id: SRD-AUTONOMOUS-LOOP
+  - id: SRD-AUTONOMOUS_LOOP
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
