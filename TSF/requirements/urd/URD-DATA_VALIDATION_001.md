@@ -5,8 +5,8 @@ text: |
   "Ensures that data units and values are valid and plausible."
 verification_method: "System Testing"
 children:
-  - id: SRD-UNIT_CONFORMANCE
-  - id: SRD-CROSS_PLAUSIBILITY
+  - id: SRD-UNIT_CONFORMANCE_001
+  - id: SRD-CROSS_PLAUSIBILITY_001
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"

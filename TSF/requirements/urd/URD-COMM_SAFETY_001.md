@@ -5,9 +5,9 @@ text: |
   "Maintains communication integrity and handles degraded operation."
 verification_method: "System Testing"
 children:
-  - id: SRD-CAN_ID_VALIDATION
-  - id: SRD-COMM_TIMEOUTS
-  - id: SRD-DEGRADED_MODE
+  - id: SRD-CAN_ID_VALIDATION_001
+  - id: SRD-COMM_TIMEOUTS_001
+  - id: SRD-DEGRADED_MODE_001
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"

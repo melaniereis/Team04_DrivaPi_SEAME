@@ -1,12 +1,12 @@
 ---
-id: URD-RESOURCE_OTA_001
+id: URD-RESSOURCES_OTA_001
 header: "System Resource & OTA Management"
 text: |
   "Monitors system resources and manages OTA updates safely."
 verification_method: "System Testing"
 children:
-  - id: SRD-RESOURCE_MONITORING
-  - id: SRD-OTA_UPDATE
+  - id: SRD-RESOURCE_MONITORING_001
+  - id: SRD-OTA_UPDATE_001
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"

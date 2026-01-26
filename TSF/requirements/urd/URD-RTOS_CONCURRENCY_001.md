@@ -5,9 +5,9 @@ text: |
   "Guarantees deterministic scheduling and safe concurrency."
 verification_method: "System Testing"
 children:
-  - id: SRD-PERIODIC_TASKS
-  - id: SRD-EXCLUSIVE_ACCESS
-  - id: SRD-QUEUE_OVERRUN
+  - id: SRD-PERIODIC_TASKS_001
+  - id: SRD-EXCLUSIVE_ACCESS_001
+  - id: SRD-QUEUE_OVERRUN_001
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
