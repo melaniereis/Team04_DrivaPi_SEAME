@@ -4,7 +4,7 @@
 - **Item:** Vehicle Actuation System (DC Motor & Servo via PCA9685 PWM).
 - **Function:** Converts digital commands into physical propulsion and steering.
 - **Operational Context:** Lab/test track; low speeds (<4 m/s); supervised operation.
-- **Assumption:** Small-scale vehicle; operators trained and present.
+- **Assumption:** Small-scale vehicle; trained operators present.
 
 ## 2. Hazard Analysis
 | ID | Hazard Description | Operational Situation | Cause of Hazard |
@@ -15,22 +15,22 @@
 ## 3. Risk Assessment (ISO 26262)
 ### H-02: Unintended Acceleration
 * **Severity (S):** **S1** (Light to moderate injuries)
-* **Rationale:** Low torque/speed limits harm to minor bruises (S1 per Annex B, no severe outcome).
+* **Rationale:** Low torque/speed limits harm to minor bruises (S1 per Annex B).
 * **Exposure (E):** **E3** (Low to medium, 10-50%)
-* **Rationale:** Propulsion used in tests but not constant (E3 per Table B.2).
+* **Rationale:** Propulsion used in tests but intermittent (E3 per Table B.2).
 * **Controllability (C):** **C2** (Normally controllable)
-* **Rationale:** Operator can E-stop or brake (C2 as "90% avoidable" per Table B.4).
+* **Rationale:** Operator E-stop/brake available (C2 per Table B.4).
 
 ### H-03: Unintended Steering
 * **Severity (S):** **S1** (Light to moderate injuries)
-* **Rationale:** Sudden steer causes minor drift/bump (S1 per Annex B).
+* **Rationale:** Sudden steer causes minor drift (S1 per Annex B).
 * **Exposure (E):** **E3** (Low to medium, 10-50%)
-* **Rationale:** Steering active in maneuvers (E3 per Table B.2).
+* **Rationale:** Steering in maneuvers (E3 per Table B.2).
 * **Controllability (C):** **C2** (Normally controllable)
-* **Rationale:** Visual feedback allows quick reaction (C2 per Table B.4).
+* **Rationale:** Visual feedback/quick reaction (C2 per Table B.4).
 
 ### Calculation
-**Both H-02/H-03: S1 + E3 + C2 = ASIL A**
+**S1 + E3 + C2 = ASIL A** for both.
 *(per ISO 26262 Part 3 Table 4)*
 
 ## 4. Safety Goals (SG)
