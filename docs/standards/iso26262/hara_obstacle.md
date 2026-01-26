@@ -1,8 +1,8 @@
 # HARA: Obstacle Detection System
 
 ## 1. Item Definition & Assumptions
-- **Item:** Ultrasonic Sensor and Vision Backup for Obstacle Detection.
-- **Function:** Measures distance to obstacles and recognizes them via camera for collision avoidance.
+- **Item:** Computer Vision (Primary) with Ultrasonic Sensor Fallback for Obstacle Detection.
+- **Function:** Primarily recognizes obstacles via vision pipeline; falls back to ultrasonic for distance confirmation.
 - **Operational Context:** Autonomous mode in lab/track; low speeds (<4 m/s).
 - **Assumption:** Vehicle is small-scale; operators nearby for intervention.
 
@@ -11,23 +11,23 @@ We identified one primary hazard related to obstacle detection.
 
 | ID | Hazard Description | Operational Situation | Cause of Hazard |
 |:---|:---|:---|:---|
-| **H-04** | **Missed Obstacle Detection** (System fails to detect/respond to obstacle) | Vehicle approaching obstacle in autonomous mode. | Sensor noise, failure, or low confidence in vision backup causing no trigger. |
+| **H-04** | **Missed Obstacle Detection** (System fails to detect/respond to obstacle) | Vehicle approaching obstacle in autonomous mode. | Vision pipeline error (low confidence, misdetection) or fallback sensor noise/failure causing no trigger. |
 
 ## 3. Risk Assessment (ISO 26262)
 ### Severity (S)
-* **Score:** **S3** (Severe injuries possible)
-* **Rationale:** Collision could cause vehicle flip or impact, risking operator injury in lab.
+* **Score:** **S1** (Light to moderate injuries)
+* **Rationale:** Small vehicle/low speed limits harm to minor bruises or cuts from impact; no fatal risk (rigorous: per ISO Annex B, S1 for non-life-threatening in controlled env).
 
 ### Exposure (E)
-* **Score:** **E3** (Medium probability, 10-50%)
-* **Rationale:** Obstacles common in test scenarios, but not constant.
+* **Score:** **E3** (Low to medium probability, ~10-50%)
+* **Rationale:** Obstacles in tests are common but not every run; autonomous mode not continuous (rigorous: E3 as "occasional" per Table B.2, lab use < daily driving).
 
 ### Controllability (C)
-* **Score:** **C2** (Normally controllable)
-* **Rationale:** Operator can see and stop manually, but autonomous mode reduces reaction time.
+* **Score:** **C1** (Simply controllable)
+* **Rationale:** Operator in lab can easily see/hear and intervene (E-stop); high visibility (rigorous: C1 as "99% of drivers can avoid" per Table B.4).
 
 ### Calculation
-**S3 + E3 + C2 = ASIL C**
+**S1 + E3 + C1 = ASIL A**
 *(Based on ISO 26262 Part 3 Table 4)*
 
 ## 4. Safety Goals (SG)
@@ -35,4 +35,4 @@ Based on H-04, we derive the following Safety Goal:
 
 | SG ID | ASIL | Description |
 |:---|:---|:---|
-| **SG-04** | **C** | **Reliable Obstacle Detection:** System must detect obstacles <50cm with filtering and trigger avoidance within 150ms, or flag error. |
+| **SG-04** | **A** | **Reliable Obstacle Detection:** Vision (primary) must detect obstacles with >80% confidence; fallback to ultrasonic <50cm and trigger avoidance within 150ms, or flag error. |
