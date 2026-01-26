@@ -16,15 +16,15 @@ We identified one primary hazard related to obstacle detection.
 ## 3. Risk Assessment (ISO 26262)
 ### Severity (S)
 * **Score:** **S1** (Light to moderate injuries)
-* **Rationale:** Small vehicle/low speed limits harm to minor bruises or cuts from impact; no fatal risk (rigorous: per ISO Annex B, S1 for non-life-threatening in controlled env).
+* **Rationale:** Small vehicle/low speed limits harm to minor bruises or cuts from impact; no fatal risk (per ISO Annex B, S1 for non-life-threatening in controlled env).
 
 ### Exposure (E)
 * **Score:** **E3** (Low to medium probability, ~10-50%)
-* **Rationale:** Obstacles in tests are common but not every run; autonomous mode not continuous (rigorous: E3 as "occasional" per Table B.2, lab use < daily driving).
+* **Rationale:** Obstacles in tests are common but not every run; autonomous mode not continuous (E3 as "occasional" per Table B.2, lab use < daily driving).
 
 ### Controllability (C)
 * **Score:** **C1** (Simply controllable)
-* **Rationale:** Operator in lab can easily see/hear and intervene (E-stop); high visibility (rigorous: C1 as "99% of drivers can avoid" per Table B.4).
+* **Rationale:** Operator in lab can easily see/hear and intervene (E-stop); high visibility (C1 as "99% of drivers can avoid" per Table B.4).
 
 ### Calculation
 **S1 + E3 + C1 = ASIL A**

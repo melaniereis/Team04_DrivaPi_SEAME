@@ -16,15 +16,15 @@ We identified one primary hazard related to vision processing.
 ## 3. Risk Assessment (ISO 26262)
 ### Severity (S)
 * **Score:** **S1** (Light to moderate injuries)
-* **Rationale:** Drift leads to off-path or minor bump; small vehicle/no high speed (rigorous: S1 per Annex B, no survival risk).
+* **Rationale:** Drift leads to off-path or minor bump; small vehicle/no high speed (S1 per Annex B, no survival risk).
 
 ### Exposure (E)
 * **Score:** **E2** (Very low probability, <10%)
-* **Rationale:** Lane mode in specific tests, not default; lab paths clear (rigorous: E2 as "rare" per Table B.2).
+* **Rationale:** Lane mode in specific tests, not default; lab paths clear (E2 as "rare" per Table B.2).
 
 ### Controllability (C)
 * **Score:** **C1** (Simply controllable)
-* **Rationale:** Operator can override instantly in lab (rigorous: C1 as easily avoidable per Table B.4).
+* **Rationale:** Operator can override instantly in lab (C1 as easily avoidable per Table B.4).
 
 ### Calculation
 **S1 + E2 + C1 = QM**.
