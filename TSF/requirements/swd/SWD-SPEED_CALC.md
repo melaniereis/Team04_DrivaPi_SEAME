@@ -1,0 +1,30 @@
+---
+id: SWD-SPEED_CALC
+header: "Speed Sensor Calculation"
+text: |
+  "Implements accurate speed logic with safety checks."
+ASIL: "A"
+verification_method: "Unit Testing, Code Coverage, Static Analysis"
+parents:
+  - id: SRD-SPEED_001
+children:
+  - id: LLTC-SPEED_UNIT
+  - id: LLTC-SPEED_COV
+  - id: LLTC-SPEED_STATIC
+reviewers:
+  - name: "Melanie Reis"
+    email: "melanie.reis@seame.pt"
+reviewed: '' # Manually fill on PR approval
+references:
+  - type: "file"
+    path: firmware/Core/Src/speed_sensor.c
+    description: "Production Implementation"
+  - type: "file"
+    path: docs/standards/iso26262/asil_justification_SWD-SPEED_SENSOR.md
+    description: "ASIL A Justification"
+active: true
+derived: false
+normative: true
+level: 3.0
+---
+The 'speed_sensor' component shall calculate speed as (pulses/30)*0.212/dt, handle 16-bit timer overflows, detect zero via timeout, and prevent division by zero.
