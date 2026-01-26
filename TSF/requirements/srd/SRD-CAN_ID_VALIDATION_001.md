@@ -8,14 +8,14 @@ parents:
   - id: URD-COMM_SAFETY_001
 children:
   - id: SWD-CAN_VALIDATION
-# reviewers:
-#   - name: "Melanie Reis"
-#     email: "melanie.reis@seame.pt"
-# reviewed: '' # Manually fill on PR approval (YYYY-MM-DD - Approved by Name <email>)
-references:
-  - type: "report"
-    path: comparison_report.md
-    description: "Addresses CAN ID mapping hazards"
+reviewers:
+  - name: "Melanie Reis"
+    email: "melanie.reis@seame.pt"
+reviewed: '' # Manually fill on PR approval (YYYY-MM-DD - Approved by Name <email>)
+# references:
+#   - type: "report"
+#     path: comparison_report.md
+#     description: "Addresses CAN ID mapping hazards"
 active: true
 derived: false
 normative: true

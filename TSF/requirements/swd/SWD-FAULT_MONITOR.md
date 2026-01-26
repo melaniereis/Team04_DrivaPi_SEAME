@@ -14,10 +14,10 @@ reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
 reviewed: '' # Manually fill on PR approval
-references:
-  - type: "file"
-    path: firmware/Core/Src/fault_monitor.c
-    description: "Production Implementation (placeholder)"
+# references:
+#   - type: "file"
+#     path: firmware/Core/Src/fault_monitor.c
+#     description: "Production Implementation (placeholder)"
 active: true
 derived: false
 normative: true
