@@ -1,0 +1,24 @@
+---
+id: SRD-VISION_002
+header: "Primary Obstacle Recognition Pipeline"
+text: |
+  "Primary obstacle detection with ultrasonic fallback."
+verification_method: "System Testing"
+parents:
+  - id: URD-VISION_002
+children:
+  - id: SWD-OBSTACLE_PIPELINE
+reviewers:
+  - name: "Melanie Reis"
+    email: "melanie.reis@seame.pt"
+reviewed: '' # Manually fill on PR approval
+references:
+  - type: "file"
+    path: docs/standards/iso26262/hara_obstacle.md
+    description: "Supports SG-04 (Reliable Detection)"
+active: true
+derived: false
+normative: true
+level: 2.0
+---
+The vision system shall detect and classify obstacles as primary mechanism, triggering avoidance on confidence >80%.
