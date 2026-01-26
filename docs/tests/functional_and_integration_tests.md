@@ -1,4 +1,4 @@
-# Functional vs Integration Tests — Study Note (DrivaPi)
+# Functional vs Integration Tests — Study Note
 
 This note explains what functional tests and integration tests are, how they differ and how to apply them to DrivaPi.
 
