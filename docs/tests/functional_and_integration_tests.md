@@ -1,6 +1,6 @@
 # Functional vs Integration Tests — Study Note (DrivaPi)
 
-This note explains what functional tests and integration tests are, how they differ, and how to apply them to DrivaPi.
+This note explains what functional tests and integration tests are, how they differ and how to apply them to DrivaPi.
 
 ---
 
@@ -13,18 +13,17 @@ This note explains what functional tests and integration tests are, how they dif
 - Pass/Fail: Determined by matching behavior to the requirement.
 
 DrivaPi examples:
-- Given forward throttle input, the car moves forward; given reverse throttle input, it moves backward.
-- If an obstacle is detected by the sensor within threshold distance, the car stops automatically.
-- The display shows the current speed, temperature, and detected obstacles in real-time.
+- Given forward/backward throttle input, the car moves forward/backward.
+- If an obstacle is detected by the sensor within threshold distance, the car stops.
 
 ---
 
 ## Integration Tests
 
 - Purpose: Verify that multiple components work together correctly and respect their interface contracts.
-- Scope: Two or more components connected (e.g., controller + CAN + peripheral), validating data flows and timing across boundaries.
+- Scope: Two or more components connected (controller + CAN + peripheral), validating data flows and timing across boundaries.
 - Inputs: End-to-end or cross-component stimuli that traverse interfaces.
-- Expected Results: Correct interactions, message formats, state transitions, and timing across modules.
+- Expected Results: Correct interactions, message formats, state transitions and timing across modules.
 - Pass/Fail: Based on interface and end-to-end behavior criteria.
 
 DrivaPi examples:
