@@ -59,6 +59,7 @@ typedef enum threads_s
 	dc_motor_e,
 	servo_motor_e,
 	speed_sensor_e,
+	ultrasonic_sensor_e,
 	can_tx_e,
 	can_rx_e,
 	sensor_hts221_e,
@@ -117,6 +118,7 @@ VOID	CanTx(ULONG initial_input);
 VOID	SpeedSensor(ULONG initial_input);
 VOID	SensorHTS221Thread(ULONG initial_input);
 VOID	SensorBatteryThread(ULONG initial_input);
+void	UltrasonicEntry(ULONG initial_input);
 void	ThreadInit(void);
 int		CanSend(t_can_message* msg);
 /* USER CODE END EFP */
