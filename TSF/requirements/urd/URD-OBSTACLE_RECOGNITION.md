@@ -19,5 +19,5 @@ derived: false
 normative: true
 level: 1.0
 ---
-Vision pipeline shall detect obstacles as primary to backup ultrasonic sensor.
+The vision pipeline shall detect obstacles as the primary mechanism (with ultrasonic sensor as backup) and shall achieve at least a 90 % detection rate for obstacles ≥10 cm under normal lighting conditions.
 ---

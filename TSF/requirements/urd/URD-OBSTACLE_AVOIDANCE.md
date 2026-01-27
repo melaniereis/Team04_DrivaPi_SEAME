@@ -19,5 +19,5 @@ derived: false
 normative: true
 level: 1.0
 ---
-The system shall detect obstacles in front and trigger collision avoidance.
+The system shall detect obstacles within 2 m ahead of the vehicle and trigger collision avoidance maneuvers within 100 ms of detection.
 ---

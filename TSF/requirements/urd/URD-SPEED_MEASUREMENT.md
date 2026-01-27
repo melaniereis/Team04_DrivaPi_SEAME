@@ -19,5 +19,5 @@ derived: false
 normative: true
 level: 1.0
 ---
-The system shall accurately measure and report current vehicle speed in m/s.
+The system shall accurately measure and report current vehicle speed in metres per second (m/s) with an update rate of at least 20 Hz and a measurement accuracy within ±0.05 m/s under nominal conditions.
 ---

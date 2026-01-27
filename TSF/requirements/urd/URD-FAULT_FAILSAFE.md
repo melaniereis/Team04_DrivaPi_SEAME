@@ -22,5 +22,5 @@ derived: false
 normative: true
 level: 1.0
 ---
-System shall detect motor stall, sensor failure, comms loss and enter safe state.
+The system shall detect motor stall, sensor failure, and communications loss within 100 ms and transition to a safe state (e.g., reduced speed or halt) within 200 ms while issuing an alert to the operator.
 ---

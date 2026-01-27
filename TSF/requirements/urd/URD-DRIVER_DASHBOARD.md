@@ -19,5 +19,5 @@ derived: false
 normative: true
 level: 1.0
 ---
-Qt HMI shall display speed, battery, warnings and status in real-time.
+Qt HMI shall display speed, battery level, system warnings and overall status with an update rate of at least 10 Hz (data refresh every 100 ms).
 ---
