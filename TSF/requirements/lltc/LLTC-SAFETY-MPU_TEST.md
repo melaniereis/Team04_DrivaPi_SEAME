@@ -34,4 +34,9 @@ normative: true
 level: 4.0
 ---
 All unit tests for the MPU configuration and fault containment shall pass, validating memory region setup, access permissions, and fault response behavior.
+
+Test Steps:
+1. Attempt to write into a read-only memory region; verify that the MPU triggers a memory fault and the system enters a safe state.
+2. Attempt to access a memory region not assigned to the current task; verify detection and safe mode activation.
+3. Verify that normal tasks operate correctly within their permitted memory regions without triggering faults.
 ---
