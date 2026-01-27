@@ -2,7 +2,7 @@
 id: LLTC-ESTOP_TIME
 header: "Emergency Stop Timing (System Functional)"
 text: |
-  "On critical stop trigger, propulsion PWM shall reach zero and steering shall enter the defined safe state within the timing target."
+  "Proves URD-EMERGENCY_STOP behavior with objective timing evidence (stop + safe steering)."
 
 verification_method: "System Functional Test (Measurement + Logs + Video)"
 
@@ -30,4 +30,5 @@ derived: false
 normative: true
 level: 4.0
 ---
-Proves URD-EMERGENCY_STOP behavior with objective timing evidence (stop + safe steering).
+On critical stop trigger, propulsion PWM shall reach zero and steering shall enter the defined safe state within the timing target.
+---

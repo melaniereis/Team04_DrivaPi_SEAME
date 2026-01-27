@@ -2,7 +2,7 @@
 id: LLTC-OBSTACLE_STOP
 header: "Obstacle → Stop/Avoid Reaction (System Functional)"
 text: |
-  "When an obstacle is presented within the defined threshold, the system shall trigger stop/avoid behavior as specified."
+  "Proves URD-OBSTACLE_AVOIDANCE trigger and response on real obstacle presentation."
 
 verification_method: "System Functional Test (Track/Bench + Logs + Video)"
 
@@ -30,4 +30,5 @@ derived: false
 normative: true
 level: 4.0
 ---
-Proves URD-OBSTACLE_AVOIDANCE trigger and response on real obstacle presentation.
+When an obstacle is presented within the defined threshold, the system shall trigger stop/avoid behavior as specified.
+---

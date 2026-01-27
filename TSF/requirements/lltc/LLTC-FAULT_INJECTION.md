@@ -2,7 +2,7 @@
 id: LLTC-FAULT_INJECTION
 header: "Fault Injection & Failsafe Reaction (System Functional)"
 text: |
-  "Injected faults (sensor disconnect, comms loss, actuator stall) shall be detected and shall trigger safe/degraded behavior as specified."
+  "Validates URD-FAULT_FAILSAFE and degraded-mode transitions under realistic injected faults."
 
 verification_method: "System Functional Test (Fault Injection + Logs)"
 
@@ -31,4 +31,5 @@ derived: false
 normative: true
 level: 4.0
 ---
-Validates URD-FAULT_FAILSAFE and degraded-mode transitions under realistic injected faults.
+Injected faults (sensor disconnect, comms loss, actuator stall) shall be detected and shall trigger safe/degraded behavior as specified.
+---
