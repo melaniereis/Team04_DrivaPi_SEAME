@@ -1,13 +1,13 @@
 ---
-id: SRD-UNIT_CONFORMANCE_001
-header: "SI Unit Conformance"
+id: SRD-RESOURCE_MONITORING_001
+header: "System Resource Monitoring"
 text: |
-  "Ensures signals conform to SI units defined in VSS."
+  "Implements monitoring of critical system resources."
 verification_method: "Integration Testing"
 parents:
-  - id: URD-DATA_VALIDATION_001
+  - id: URD-RESOURCES_MONITOR
 children:
-  - id: SWD-UNIT_VALIDATION
+  - id: SWD-RESOURCE_MONITOR
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
@@ -15,11 +15,11 @@ reviewed: '' # Manually fill on PR approval (YYYY-MM-DD - Approved by Name <emai
 # references:
 #   - type: "report"
 #     path: comparison_report.md
-#     description: "Addresses unit mismatch hazards"
+#     description: "Mitigates system resource hazards"
 active: true
 derived: false
 normative: true
 level: 2.0
 ---
-The software shall validate that speed and steering values adhere to SI units (km/h for speed, degrees for steering) as defined by VSS. It shall convert or reject any input that does not conform to these units.
+The system shall monitor CPU temperature, supply voltage and available storage with thresholds defined in the hazard analysis. On threshold violation, it shall log the event, notify the operator and enter a safe state (e.g., throttle limit or shutdown) if necessary.
 ---

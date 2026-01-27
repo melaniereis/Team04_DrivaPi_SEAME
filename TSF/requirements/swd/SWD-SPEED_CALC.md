@@ -6,11 +6,11 @@ text: |
 ASIL: "A"
 verification_method: "Unit Testing, Code Coverage, Static Analysis"
 parents:
-  - id: SRD-SPEED_001
+  - id: SRD-SENS-ENCODER_SPD
 children:
-  - id: LLTC-SPEED_UNIT
-  - id: LLTC-SPEED_COV
-  - id: LLTC-SPEED_STATIC
+  - id: LLTC-SPEED_SENSOR_UNIT
+  - id: LLTC-SPEED_SENSOR_COV
+  - id: LLTC-SPEED_SENSOR_STATIC
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"

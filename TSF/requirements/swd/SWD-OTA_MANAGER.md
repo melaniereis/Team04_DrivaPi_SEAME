@@ -7,7 +7,7 @@ text: |
 ASIL: "A"
 verification_method: "Unit Testing, Integration Testing"
 parents:
-  - id: SRD-OTA_UPDATE_001
+  - id: SRD-SYS-OTA_SAFE_PROC
 children: []
 reviewers:
   - name: "Melanie Reis"

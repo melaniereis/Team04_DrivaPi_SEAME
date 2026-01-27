@@ -6,7 +6,7 @@ text: |
 ASIL: "A"
 verification_method: "Unit Testing, System Testing"
 parents:
-  - id: SRD-CONTROL_001
+  - id: SRD-SAFE-ESTOP_EXEC
 children:
   - id: LLTC-ESTOP_UNIT
   - id: LLTC-ESTOP_COV

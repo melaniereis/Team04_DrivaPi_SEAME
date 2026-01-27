@@ -6,7 +6,7 @@ text: |
 ASIL: "QM"
 verification_method: "Unit Testing, System Testing"
 parents:
-  - id: SRD-SYSTEM_001
+  - id: SRD-SYS-BOOT_CALIB
 children:
   - id: LLTC-BOOT_UNIT
   - id: LLTC-BOOT_COV

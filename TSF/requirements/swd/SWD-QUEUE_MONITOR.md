@@ -7,7 +7,7 @@ text: |
 ASIL: "QM"
 verification_method: "Unit Testing, Integration Testing"
 parents:
-  - id: SRD-QUEUE_OVERRUN_001
+  - id: SRD-RTOS-QUEUE_MON
 children: []
 reviewers:
   - name: "Melanie Reis"

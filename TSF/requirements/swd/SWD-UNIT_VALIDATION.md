@@ -7,7 +7,7 @@ text: |
 ASIL: "QM"
 verification_method: "Unit Testing, Integration Testing"
 parents:
-  - id: SRD-UNIT_CONFORMANCE_001
+  - id: SRD-SENS-SI_UNITS
 children: []
 reviewers:
   - name: "Melanie Reis"

@@ -5,7 +5,7 @@ text: |
   "Defines a safe process for OTA updates."
 verification_method: "Integration Testing"
 parents:
-  - id: URD-RESSOURCES_OTA_001
+  - id: URD-RESOURCES_MONITOR
 children:
   - id: SWD-OTA_MANAGER
 reviewers:

@@ -6,7 +6,7 @@ text: |
 ASIL: "QM"
 verification_method: "Unit Testing, System Testing"
 parents:
-  - id: SRD-HMI_001
+  - id: SRD-HMI-DASHBOARD
 children:
   - id: LLTC-QT_DASH_UNIT
   - id: LLTC-QT_DASH_COV

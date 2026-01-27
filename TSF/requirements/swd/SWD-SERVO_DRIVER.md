@@ -6,11 +6,11 @@ text: |
 ASIL: "A"
 verification_method: "Unit Testing, Code Coverage"
 parents:
-  - id: SRD-STEER_001
+  - id: SRD-ACT-SERVO_STEER
 children:
-  - id: LLTC-SERVO_UNIT
-  - id: LLTC-SERVO_COV
-  - id: LLTC-SERVO_STATIC
+  - id: LLTC-SERVO_MOTOR_UNIT
+  - id: LLTC-SERVO_MOTOR_COV
+  - id: LLTC-SERVO_MOTOR_STATIC
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"

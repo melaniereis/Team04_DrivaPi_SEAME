@@ -7,7 +7,7 @@ text: |
 ASIL: "A"
 verification_method: "Unit Testing, Integration Testing"
 parents:
-  - id: SRD-PERIODIC_TASKS_001
+  - id: SRD-RTOS-PERIODIC_TASK
 children: []
 reviewers:
   - name: "Melanie Reis"

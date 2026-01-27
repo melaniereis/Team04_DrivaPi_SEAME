@@ -7,7 +7,7 @@ text: |
 ASIL: "QM"
 verification_method: "Unit Testing, Integration Testing"
 parents:
-  - id: SRD-RESOURCE_MONITORING_001
+  - id: SRD-SYS-RES_MONITOR
 children: []
 reviewers:
   - name: "Melanie Reis"

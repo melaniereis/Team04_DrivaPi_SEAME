@@ -6,7 +6,7 @@ text: |
 ASIL: "A"
 verification_method: "Unit Testing, Integration Testing"
 parents:
-  - id: SRD-COMM_001
+  - id: SRD-COMM-PROTOCOL
 children:
   - id: LLTC-COMM_UNIT
   - id: LLTC-COMM_COV

@@ -6,7 +6,7 @@ text: |
 ASIL: "QM"
 verification_method: "Unit Testing, System Testing"
 parents:
-  - id: SRD-VISION_001
+  - id: SRD-SENS-LANE_DET
 children:
   - id: LLTC-LANE_UNIT
   - id: LLTC-LANE_COV

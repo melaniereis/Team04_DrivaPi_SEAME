@@ -6,7 +6,7 @@ text: |
 ASIL: "QM"
 verification_method: "Unit Testing, System Testing"
 parents:
-  - id: SRD-PERF_001
+  - id: SRD-CTRL-AUTO_LOOP
 children:
   - id: LLTC-PID_UNIT
   - id: LLTC-PID_COV

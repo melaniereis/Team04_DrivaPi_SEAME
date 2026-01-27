@@ -6,7 +6,7 @@ text: |
 ASIL: "A"
 verification_method: "Unit Testing, System Testing"
 parents:
-  - id: SRD-SAFETY_001
+  - id: SRD-SAFE-MONITOR
 children:
   - id: LLTC-FAULT_UNIT
   - id: LLTC-FAULT_COV

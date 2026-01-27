@@ -7,7 +7,7 @@ text: |
 ASIL: "A"
 verification_method: "Unit Testing, Integration Testing"
 parents:
-  - id: SRD-DEGRADED_MODE_001
+  - id: SRD-SAFE-DEGRADED_OPS
 children: []
 reviewers:
   - name: "Melanie Reis"

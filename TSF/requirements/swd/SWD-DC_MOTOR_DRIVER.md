@@ -6,7 +6,7 @@ text: |
 ASIL: "A"
 verification_method: "Unit Testing, Code Coverage, Static Analysis"
 parents:
-  - id: SRD-PROP_001
+  - id: SRD-ACT-MOTOR_DRIVE
 children:
   - id: LLTC-DC_MOTOR_UNIT
   - id: LLTC-DC_MOTOR_COV

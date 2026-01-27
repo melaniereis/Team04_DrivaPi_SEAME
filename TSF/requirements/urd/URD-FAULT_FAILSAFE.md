@@ -1,0 +1,26 @@
+---
+id: URD-FAULT_FAILSAFE
+header: "Fault Detection & Failsafe"
+text: |
+  "Detects and responds to system faults for safety."
+verification_method: "System Testing"
+children:
+  - id: SRD-SAFE-MONITOR
+reviewers:
+  - name: "Melanie Reis"
+    email: "melanie.reis@seame.pt"
+reviewed: '' # Manually fill on PR approval (YYYY-MM-DD - Approved by Name <email>)
+references:
+  - type: "file"
+    path: docs/standards/iso26262/hara_motor_speed.md
+    description: "Mitigates Hazard H-01 (False Zero Speed)"
+  - type: "file"
+    path: docs/standards/iso26262/hara_actuation.md
+    description: "Mitigates Hazard H-02 (Unintended Acceleration)"
+active: true
+derived: false
+normative: true
+level: 1.0
+---
+System shall detect motor stall, sensor failure, comms loss and enter safe state.
+---

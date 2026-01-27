@@ -6,7 +6,7 @@ text: |
 ASIL: "QM"
 verification_method: "Unit Testing, System Testing"
 parents:
-  - id: SRD-HMI_002
+  - id: SRD-HMI-ALERTS
 children:
   - id: LLTC-QT_ALERT_UNIT
   - id: LLTC-QT_ALERT_COV

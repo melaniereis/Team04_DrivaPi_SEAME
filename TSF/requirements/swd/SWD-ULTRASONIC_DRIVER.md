@@ -6,7 +6,7 @@ text: |
 ASIL: "A"
 verification_method: "Unit Testing, Integration Testing"
 parents:
-  - id: SRD-DIST_001
+  - id: SRD-SENS-US_DISTANCE
 children:
   - id: LLTC-ULTRASONIC_UNIT
   - id: LLTC-ULTRASONIC_COV

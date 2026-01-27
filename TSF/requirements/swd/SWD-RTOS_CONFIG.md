@@ -6,7 +6,7 @@ text: |
 ASIL: "A"
 verification_method: "Unit Testing, Integration Testing"
 parents:
-  - id: SRD-CONTROL_002
+  - id: SRD-RTOS-SCHED_LATENCY
 children:
   - id: LLTC-RTOS_UNIT
   - id: LLTC-RTOS_COV

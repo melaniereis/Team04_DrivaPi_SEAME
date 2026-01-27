@@ -6,7 +6,7 @@ text: |
 ASIL: "-"
 verification_method: "Review"
 parents:
-  - id: SRD-SYSTEM_002
+  - id: SRD-SYS-TRACEABILITY
 children: []
 reviewers:
   - name: "Melanie Reis"

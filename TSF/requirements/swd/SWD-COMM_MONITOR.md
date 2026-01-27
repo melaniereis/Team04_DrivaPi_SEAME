@@ -7,7 +7,7 @@ text: |
 ASIL: "A"
 verification_method: "Unit Testing, Integration Testing"
 parents:
-  - id: SRD-COMM_TIMEOUTS_001
+  - id: SRD-COMM-TIMEOUT_MGMT
 children: []
 reviewers:
   - name: "Melanie Reis"

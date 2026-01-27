@@ -7,7 +7,7 @@ text: |
 ASIL: "A"
 verification_method: "Unit Testing, Integration Testing"
 parents:
-  - id: SRD-EXCLUSIVE_ACCESS_001
+  - id: SRD-RTOS-MUTEX_DATA
 children: []
 reviewers:
   - name: "Melanie Reis"

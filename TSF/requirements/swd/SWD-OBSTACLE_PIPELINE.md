@@ -6,7 +6,7 @@ text: |
 ASIL: "A"
 verification_method: "Unit Testing, System Testing"
 parents:
-  - id: SRD-VISION_002
+  - id: SRD-SENS-OBJ_DET
 children:
   - id: LLTC-OBSTACLE_UNIT
   - id: LLTC-OBSTACLE_COV
