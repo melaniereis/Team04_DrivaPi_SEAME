@@ -22,5 +22,5 @@ derived: false
 normative: true
 level: 1.0
 ---
-Safety-critical tasks shall be scheduled periodically within their deadlines. Access to shared speed or control data shall use deterministic synchronization primitives to prevent race conditions. The system shall detect and report queue overruns or lost messages and enter a safe or degraded mode.
+Safety-critical tasks shall be scheduled periodically within their deadlines. Access to shared data shall use deterministic synchronization (mutexes/queues) to prevent race conditions. The system shall detect and report queue overruns or lost messages and enter a safe or degraded mode if they occur.
 ---

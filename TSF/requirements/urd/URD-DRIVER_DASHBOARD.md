@@ -6,6 +6,7 @@ text: |
 verification_method: "System Testing"
 children:
   - id: SRD-HMI-DASHBOARD
+  - id: SRD-HMI-ALERTS
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"

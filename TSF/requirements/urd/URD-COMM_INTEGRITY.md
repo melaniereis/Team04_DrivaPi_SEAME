@@ -21,5 +21,5 @@ derived: false
 normative: true
 level: 1.0
 ---
-The system shall validate CAN ID mappings at initialization and discard messages with unexpected IDs. It shall detect communication timeouts, stale data, bus off and bus congestion, entering a degraded mode (e.g., reduced speed) or stopping the vehicle within 100 ms as appropriate.
+The firmware shall accept only predefined CAN command messages and ignore or discard any unexpected or invalid CAN frames.
 ---

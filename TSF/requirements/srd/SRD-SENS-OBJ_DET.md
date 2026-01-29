@@ -5,7 +5,7 @@ text: |
   "Primary obstacle detection with ultrasonic fallback."
 verification_method: "System Testing"
 parents:
-  - id: URD-OBSTACLE_RECOGNITION
+  - id: URD-OBSTACLE_AVOIDANCE
 children:
   - id: SWD-OBSTACLE_PIPELINE
 reviewers:

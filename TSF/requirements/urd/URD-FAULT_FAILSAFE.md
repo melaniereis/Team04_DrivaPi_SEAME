@@ -6,6 +6,7 @@ text: |
 verification_method: "System Testing"
 children:
   - id: SRD-SAFE-MONITOR
+  - id: SRD-HMI-ALERTS
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
@@ -22,5 +23,5 @@ derived: false
 normative: true
 level: 1.0
 ---
-The system shall detect motor stall, sensor failure, and communications loss within 100 ms and transition to a safe state (e.g., reduced speed or halt) within 200 ms while issuing an alert to the operator.
+The system shall detect motor stalls, sensor failures, or loss of communication within 100 ms and transition to a safe state (e.g. halt or reduced speed) within 200 ms while alerting the operator.
 ---

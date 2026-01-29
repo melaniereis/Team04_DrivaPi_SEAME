@@ -19,5 +19,5 @@ derived: false
 normative: true
 level: 1.0
 ---
-The system shall measure and report the vehicle’s speed in meters per second with an update rate of at least 100 ms (10 Hz).
+The system shall compute and report the current vehicle speed at least every 100 ms (≥10 Hz).
 ---

@@ -19,5 +19,5 @@ derived: false
 normative: true
 level: 1.0
 ---
-On power-up, the system shall automatically calibrate the servo neutral position and perform self-tests for all critical subsystems within 2 seconds; if calibration or tests fail, the system shall prevent entering autonomous mode and issue an alert.
+On power-up, the system shall automatically calibrate the steering servo neutral position and perform self-tests for all critical subsystems within 2 seconds; if calibration or tests fail, it shall prevent autonomous mode and issue an alert.
 ---
