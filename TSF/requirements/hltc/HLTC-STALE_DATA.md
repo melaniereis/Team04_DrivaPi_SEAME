@@ -2,8 +2,7 @@
 id: HLTC-STALE_DATA
 header: "Stale Data Detection & Reaction"
 text: |
-  "Explicit TSF comm-integrity edge case proof: stale/timeout detection and controlled reaction."
-
+  "Explicit comm-integrity edge case proof: stale/timeout detection and controlled reaction."
 verification_method: "Integration/System Test (Timeout + Logs)"
 
 parents:
@@ -14,16 +13,10 @@ reviewers:
     email: "melanie.reis@seame.pt"
 reviewed: ''
 
-# references:
-#   - type: "file"
-#     path: "artifacts/verification/system/HLTC-STALE_DATA/stale_data_steps.md"
-#   - type: "file"
-#     path: "artifacts/verification/system/HLTC-STALE_DATA/stale_data_logs.txt"
-
 active: true
 derived: false
 normative: true
-level: 3.0
+level: 2.0
 ---
-If command/telemetry data becomes stale or times out, the system shall detect it, log it, and transition to safe/degraded behavior within the specified time.
+If command/telemetry data becomes stale or times out, the system shall detect it and transition to safe/degraded behavior.
 ---

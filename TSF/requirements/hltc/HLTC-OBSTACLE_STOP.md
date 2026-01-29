@@ -14,17 +14,6 @@ reviewers:
     email: "melanie.reis@seame.pt"
 reviewed: ''
 
-# references:
-#   - type: "file"
-#     path: "artifacts/verification/system/HLTC-OBSTACLE_STOP/obstacle_distance.csv"
-#     description: "Distance samples and trigger point."
-#   - type: "file"
-#     path: "artifacts/verification/system/HLTC-OBSTACLE_STOP/obstacle_stop_log.txt"
-#     description: "Logs showing detection → stop command."
-#   - type: "file"
-#     path: "artifacts/verification/system/HLTC-OBSTACLE_STOP/obstacle_video.mp4"
-#     description: "Video proof."
-
 active: true
 derived: false
 normative: true
