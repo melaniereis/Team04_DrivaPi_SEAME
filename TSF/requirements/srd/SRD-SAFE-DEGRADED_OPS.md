@@ -13,6 +13,10 @@ reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
 reviewed: ''
+references:
+  - type: "file"
+    path: docs/standards/iso26262/hara_comms.md
+    description: "Mitigates Hazard H-08 (Communication Loss/Failure)"
 active: true
 derived: false
 normative: true

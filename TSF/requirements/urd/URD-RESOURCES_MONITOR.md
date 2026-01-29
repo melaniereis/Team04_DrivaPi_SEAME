@@ -11,10 +11,10 @@ reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
 reviewed: ''
-# references:
-#   - type: "file"
-#     path: docs/standards/iso26262/hara_overview.md
-#     description: "General Resource Hazard"
+references:
+  - type: "file"
+    path: docs/standards/iso26262/hara_overview.md
+    description: "Mitigates General System Hazards (H-06, H-09)"
 active: true
 derived: false
 normative: true

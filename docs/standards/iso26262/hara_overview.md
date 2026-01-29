@@ -11,16 +11,16 @@ All 10 hazards with ASIL, linked URDs, and SGs.
 
 | Hazard ID | Description | Linked URD(s) | Severity (S) | Exposure (E) | Controllability (C) | ASIL | Safety Goal (SG) |
 |:----------|:------------|:--------------|:-------------|:-------------|:--------------------|:-----|:-----------------|
-| H-01      | False Zero Speed Indication | URD-SPEED_001, URD-SAFETY_001 | S1 | E2 | C1 | A | SG-01 |
-| H-02      | Unintended Acceleration | URD-PROP_001, URD-CONTROL_001, URD-SAFETY_001 | S1 | E3 | C2 | A | SG-02 |
-| H-03      | Unintended Steering | URD-STEER_001 | S1 | E3 | C2 | A | SG-03 |
-| H-04      | Missed Obstacle Detection (Vision primary) | URD-VISION_002, URD-DIST_001 | S1 | E3 | C1 | A | SG-04 |
-| H-05      | Lane Misdetection | URD-VISION_001 | S1 | E2 | C1 | QM | SG-05 |
-| H-06      | Scheduling Overrun/Delay | URD-CONTROL_002 | S2 | E2 | C2 | A | SG-06 |
-| H-07      | Stale or Inaccurate HMI Display | URD-HMI_001, URD-HMI_002 | S1 | E3 | C1 | QM | SG-07 |
-| H-08      | Communication Loss | URD-COMM_001 | S2 | E3 | C2 | A | SG-08 |
-| H-09      | Calibration/Startup Failure | URD-SYSTEM_001 | S1 | E3 | C1 | QM | SG-09 |
-| H-10      | Control Instability | URD-PERF_001 | S1 | E3 | C1 | QM | SG-10 |
+| H-01      | False Zero Speed Indication | URD-SPEED_MEASUREMENT, URD-FAULT_FAILSAFE | S1 | E2 | C1 | A | SG-01 |
+| H-02      | Unintended Acceleration | URD-PROPULSION_CONTROL, URD-EMERGENCY_STOP | S1 | E3 | C2 | A | SG-02 |
+| H-03      | Unintended Steering | URD-STEERING_CONTROL | S1 | E3 | C2 | A | SG-03 |
+| H-04      | Missed Obstacle Detection (Vision primary) | URD-OBSTACLE_AVOIDANCE, URD-SENS-US_DISTANCE | S1 | E3 | C1 | A | SG-04 |
+| H-05      | Lane Misdetection | URD-LANE_DETECTION | S1 | E2 | C1 | QM | SG-05 |
+| H-06      | Scheduling Overrun/Delay | URD-DETERMINISTIC_SCHED | S2 | E2 | C2 | A | SG-06 |
+| H-07      | Stale or Inaccurate HMI Display | URD-HMI_001, URD-DRIVER_DASHBOARD | S1 | E3 | C1 | QM | SG-07 |
+| H-08      | Communication Loss | URD-HMI_COMMUNICATION, URD-COMM_INTEGRITY | S2 | E3 | C2 | A | SG-08 |
+| H-09      | Calibration/Startup Failure | URD-STARTUP_CALIBRATION | S1 | E3 | C1 | QM | SG-09 |
+| H-10      | Control Instability | URD-DETERMINISTIC_SCHED | S1 | E3 | C1 | QM | SG-10 |
 
 ## 3. Overall Risk Assessment Rationale
 - **Severity (S)**: Max S2 – small vehicle/low speed (bruises/cuts only).

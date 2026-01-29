@@ -13,10 +13,10 @@ reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
 reviewed: '' # Manually fill on PR approval (YYYY-MM-DD - Approved by Name <email>)
-# references:
-#   - type: "report"
-#     path: comparison_report.md
-#     description: "Addresses communication loss, stale data and bus congestion hazards"
+references:
+  - type: "file"
+    path: docs/standards/iso26262/hara_comms.md
+    description: "Mitigates Hazard H-08 (Communication Loss/Failure)"
 active: true
 derived: false
 normative: true
