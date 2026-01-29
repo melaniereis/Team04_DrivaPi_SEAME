@@ -21,5 +21,5 @@ derived: false
 normative: true
 level: 2.0
 ---
-At system initialization, the software shall validate that all expected CAN IDs match their defined control variables. Frames received with unexpected IDs shall be silently discarded.
+The CAN interface shall filter incoming frames by identifier, forwarding only recognized command IDs (e.g. speed, steering) to the appropriate software queues and ignoring any others.
 ---

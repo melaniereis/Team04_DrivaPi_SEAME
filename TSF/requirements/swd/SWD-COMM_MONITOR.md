@@ -22,5 +22,5 @@ derived: false
 normative: true
 level: 3.0
 ---
-The software shall monitor CAN and internal bus communication for timeouts, stale data and congestion. When thresholds are exceeded, it shall trigger safe or degraded operation and log the event.
+The software shall monitor CAN and internal bus communication for timeouts, stale data and congestion. When thresholds are exceeded, it shall trigger safe or degraded operation.
 ---

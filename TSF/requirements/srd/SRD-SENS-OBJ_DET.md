@@ -21,4 +21,4 @@ derived: false
 normative: true
 level: 2.0
 ---
-The vision system shall detect and classify obstacles as primary mechanism, triggering avoidance on confidence >80%.
+The vision system shall detect and classify obstacles as primary mechanism, triggering avoidance.

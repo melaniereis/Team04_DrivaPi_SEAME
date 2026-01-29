@@ -21,4 +21,4 @@ derived: false
 normative: true
 level: 2.0
 ---
-The system shall control the DC drive motor via PCA9685 PWM channels, mapping commanded speed [-1.0, 1.0] to calibrated pulse widths with dead-zone at 0.0.
+The system shall control the DC motor via the PCA9685 PWM channels, mapping commanded speed (–1.0…+1.0) to calibrated pulse widths with a dead-zone at 0.0.

@@ -21,4 +21,4 @@ derived: false
 normative: true
 level: 2.0
 ---
-Calculate speed as (pulse_count / 30) × 0.212 / Δt in m/s, update at least every 100 ms, clamp results to 0–4 m/s and transmit the speed over CAN as a float.
+The wheel encoder interface shall convert raw encoder pulses into linear speed (0–4 m/s) using the known wheel circumference and pulses-per-rev (30 pulses/rev, 0.212 m perimeter), handling timer overflows and timeouts.

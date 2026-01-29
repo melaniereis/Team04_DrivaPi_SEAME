@@ -21,4 +21,4 @@ derived: false
 normative: true
 level: 2.0
 ---
-The vision system shall process camera frames to detect lane center with >80% confidence for autonomous keeping.
+The vision system shall process camera frames to detect lane center for autonomous keeping.

@@ -21,4 +21,4 @@ derived: false
 normative: true
 level: 2.0
 ---
-The system shall measure front distance using ultrasonic sensor as fallback, triggering avoidance if <50cm.
+The system shall measure front distance using ultrasonic sensor as fallback, triggering avoidance if <100cm.

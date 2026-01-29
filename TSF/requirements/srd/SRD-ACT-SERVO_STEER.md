@@ -21,4 +21,4 @@ derived: false
 normative: true
 level: 2.0
 ---
-The system shall control the steering servo via PCA9685, mapping commanded angle [0, 180] to calibrated PWM counts with mechanical limits enforced.
+The system shall control the steering servo via PCA9685, mapping 0–180° angles to calibrated PWM values and enforcing mechanical limits.

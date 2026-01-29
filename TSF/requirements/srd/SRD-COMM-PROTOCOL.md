@@ -21,4 +21,4 @@ derived: false
 normative: true
 level: 2.0
 ---
-System shall exchange commands/status between STM32 firmware and RPi5 HMI with timeout detection.
+System shall exchange CAN messages between STM32 firmware and RPi5 HMI via CAN Bus communication.

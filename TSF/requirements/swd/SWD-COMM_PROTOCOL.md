@@ -23,4 +23,4 @@ derived: false
 normative: true
 level: 3.0
 ---
-Communication module shall handle bidirectional packets with timeout detection and failsafe.
+Communication module shall handle bidirectional packets.

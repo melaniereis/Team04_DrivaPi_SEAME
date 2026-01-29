@@ -22,5 +22,5 @@ derived: false
 normative: true
 level: 3.0
 ---
-On startup, the software shall verify that the configured CAN IDs match expected definitions. At runtime, it shall ignore or discard frames with unknown IDs and log the event for diagnostics.
+On startup, the software shall verify that the configured CAN IDs match expected definitions. At runtime, it shall ignore or discard frames with unknown IDs.
 ---

@@ -23,4 +23,4 @@ derived: false
 normative: true
 level: 3.0
 ---
-The vision pipeline shall detect lane markings with >80% confidence and output center offset for steering correction.
+The vision pipeline shall detect lane markings and output center offset for steering correction.

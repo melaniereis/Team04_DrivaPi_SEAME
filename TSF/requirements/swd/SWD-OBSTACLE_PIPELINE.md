@@ -23,4 +23,4 @@ derived: false
 normative: true
 level: 3.0
 ---
-The vision pipeline shall classify obstacles with >80% confidence and trigger avoidance signal.
+The vision pipeline shall classify obstacles and trigger avoidance signal.
