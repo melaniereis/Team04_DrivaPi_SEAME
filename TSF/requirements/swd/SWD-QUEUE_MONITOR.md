@@ -8,6 +8,7 @@ verification_method: "Unit Testing, Integration Testing"
 parents:
   - id: SRD-RTOS-QUEUE_MON
 children:
+  - id: LLTC-QUEUE_MON_COV
   - id: LLTC-QUEUE_MON_UNIT
 reviewers:
   - name: "Melanie Reis"

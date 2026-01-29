@@ -8,6 +8,7 @@ verification_method: "Unit Testing, Integration Testing"
 parents:
   - id: SRD-SYS-RES_MONITOR
 children:
+  - id: LLTC-RES_MON_COV
   - id: LLTC-RES_MON_UNIT
 reviewers:
   - name: "Melanie Reis"

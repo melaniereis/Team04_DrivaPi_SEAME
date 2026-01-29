@@ -8,6 +8,7 @@ verification_method: "Unit Testing, Integration Testing"
 parents:
   - id: SRD-RTOS-PERIODIC_TASK
 children:
+  - id: LLTC-SCHEDULER_COV
   - id: LLTC-SCHEDULER_UNIT
 reviewers:
   - name: "Melanie Reis"

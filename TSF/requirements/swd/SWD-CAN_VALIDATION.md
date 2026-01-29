@@ -8,6 +8,7 @@ verification_method: "Unit Testing, Integration Testing"
 parents:
   - id: SRD-COMM-CAN_VALIDATION
 children:
+  - id: LLTC-CAN_VALID_COV
   - id: LLTC-CAN_VALID_UNIT
 reviewers:
   - name: "Melanie Reis"

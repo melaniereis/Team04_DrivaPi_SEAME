@@ -8,6 +8,7 @@ verification_method: "Unit Testing, Integration Testing"
 parents:
   - id: SRD-SAFE-DEGRADED_OPS
 children:
+  - id: LLTC-DEGRADED_COV
   - id: LLTC-DEGRADED_UNIT
 reviewers:
   - name: "Melanie Reis"

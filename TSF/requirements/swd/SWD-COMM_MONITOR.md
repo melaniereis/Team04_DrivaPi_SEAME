@@ -8,6 +8,7 @@ verification_method: "Unit Testing, Integration Testing"
 parents:
   - id: SRD-COMM-TIMEOUT_MGMT
 children:
+  - id: LLTC-COMM_MON_COV
   - id: LLTC-COMM_MON_UNIT
 reviewers:
   - name: "Melanie Reis"

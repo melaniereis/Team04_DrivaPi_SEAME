@@ -8,6 +8,7 @@ verification_method: "Unit Testing, Integration Testing"
 parents:
   - id: SRD-RTOS-MUTEX_DATA
 children:
+  - id: LLTC-MUTEX_COV
   - id: LLTC-MUTEX_UNIT
 reviewers:
   - name: "Melanie Reis"
