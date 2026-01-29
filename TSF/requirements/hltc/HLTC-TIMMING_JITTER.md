@@ -1,14 +1,13 @@
 ---
-id: LLTC-TIMING_JITTER
+id: HLTC-TIMING_JITTER
 header: "Real-Time Timing Jitter Measurement"
 text: |
-  "Proves URD-REALTIME_TIMING with objective jitter/latency evidence under load."
+  "Proves with objective jitter/latency evidence under load."
 
 verification_method: "Timing Measurement (On-target Profiling + Logs)"
 
 parents:
-  - id: SWD-RTOS_CONFIG
-  - id: SWD-RTOS_SCHEDULER
+  - id: SRD-RTOS-PERIODIC_TASK
 
 reviewers:
   - name: "Melanie Reis"
@@ -17,11 +16,11 @@ reviewed: ''
 
 # references:
 #   - type: "file"
-#     path: "artifacts/verification/timing/LLTC-TIMING_JITTER/jitter_results.csv"
+#     path: "artifacts/verification/timing/HLTC-TIMING_JITTER/jitter_results.csv"
 #   - type: "file"
-#     path: "artifacts/verification/timing/LLTC-TIMING_JITTER/jitter_setup.md"
+#     path: "artifacts/verification/timing/HLTC-TIMING_JITTER/jitter_setup.md"
 #   - type: "file"
-#     path: "artifacts/verification/timing/LLTC-TIMING_JITTER/jitter_logs.txt"
+#     path: "artifacts/verification/timing/HLTC-TIMING_JITTER/jitter_logs.txt"
 
 active: true
 derived: false

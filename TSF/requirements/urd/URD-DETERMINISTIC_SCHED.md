@@ -8,7 +8,6 @@ children:
   - id: SRD-RTOS-PERIODIC_TASK
   - id: SRD-RTOS-MUTEX_DATA
   - id: SRD-RTOS-QUEUE_MON
-  - id: SRD-RTOS-SCHED_LATENCY
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"

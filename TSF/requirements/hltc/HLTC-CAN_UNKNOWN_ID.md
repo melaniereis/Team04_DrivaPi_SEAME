@@ -1,5 +1,5 @@
 ---
-id: LLTC-CAN_UNKNOWN_ID
+id: HLTC-CAN_UNKNOWN_ID
 header: "Unknown CAN ID Handling"
 text: |
   "Explicit TSF comm-integrity edge case proof: unknown IDs discarded + logged."
@@ -7,7 +7,7 @@ text: |
 verification_method: "Integration Test (CAN Injection + Logs)"
 
 parents:
-  - id: SWD-CAN_VALIDATION
+  - id: SRD-COMM-CAN_VALIDATION
 
 reviewers:
   - name: "Melanie Reis"
@@ -16,13 +16,13 @@ reviewed: ''
 
 # references:
 #   - type: "file"
-#     path: "artifacts/verification/system/LLTC-CAN_UNKNOWN_ID/can_injection_script.md"
+#     path: "artifacts/verification/system/HLTC-CAN_UNKNOWN_ID/can_injection_script.md"
 #   - type: "file"
-#     path: "artifacts/verification/system/LLTC-CAN_UNKNOWN_ID/can_unknown_id_logs.txt"
+#     path: "artifacts/verification/system/HLTC-CAN_UNKNOWN_ID/can_unknown_id_logs.txt"
 
 active: true
 derived: false
 normative: true
-level: 4.0
+level: 3.0
 ---
-Unknown or unexpected CAN message identifiers shall be rejected/discarded and logged, without affecting safety-critical control flow.
+Unknown or unexpected CAN message identifiers shall be rejected/discarded without affecting safety-critical control flow.

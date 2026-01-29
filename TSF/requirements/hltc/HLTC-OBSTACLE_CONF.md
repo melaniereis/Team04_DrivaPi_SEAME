@@ -1,13 +1,13 @@
 ---
-id: LLTC-OBSTACLE_CONF
+id: HLTC-OBSTACLE_CONF
 header: "Obstacle Recognition Confidence Validation"
 text: |
-  "Provides objective confidence/precision evidence for URD-OBSTACLE_RECOGNITION."
+  "Provides objective confidence/precision evidence for SRD-SENS-OBJ_DET."
 
 verification_method: "System Validation (Dataset/Track + Metrics)"
 
 parents:
-  - id: SWD-OBSTACLE_PIPELINE
+  - id: SRD-SENS-OBJ_DET
 
 reviewers:
   - name: "Melanie Reis"
@@ -16,14 +16,14 @@ reviewed: ''
 
 # references:
 #   - type: "file"
-#     path: "artifacts/verification/vision/LLTC-OBSTACLE_CONF/metrics.json"
+#     path: "artifacts/verification/vision/HLTC-OBSTACLE_CONF/metrics.json"
 #   - type: "file"
-#     path: "artifacts/verification/vision/LLTC-OBSTACLE_CONF/test_set_description.md"
+#     path: "artifacts/verification/vision/HLTC-OBSTACLE_CONF/test_set_description.md"
 
 active: true
 derived: false
 normative: true
-level: 4.0
+level: 3.0
 ---
 Vision obstacle recognition shall meet agreed confidence/precision thresholds in the defined ODD scenarios.
 ---

@@ -17,7 +17,7 @@ reviewers:
     email: "<REVIEWER_EMAIL>"
 reviewed: ''  # Manually fill on PR approval (YYYY-MM-DD - Approved by Name <email>)
 
-# Evidence Linking (use 'references:', NOT deprecated 'artifact:')
+# Evidence Linking
 references:
   - type: "file"
     path: <relative/path/to/artifact>  # Path from repo root
@@ -47,6 +47,6 @@ score:
 active: true
 derived: false
 normative: true
-level: 4.0  # 1.0=URD, 2.0=SRD, 3.0=SWD, 4.0=LLTC
+level: 3.0  # 1.0=URD, 2.0=SRD, 3.0=SWD, 3.0=LLTC
 ---
 <STATEMENT>

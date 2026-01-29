@@ -1,5 +1,5 @@
 ---
-id: LLTC-LANE_TRACK
+id: HLTC-LANE_TRACK
 header: "Lane Output Stability Validation"
 text: |
   "Adds system-level evidence that lane outputs are usable for control and monitoring."
@@ -7,7 +7,7 @@ text: |
 verification_method: "System Validation (Track + Logs)"
 
 parents:
-  - id: SWD-LANE_PIPELINE
+  - id: SRD-SENS-LANE_DET
 
 reviewers:
   - name: "Melanie Reis"
@@ -16,14 +16,14 @@ reviewed: ''
 
 # references:
 #   - type: "file"
-#     path: "artifacts/verification/lane/LLTC-LANE_TRACK/lane_log.csv"
+#     path: "artifacts/verification/lane/HLTC-LANE_TRACK/lane_log.csv"
 #   - type: "file"
-#     path: "artifacts/verification/lane/LLTC-LANE_TRACK/lane_video.mp4"
+#     path: "artifacts/verification/lane/HLTC-LANE_TRACK/lane_video.mp4"
 
 active: true
 derived: false
 normative: true
-level: 4.0
+level: 3.0
 ---
 Lane detection output (offset/heading) shall remain stable within defined bounds over representative track conditions.
 ---
