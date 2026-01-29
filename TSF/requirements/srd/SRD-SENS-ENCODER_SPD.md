@@ -21,4 +21,4 @@ derived: false
 normative: true
 level: 2.0
 ---
-The system shall calculate linear speed (m/s) from encoder pulses using wheel perimeter 0.212m and 30 pulses/rev, with overflow/timeout handling.
+Calculate speed as (pulse_count / 30) × 0.212 / Δt in m/s, update at least every 100 ms, clamp results to 0–4 m/s and transmit the speed over CAN as a float.

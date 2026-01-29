@@ -19,5 +19,5 @@ derived: false
 normative: true
 level: 1.0
 ---
-The vehicle shall provide propulsion control to move forward and backward at requested speeds (0-100%).
+The vehicle shall provide propulsion control to move forward (positive throttle) and backward (negative throttle) up to full scale, and zero shall command stop (no motion).
 ---

@@ -27,4 +27,5 @@ derived: false
 normative: true
 level: 3.0
 ---
-The 'speed_sensor' component shall calculate speed as (pulses/30)*0.212/dt, handle 16-bit timer overflows, detect zero via timeout, and prevent division by zero.
+The ‘speed_sensor’ component shall calculate speed in m/s as (pulse_count/30) * 0.212 / Δt. It shall handle 16-bit timer overflow by accounting for wraparound, detect zero speed by timing out appropriately, and avoid division by zero or other undefined math operations.
+----

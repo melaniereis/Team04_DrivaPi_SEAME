@@ -19,5 +19,5 @@ derived: false
 normative: true
 level: 1.0
 ---
-The vehicle shall steer left and right according to commanded angle.
+The vehicle shall respond to commanded steering angles between 0° and 180°, clamping any input outside this range to protect the mechanical limits of the steering servo.
 ---

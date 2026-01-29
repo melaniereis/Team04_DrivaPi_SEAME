@@ -20,3 +20,4 @@ normative: true
 level: 1.0
 ---
 The system shall monitor Raspberry Pi temperature (>80°C), voltage (<4.8V), and storage (<10% free) during operation and generate alerts or enter safe state (degraded mode or stop) when any threshold is exceeded.
+---
