@@ -8,6 +8,7 @@ parents:
   - id: URD-SPEED_MEASUREMENT
 children:
   - id: SWD-SPEED_CALC
+  - id: HLTC-SPEED_ACCURACY
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"

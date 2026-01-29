@@ -7,7 +7,7 @@ verification_method: "Integration + System Testing"
 parents:
   - id: URD-RESOURCES_MONITOR
 children:
-  - id: SWD-RES_MONITOR
+  - id: SWD-RESOURCE_MONITOR
   - id: HLTC-RESOURCE_THRESH
 reviewers:
   - name: "Melanie Reis"

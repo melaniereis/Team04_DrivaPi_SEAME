@@ -8,6 +8,7 @@ parents:
   - id: URD-PROPULSION_CONTROL
 children:
   - id: SWD-DC_MOTOR_DRIVER
+  - id: HLTC-PROPULSION_NOMINAL
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"

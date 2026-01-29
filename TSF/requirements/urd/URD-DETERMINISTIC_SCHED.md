@@ -8,6 +8,7 @@ children:
   - id: SRD-RTOS-PERIODIC_TASK
   - id: SRD-RTOS-MUTEX_DATA
   - id: SRD-RTOS-QUEUE_MON
+  - id: HLTC-VAL-SYSTEM_STABILITY
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"

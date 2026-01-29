@@ -5,7 +5,8 @@ text: |
   "Ensures immediate operator awareness of hazards."
 verification_method: "System Testing"
 parents:
-  - id: URD-CRITICAL_ALERTS
+  - id: URD-DRIVER_DASHBOARD
+  - id: URD-FAULT_FAILSAFE
 children:
   - id: SWD-QT_ALERTS
   - id: HLTC-ALERT_DISPLAY

@@ -8,6 +8,7 @@ children:
   - id: SRD-COMM-CAN_VALIDATION
   - id: SRD-COMM-TIMEOUT_MGMT
   - id: SRD-SAFE-DEGRADED_OPS
+  - id: HLTC-VAL-COMM_INTEGRITY
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"

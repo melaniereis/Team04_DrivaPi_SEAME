@@ -6,6 +6,7 @@ text: |
 verification_method: "System Testing"
 children:
   - id: SRD-SENS-LANE_DET
+  - id: HLTC-VAL-LANE_KEEPING
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"

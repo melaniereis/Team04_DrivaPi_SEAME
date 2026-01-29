@@ -8,7 +8,7 @@ text: |
 verification_method: "Automated Unit Testing"
 
 parents:
-  - id: SWD-SERVO_MOTOR_DRIVER
+  - id: SWD-SERVO_DRIVER
 
 reviewers:
   - name: "Miguel Cardoso"

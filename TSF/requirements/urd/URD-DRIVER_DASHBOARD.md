@@ -7,6 +7,7 @@ verification_method: "System Testing"
 children:
   - id: SRD-HMI-DASHBOARD
   - id: SRD-HMI-ALERTS
+  - id: HLTC-VAL-DASHBOARD_CHECK
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"

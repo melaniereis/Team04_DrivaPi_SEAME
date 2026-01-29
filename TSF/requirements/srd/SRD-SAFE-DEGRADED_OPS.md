@@ -8,18 +8,16 @@ parents:
   - id: URD-COMM_INTEGRITY
 children:
   - id: SWD-DEGRADED_CONTROL
+  - id: HLTC-DEGRADED_BEHAVIOR
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
-reviewed: '' # Manually fill on PR approval (YYYY-MM-DD - Approved by Name <email>)
-# references:
-#   - type: "report"
-#     path: comparison_report.md
-#     description: "Addresses safe state strategy"
+reviewed: ''
 active: true
 derived: false
 normative: true
 level: 2.0
 ---
-In case of communication loss, high latency or stale data, the system shall reduce the maximum speed to a safe level (e.g., 10 %–20 % of nominal) or stop the vehicle. It shall log the event and signal the operator via the HMI.
+In case of communication loss, high latency or stale data, the system shall reduce the maximum speed to a safe level (e.g., 10 %–20 % of nominal) or stop the vehicle.
+It shall log the event and signal the operator via the HMI.
 ---

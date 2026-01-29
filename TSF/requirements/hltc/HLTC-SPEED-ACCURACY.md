@@ -6,6 +6,7 @@ text: |
 verification_method: "System Test (External Chronometer/Laser)"
 
 parents:
+  - id: SRD-SENS-ENCODER_SPD
   - id: URD-SPEED_MEASUREMENT
 
 reviewers:

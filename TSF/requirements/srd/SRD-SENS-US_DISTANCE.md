@@ -8,10 +8,11 @@ parents:
   - id: URD-OBSTACLE_AVOIDANCE
 children:
   - id: SWD-ULTRASONIC_DRIVER
+  - id: HLTC-US_DISTANCE_TEST
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
-reviewed: '' # Manually fill on PR approval
+reviewed: ''
 references:
   - type: "file"
     path: docs/standards/iso26262/hara_obstacle.md
@@ -22,3 +23,4 @@ normative: true
 level: 2.0
 ---
 The system shall measure front distance using ultrasonic sensor as fallback, triggering avoidance if <100cm.
+---

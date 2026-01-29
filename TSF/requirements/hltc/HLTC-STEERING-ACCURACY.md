@@ -6,6 +6,7 @@ text: |
 verification_method: "System Test (Angle Measurement)"
 
 parents:
+  - id: SRD-ACT-SERVO_STEER
   - id: URD-STEERING_CONTROL
 
 reviewers:

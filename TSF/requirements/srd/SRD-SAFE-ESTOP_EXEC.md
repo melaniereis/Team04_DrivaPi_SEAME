@@ -8,6 +8,7 @@ parents:
   - id: URD-EMERGENCY_STOP
 children:
   - id: SWD-ESTOP_EXEC
+  - id: HLTC-ESTOP_TIME
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"

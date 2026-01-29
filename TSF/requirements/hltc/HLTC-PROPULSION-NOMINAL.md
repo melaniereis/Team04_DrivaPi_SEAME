@@ -6,6 +6,7 @@ text: |
 verification_method: "System Test (Tachometer/Encoder + Logs)"
 
 parents:
+  - id: SRD-ACT-MOTOR_DRIVE
   - id: URD-PROPULSION_CONTROL
 
 reviewers:

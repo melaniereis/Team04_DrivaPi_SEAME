@@ -6,6 +6,7 @@ text: |
 verification_method: "Integration Test (Packet Loss Analysis)"
 
 parents:
+  - id: SRD-COMM-PROTOCOL
   - id: URD-HMI_COMMUNICATION
 
 reviewers:

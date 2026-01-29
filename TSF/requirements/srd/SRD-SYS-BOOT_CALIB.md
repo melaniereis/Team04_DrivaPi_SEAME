@@ -8,6 +8,7 @@ parents:
   - id: URD-STARTUP_CALIBRATION
 children:
   - id: SWD-BOOT_INIT
+  - id: HLTC-BOOT_SELFTEST
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"

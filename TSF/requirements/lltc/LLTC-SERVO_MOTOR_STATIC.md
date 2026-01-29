@@ -8,7 +8,7 @@ text: |
 verification_method: "Static Analysis (CodeQL)"
 
 parents:
-  - id: SWD-SERVO_MOTOR_DRIVER
+  - id: SWD-SERVO_DRIVER
 
 reviewers:
   - name: "Miguel Cardoso"

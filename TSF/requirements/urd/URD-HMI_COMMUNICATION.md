@@ -7,6 +7,7 @@ verification_method: "Integration Testing"
 children:
   - id: SRD-COMM-PROTOCOL
   - id: HLTC-COMM_NOMINAL
+  - id: HLTC-VAL-HMI_LINK
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"

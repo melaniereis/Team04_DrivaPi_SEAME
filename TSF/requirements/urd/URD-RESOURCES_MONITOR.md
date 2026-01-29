@@ -6,6 +6,7 @@ text: |
 verification_method: "System Testing + Validation Evidence (Logs)"
 children:
   - id: SRD-SYS-RES_MONITOR
+  - id: HLTC-VAL-RESOURCE_ALERTS
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
