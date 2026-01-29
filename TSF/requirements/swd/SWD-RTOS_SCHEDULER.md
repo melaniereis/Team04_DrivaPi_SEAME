@@ -14,6 +14,10 @@ reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
 reviewed: ''
+references:
+  - type: "file"
+    path: docs/standards/iso26262/asil_justification_SWD-RTOS_SCHEDULER.md
+    description: "ASIL A Justification"
 active: true
 derived: false
 normative: true

@@ -14,10 +14,10 @@ reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
 reviewed: '' # Manually fill on PR approval
-# references:
-#   - type: "file"
-#     path: firmware/Core/Src/comm_protocol.c
-#     description: "Production Implementation (placeholder)"
+references:
+  - type: "file"
+    path: docs/standards/iso26262/asil_justification_SWD-COMM_PROTOCOL.md
+    description: "ASIL A Justification"
 active: true
 derived: false
 normative: true
