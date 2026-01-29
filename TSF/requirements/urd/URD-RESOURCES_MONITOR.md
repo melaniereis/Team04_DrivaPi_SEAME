@@ -19,5 +19,5 @@ derived: false
 normative: true
 level: 1.0
 ---
-The system shall monitor data from Raspberry Pi and STM32 resources during operation and generate alerts or enter safe state (degraded mode or stop) when any threshold is exceeded.
+The system shall monitor defined resource thresholds (CPU, memory, power, etc.) on both Raspberry Pi and STM32. If any threshold is exceeded, the system shall alert the operator or enter a safe/degraded state.
 ---

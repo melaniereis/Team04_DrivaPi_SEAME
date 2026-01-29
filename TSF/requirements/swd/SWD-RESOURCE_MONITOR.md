@@ -22,5 +22,5 @@ derived: false
 normative: true
 level: 3.0
 ---
-The software shall read system temperature, supply voltage and available storage capacity at defined intervals. When thresholds are violated, it shall log, notify the operator and enforce safe state actions.
+At defined intervals, the software shall read system temperature, supply voltage, and free storage. If any value violates its threshold, the software shall log the event, notify the operator, and enter a safe state.
 ---
