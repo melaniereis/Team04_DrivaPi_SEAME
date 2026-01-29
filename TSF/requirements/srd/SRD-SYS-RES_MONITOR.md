@@ -8,6 +8,7 @@ parents:
   - id: URD-RESOURCES_MONITOR
 children:
   - id: SWD-RES_MONITOR
+  - id: HLTC-RESOURCE_THRESH
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
@@ -22,3 +23,4 @@ normative: true
 level: 2.0
 ---
 The resource monitor shall check temperature (>80°C), voltage (<4.8V), storage (<10% free) every 1s and trigger alert or safe state.
+---

@@ -8,10 +8,11 @@ parents:
   - id: URD-DRIVER_DASHBOARD
 children:
   - id: SWD-QT_DASHBOARD
+  - id: HLTC-HMI_FRESHNESS
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
-reviewed: '' # Manually fill on PR approval
+reviewed: ''
 references:
   - type: "file"
     path: docs/standards/iso26262/hara_hmi.md
@@ -22,3 +23,4 @@ normative: true
 level: 2.0
 ---
 Qt HMI shall refresh speed, battery, status with <1s latency.
+---

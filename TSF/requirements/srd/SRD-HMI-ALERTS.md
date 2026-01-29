@@ -8,10 +8,11 @@ parents:
   - id: URD-CRITICAL_ALERTS
 children:
   - id: SWD-QT_ALERTS
+  - id: HLTC-ALERT_DISPLAY
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
-reviewed: '' # Manually fill on PR approval
+reviewed: ''
 references:
   - type: "file"
     path: docs/standards/iso26262/hara_hmi.md
@@ -22,3 +23,4 @@ normative: true
 level: 2.0
 ---
 HMI shall display prominent alerts for collision, stall, communications loss.
+---

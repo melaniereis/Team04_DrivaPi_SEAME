@@ -6,10 +6,11 @@ text: |
 verification_method: "Integration Testing"
 children:
   - id: SRD-COMM-PROTOCOL
+  - id: HLTC-COMM_NOMINAL
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
-reviewed: '' # Manually fill on PR approval (YYYY-MM-DD - Approved by Name <email>)
+reviewed: ''
 references:
   - type: "file"
     path: docs/standards/iso26262/hara_comms.md

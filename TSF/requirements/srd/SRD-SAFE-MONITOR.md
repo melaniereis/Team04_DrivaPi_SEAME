@@ -8,10 +8,11 @@ parents:
   - id: URD-FAULT_FAILSAFE
 children:
   - id: SWD-FAULT_MONITOR
+  - id: HLTC-PLAUSIBILITY_TEST
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
-reviewed: '' # Manually fill on PR approval
+reviewed: ''
 references:
   - type: "file"
     path: docs/standards/iso26262/hara_motor_speed.md
@@ -25,3 +26,4 @@ normative: true
 level: 2.0
 ---
 System shall monitor for stall, sensor error, communications loss and trigger safe state.
+---

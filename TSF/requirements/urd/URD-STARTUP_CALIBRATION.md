@@ -6,10 +6,11 @@ text: |
 verification_method: "System Testing"
 children:
   - id: SRD-SYS-BOOT_CALIB
+  - id: HLTC-BOOT_SELFTEST
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
-reviewed: '' # Manually fill on PR approval (YYYY-MM-DD - Approved by Name <email>)
+reviewed: ''
 references:
   - type: "file"
     path: docs/standards/iso26262/hara_startup.md
@@ -19,5 +20,5 @@ derived: false
 normative: true
 level: 1.0
 ---
-On power-up, the system shall calibrate the steering servo and perform self-tests on all critical subsystems. If any calibration or test fails, the system shall disable autonomous mode and alert the operator.
+On power-up, the system shall calibrate the steering servo and perform self-tests on all critical subsystems.
 ---

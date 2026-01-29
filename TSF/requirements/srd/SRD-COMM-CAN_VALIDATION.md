@@ -8,14 +8,11 @@ parents:
   - id: URD-COMM_INTEGRITY
 children:
   - id: SWD-CAN_VALIDATION
+  - id: HLTC-CAN_UNKNOWN_ID
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
-reviewed: '' # Manually fill on PR approval (YYYY-MM-DD - Approved by Name <email>)
-# references:
-#   - type: "report"
-#     path: comparison_report.md
-#     description: "Addresses CAN ID mapping hazards"
+reviewed: ''
 active: true
 derived: false
 normative: true

@@ -6,10 +6,11 @@ text: |
 verification_method: "System Testing"
 children:
   - id: SRD-SAFE-ESTOP_EXEC
+  - id: HLTC-ESTOP_TIME
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
-reviewed: '' # Manually fill on PR approval (YYYY-MM-DD - Approved by Name <email>)
+reviewed: ''
 references:
   - type: "file"
     path: docs/standards/iso26262/hara_actuation.md

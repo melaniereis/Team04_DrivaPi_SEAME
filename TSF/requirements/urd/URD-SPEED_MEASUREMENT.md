@@ -6,10 +6,11 @@ text: |
 verification_method: "System Testing"
 children:
   - id: SRD-SENS-ENCODER_SPD
+  - id: HLTC-SPEED_ACCURACY
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
-reviewed: '' # Manually fill on PR approval (YYYY-MM-DD - Approved by Name <email>)
+reviewed: ''
 references:
   - type: "file"
     path: docs/standards/iso26262/hara_motor_speed.md

@@ -8,10 +8,11 @@ parents:
   - id: URD-OBSTACLE_AVOIDANCE
 children:
   - id: SWD-OBSTACLE_PIPELINE
+  - id: HLTC-OBSTACLE_CONF
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
-reviewed: '' # Manually fill on PR approval
+reviewed: ''
 references:
   - type: "file"
     path: docs/standards/iso26262/hara_obstacle.md
@@ -22,3 +23,4 @@ normative: true
 level: 2.0
 ---
 The vision system shall detect and classify obstacles as primary mechanism, triggering avoidance.
+---

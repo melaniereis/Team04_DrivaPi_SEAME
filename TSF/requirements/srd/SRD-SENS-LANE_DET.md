@@ -8,10 +8,11 @@ parents:
   - id: URD-LANE_DETECTION
 children:
   - id: SWD-LANE_PIPELINE
+  - id: HLTC-LANE_TRACK
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
-reviewed: '' # Manually fill on PR approval
+reviewed: ''
 references:
   - type: "file"
     path: docs/standards/iso26262/hara_vision.md
@@ -22,3 +23,4 @@ normative: true
 level: 2.0
 ---
 The vision system shall process camera frames to detect lane center for autonomous keeping.
+---

@@ -8,18 +8,15 @@ parents:
   - id: URD-COMM_INTEGRITY
 children:
   - id: SWD-COMM_MONITOR
+  - id: HLTC-STALE_DATA
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
-reviewed: '' # Manually fill on PR approval (YYYY-MM-DD - Approved by Name <email>)
-# references:
-#   - type: "report"
-#     path: comparison_report.md
-#     description: "Addresses comms loss, stale data and bus congestion"
+reviewed: ''
 active: true
 derived: false
 normative: true
 level: 2.0
 ---
-The system shall detect communication timeouts, stale data and bus congestion on the CAN or internal bus. If a timeout or stale data persists for more than a defined period, it shall enter safe or degraded mode, stopping the vehicle within 100 ms if necessary. Bus congestion shall trigger message rejection and degraded operation.
+The system shall detect communication timeouts, stale data and bus congestion on the CAN or internal bus.
 ---

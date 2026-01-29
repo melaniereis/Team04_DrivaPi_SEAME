@@ -7,10 +7,11 @@ verification_method: "System Testing"
 children:
   - id: SRD-SAFE-MONITOR
   - id: SRD-HMI-ALERTS
+  - id: HLTC-FAULT_INJECTION
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
-reviewed: '' # Manually fill on PR approval (YYYY-MM-DD - Approved by Name <email>)
+reviewed: ''
 references:
   - type: "file"
     path: docs/standards/iso26262/hara_motor_speed.md
