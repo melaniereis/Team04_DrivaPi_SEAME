@@ -35,7 +35,8 @@ Core/Src/ultrasonic.o: ../Core/Src/ultrasonic.c ../Core/Inc/soft_i2c.h \
  ../Middlewares/ST/threadx/ports/cortex_m33/gnu/inc/tx_port.h \
  ../Core/Inc/tx_user.h ../Core/Inc/pca9685.h ../Core/Inc/app_threadx.h \
  ../Core/Inc/dc_motor.h ../Core/Inc/servo_motor.h \
- ../Core/Inc/dc_motor_test.h ../Core/Inc/motor_utils.h
+ ../Core/Inc/dc_motor_test.h ../Core/Inc/motor_utils.h \
+ ../Core/Inc/dc_motor.h
 ../Core/Inc/soft_i2c.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32U5xx_HAL_Driver/Inc/stm32u5xx_hal.h:
@@ -80,3 +81,4 @@ Core/Src/ultrasonic.o: ../Core/Src/ultrasonic.c ../Core/Inc/soft_i2c.h \
 ../Core/Inc/servo_motor.h:
 ../Core/Inc/dc_motor_test.h:
 ../Core/Inc/motor_utils.h:
+../Core/Inc/dc_motor.h:

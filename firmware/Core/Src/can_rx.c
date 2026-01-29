@@ -27,7 +27,7 @@ uint8_t CanReceive(t_can_message *msg)
 		if (HAL_FDCAN_GetRxMessage(&hfdcan1, FDCAN_RX_FIFO0, &rx_header, rx_data) == HAL_OK)
 		{
 			msg->id = rx_header.Identifier;
-			msg->len = (rx_header.DataLength <= 8) ? rx_header.DataLength : 8;
+			msg->len = 8;
 			memcpy(msg->data, rx_data, msg->len);
 			return 1; // Message received
 		}

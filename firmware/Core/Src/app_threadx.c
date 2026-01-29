@@ -43,11 +43,13 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
+bool					g_emergencyBrake;
 thread_t				g_threads[8];
 TX_QUEUE                g_queueSpeedCmd;
 TX_QUEUE                g_queueSteerCmd;
 TX_EVENT_FLAGS_GROUP    g_eventFlags;
 TX_MUTEX                g_speedDataMutex;
+TX_MUTEX             	g_emergencyMutex;
 float                   g_vehicleSpeed;
 /* USER CODE END PV */
 
@@ -69,6 +71,7 @@ UINT App_ThreadX_Init(VOID *memory_ptr)
   /* USER CODE END App_ThreadX_MEM_POOL */
   /* USER CODE BEGIN App_ThreadX_Init */
 
+  	g_emergencyBrake = false;
 	g_vehicleSpeed = 0;
 
 	const char *msg = "\r\n=== DrivaPi ThreadX Init ===\r\n";

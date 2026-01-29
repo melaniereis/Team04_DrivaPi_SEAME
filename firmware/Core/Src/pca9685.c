@@ -66,13 +66,16 @@ HAL_StatusTypeDef PCA9685_InitDevice(I2C_HandleTypeDef *hi2c, uint8_t addr7, con
 	ret = PCA9685_WriteReg(hi2c, addr7, MODE1, 0x31);
 	if (ret != HAL_OK)
 		return ret;
-
+	}
+	// Set motor frequency Hz (0x05)
 	if (addr7 == 0x60)
 		ret = PCA9685_WriteReg(hi2c, addr7, PRESCALE, 0x05);
 	else
-		ret = PCA9685_WriteReg(hi2c, addr7, PRESCALE, SERVO_FREQ);
-
-	if (ret != HAL_OK)
+		ret = PCA9685_WriteReg(hi2c, addr7, PRESCALE, 121);
+	if (ret != HAL_OK) 
+	{ 
+		snprintf(msg, sizeof(msg), "  FAILED PRESCALE: %d\r\n", ret);
+		UartPrint(msg);
 		return ret;
 	ret = PCA9685_WriteReg(hi2c, addr7, MODE1, 0x21);
 	if (ret != HAL_OK)

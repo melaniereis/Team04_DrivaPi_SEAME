@@ -22,6 +22,14 @@ void MotorSetPWM(int32_t left_counts, int32_t right_counts)
 	/* Left motor */
 	if (left_counts > 0)
 	{
+		tx_mutex_get(&g_emergencyMutex, TX_WAIT_FOREVER);
+		if(g_emergencyBrake)
+		{
+    		tx_mutex_put(&g_emergencyMutex);
+			return ;
+		}
+		tx_mutex_put(&g_emergencyMutex);
+
 		uint16_t pwm = ClampU16(left_counts);
 		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_A, 0, max);
 		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_B, 0, 0);
@@ -47,6 +55,14 @@ void MotorSetPWM(int32_t left_counts, int32_t right_counts)
 	/* Right motor */
 	if (right_counts > 0)
 	{
+		tx_mutex_get(&g_emergencyMutex, TX_WAIT_FOREVER);
+		if(g_emergencyBrake)
+		{
+    		tx_mutex_put(&g_emergencyMutex);
+			return ;
+		}
+		tx_mutex_put(&g_emergencyMutex);
+
 		uint16_t pwm = ClampU16(right_counts);
 		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_A, 0, 0);
 		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_B, 0, max);
@@ -85,7 +101,6 @@ VOID DcMotor(ULONG initial_input)
 
 		while (tx_queue_receive(&g_queueSpeedCmd, &msg, TX_NO_WAIT) == TX_SUCCESS)
 		{
-
 			if (msg.len >= 8)
 			{
 				int32_t left_count = 0;

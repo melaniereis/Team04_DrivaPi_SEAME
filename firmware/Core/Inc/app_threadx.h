@@ -40,6 +40,7 @@ extern "C" {
 #include "servo_motor.h"
 #include "dc_motor_test.h"
 #include "motor_utils.h"
+#include <stdbool.h>
 #include "sensors.h"
 #include "speed_sensor.h"
 
@@ -56,6 +57,7 @@ typedef struct thread_s
 typedef enum threads_s
 {
 	supervisor_e,
+	emergency_brake_e,
 	dc_motor_e,
 	servo_motor_e,
 	speed_sensor_e,
@@ -85,6 +87,7 @@ typedef struct can_message_s
 #define FLAG_CAN_SPEED_CMD	(1 << 0)
 #define FLAG_CAN_STEER_CMD	(1 << 1)
 #define FLAG_SENSOR_UPDATE	(1 << 2)
+#define FLAG_EMERGENCY_STOP (1 << 3)
 #define THREAD_STACK_SIZE	1024
 #define QUEUE_SIZE         	10
 #define CMD_SPEED           44u
@@ -119,16 +122,20 @@ VOID	SpeedSensor(ULONG initial_input);
 VOID	SensorHTS221Thread(ULONG initial_input);
 VOID	SensorBatteryThread(ULONG initial_input);
 void	UltrasonicEntry(ULONG initial_input);
+void	EmergencyBrakeEntry(ULONG initial_input);
 void	ThreadInit(void);
 int		CanSend(t_can_message* msg);
+
 /* USER CODE END EFP */
 
 /* USER CODE BEGIN 1 */
+extern bool					g_emergencyBrake;
 extern thread_t				g_threads[8];
 extern TX_QUEUE             g_queueSpeedCmd;
 extern TX_QUEUE             g_queueSteerCmd;
 extern TX_EVENT_FLAGS_GROUP	g_eventFlags;
 extern TX_MUTEX             g_speedDataMutex;
+extern TX_MUTEX             g_emergencyMutex;
 extern float				g_vehicleSpeed;
 /* USER CODE END 1 */
 
