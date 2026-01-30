@@ -6,7 +6,7 @@ text: |
 verification_method: "System Testing"
 children:
   - id: SRD-SENS-ENCODER_SPD
-  - id: HLTC-SPEED_ACCURACY
+  - id: HLTC-SPEED-ACCURACY
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"

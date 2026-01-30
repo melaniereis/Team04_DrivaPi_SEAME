@@ -6,7 +6,7 @@ text: |
 verification_method: "System Testing"
 children:
   - id: SRD-ACT-SERVO_STEER
-  - id: HLTC-STEERING_ACCURACY
+  - id: HLTC-STEERING-ACCURACY
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
