@@ -268,8 +268,8 @@ generate_coverage_xml() {
     local output_xml="$2"
     
     if [[ ! -f "$coverage_info" ]]; then
-        log_warn "Coverage info file not found: $coverage_info"
-        return 1
+        log_error "Coverage info file not found: $coverage_info. Not generating XML."
+        return 2
     fi
     
     log_info "Generating coverage XML from: $coverage_info"
@@ -299,21 +299,21 @@ generate_coverage_xml() {
         branch_rate="$line_rate"
     fi
     
-    # Create Cobertura XML structure
-    cat > "$output_xml" << EOF
+        # Create Cobertura XML structure
+        cat > "$output_xml" << EOF
 <?xml version="1.0" ?>
-<coverage version="1.9" timestamp="$(date +%s)" line-rate="$line_rate" branch-rate="$branch_rate" lines-valid="1" lines-covered="1" branch-valid="1" branch-covered="1">
-  <packages>
-    <package name="drivapi" line-rate="$line_rate" branch-rate="$branch_rate" complexity="1.0">
-      <classes>
-        <class name="coverage" filename="coverage" line-rate="$line_rate" branch-rate="$branch_rate" complexity="1.0">
-          <lines>
-            <line number="1" hits="1" branch="false"/>
-          </lines>
-        </class>
-      </classes>
-    </package>
-  </packages>
+<coverage version="1.9" timestamp="$(date +%s)" line-rate="$line_rate" branch-rate="$branch_rate">
+    <packages>
+        <package name="drivapi" line-rate="$line_rate" branch-rate="$branch_rate" complexity="1.0">
+            <classes>
+                <class name="coverage" filename="coverage" line-rate="$line_rate" branch-rate="$branch_rate" complexity="1.0">
+                    <lines>
+                        <line number="1" hits="1" branch="false"/>
+                    </lines>
+                </class>
+            </classes>
+        </package>
+    </packages>
 </coverage>
 EOF
     

@@ -123,7 +123,21 @@ main() {
     [[ ${speed_pass:-0} -eq 0 ]] && log_pass "Speed Sensor: PASSED" || log_fail "Speed Sensor: FAILED"
     echo ""
 
-    # Generate reports
+
+    # Only generate reports if test outputs exist and are valid
+    if [[ ! -s "$DC_MOTOR_OUTPUT" ]]; then
+        log_fail "DC Motor test output missing, aborting."
+        exit 2
+    fi
+    if [[ ! -s "$SERVO_MOTOR_OUTPUT" ]]; then
+        log_fail "Servo Motor test output missing, aborting."
+        exit 2
+    fi
+    if [[ ! -s "$SPEED_SENSOR_OUTPUT" ]]; then
+        log_fail "Speed Sensor test output missing, aborting."
+        exit 2
+    fi
+
     generate_junit_xml "$DC_MOTOR_OUTPUT" "${ARTIFACTS_DIR}/tests/dc-motor.xml"
     generate_junit_xml "$SERVO_MOTOR_OUTPUT" "${ARTIFACTS_DIR}/tests/servo-motor.xml"
     generate_junit_xml "$SPEED_SENSOR_OUTPUT" "${ARTIFACTS_DIR}/tests/speed-sensor.xml"
@@ -187,7 +201,8 @@ EOF
             speed_cov="${PROJECT_ROOT}/build/coverage/speed-sensor/coverage_filtered.info"
     fi
 
-    # Generate individual coverage XML files for each suite
+
+    # Generate individual coverage XML files for each suite, but only if real coverage exists
     mkdir -p "${ARTIFACTS_DIR}/coverage"
 
     echo ""
@@ -199,9 +214,11 @@ EOF
             echo "  ✓ dc-motor.xml"
         else
             echo "  ✗ dc-motor.xml - generation failed"
+            exit 2
         fi
     else
         echo "  ✗ dc-motor.xml - coverage file not found at: $dc_cov"
+        exit 2
     fi
 
     # Servo Motor
@@ -210,53 +227,24 @@ EOF
             echo "  ✓ servo-motor.xml"
         else
             echo "  ✗ servo-motor.xml - generation failed"
+            exit 2
         fi
     else
         echo "  ✗ servo-motor.xml - coverage file not found at: $servo_cov"
+        exit 2
     fi
 
-    # Speed Sensor - SPECIAL HANDLING
-    echo "  Looking for speed sensor coverage in:"
-    echo "    1. $speed_cov"
-    echo "    2. ${PROJECT_ROOT}/build/coverage/speed-sensor/coverage_filtered.info"
-    echo "    3. ${SPEED_SENSOR_DIR}/speed-sensor.xml"
-
-    # First try the coverage info file
+    # Speed Sensor
     if [[ -f "$speed_cov" ]]; then
         if generate_coverage_xml_simple "$speed_cov" "${ARTIFACTS_DIR}/coverage/speed-sensor.xml"; then
-            echo "  ✓ speed-sensor.xml (generated from coverage info)"
+            echo "  ✓ speed-sensor.xml"
         else
-            echo "  ✗ speed-sensor.xml - generation failed from coverage info"
+            echo "  ✗ speed-sensor.xml - generation failed"
+            exit 2
         fi
-    # Then try the pre-generated XML from speed sensor test script
-    elif [[ -f "${SPEED_SENSOR_DIR}/speed-sensor.xml" ]]; then
-        cp "${SPEED_SENSOR_DIR}/speed-sensor.xml" "${ARTIFACTS_DIR}/coverage/speed-sensor.xml"
-        echo "  ✓ speed-sensor.xml (copied from test directory)"
-    # Last resort: check if speed sensor test script left an XML in the persistent directory
-    elif [[ -f "${PROJECT_ROOT}/build/coverage/speed-sensor/speed-sensor.xml" ]]; then
-        cp "${PROJECT_ROOT}/build/coverage/speed-sensor/speed-sensor.xml" "${ARTIFACTS_DIR}/coverage/speed-sensor.xml"
-        echo "  ✓ speed-sensor.xml (copied from persistent directory)"
     else
-        echo "  ✗ speed-sensor.xml - NO COVERAGE DATA FOUND"
-        # Create a minimal coverage XML so LLTC validation doesn't fail on missing file
-        # BUT this is a last resort - we should fix the speed sensor test script instead
-        cat > "${ARTIFACTS_DIR}/coverage/speed-sensor.xml" << EOF
-<?xml version="1.0" ?>
-<coverage version="1.9" timestamp="$(date +%s)" line-rate="1.0" branch-rate="1.0" lines-valid="1" lines-covered="1" branch-valid="1" branch-covered="1">
-  <packages>
-    <package name="speed-sensor" line-rate="1.0" branch-rate="1.0" complexity="1.0">
-      <classes>
-        <class name="coverage" filename="coverage" line-rate="1.0" branch-rate="1.0" complexity="1.0">
-          <lines>
-            <line number="1" hits="1" branch="false"/>
-          </lines>
-        </class>
-      </classes>
-    </package>
-  </packages>
-</coverage>
-EOF
-        echo "  ⚠ speed-sensor.xml - created minimal coverage file (FIX SPEED SENSOR SCRIPT!)"
+        echo "  ✗ speed-sensor.xml - coverage file not found at: $speed_cov"
+        exit 2
     fi
 
     # Verify all files exist
