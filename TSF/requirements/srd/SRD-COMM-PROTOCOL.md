@@ -8,7 +8,7 @@ parents:
   - id: URD-HMI_COMMUNICATION
 children:
   - id: SWD-COMM_PROTOCOL
-  - id: HLTC-COMM_NOMINAL
+  - id: HLTC-COMM-NOMINAL
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"

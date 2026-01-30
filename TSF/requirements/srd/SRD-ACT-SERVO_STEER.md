@@ -8,7 +8,7 @@ parents:
   - id: URD-STEERING_CONTROL
 children:
   - id: SWD-SERVO_DRIVER
-  - id: HLTC-STEERING_ACCURACY
+  - id: HLTC-STEERING-ACCURACY
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"

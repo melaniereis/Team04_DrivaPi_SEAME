@@ -9,7 +9,7 @@ parents:
   - id: SRD-RTOS-PERIODIC_TASK
 children:
   - id: LLTC-SCHEDULER_COV
-  - id: LLTC-SCHEDULER_UNIT
+  - id: LLTC-SCHEDULER-UNIT
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
