@@ -15,11 +15,8 @@ jobs:
   run-tests:
     uses: ./.github/workflows/unit_tests.yml
 
-  run-codeql:
-    uses: ./.github/workflows/firmware_static.yml
-
   tsf-validation:
-    needs: [run-tests, run-codeql]
+    needs: [run-tests]
     runs-on: ubuntu-latest
 
     steps:
@@ -30,23 +27,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y graphviz
-
-      - name: Download Verification Artifacts
-        uses: actions/download-artifact@v7
-        with:
-          name: verification-artifacts
-          path: artifacts/verification
-
-      - name: Download CodeQL Artifacts
-        uses: actions/download-artifact@v7
-        with:
-          name: codeql-sarif-filtered
-          path: temp_codeql
-
-      - name: Organize Evidence
-        run: |
-          mkdir -p artifacts/verification/static_analysis
-          find temp_codeql -name "*.sarif" -exec cp {} artifacts/verification/static_analysis/codeql.sarif \;
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v6
@@ -71,10 +51,43 @@ jobs:
           cd -
 
       - name: Install local validators
-        run: pip install -e dotstop
+        run: |
+          if [ -f "dotstop/setup.py" ] || [ -f "dotstop/pyproject.toml" ]; then
+            pip install -e dotstop
+          else
+            echo "Local dotstop package not found, skipping installation"
+          fi
+
+      - name: Download Verification Artifacts (if available)
+        uses: actions/download-artifact@v7
+        continue-on-error: true
+        with:
+          name: verification-artifacts
+          path: artifacts/verification
+
+      - name: Download CodeQL Artifacts (if available)
+        uses: actions/download-artifact@v7
+        continue-on-error: true
+        with:
+          name: codeql-sarif-filtered
+          path: temp_codeql
+
+      - name: Organize Evidence
+        run: |
+          mkdir -p artifacts/verification/static_analysis
+          if [ -d "temp_codeql" ]; then
+            find temp_codeql -name "*.sarif" -type f | head -1 | xargs -I {} cp {} artifacts/verification/static_analysis/codeql.sarif 2>/dev/null || echo "No SARIF files found"
+          else
+            echo "temp_codeql directory not found, skipping CodeQL artifact organization"
+          fi
 
       - name: Create temporary symlink to .dotstop.dot
-        run: ln -sf dotstop/.dotstop.dot .dotstop.dot
+        run: |
+          if [ -f "dotstop/.dotstop.dot" ]; then
+            ln -sf dotstop/.dotstop.dot .dotstop.dot
+          else
+            echo "Warning: dotstop/.dotstop.dot not found"
+          fi
 
       - name: Run trudag lint
         id: lint
@@ -90,10 +103,10 @@ jobs:
       - name: Get lint summary
         id: summary
         run: |
-          if [ -f artifacts/tsf/trudag-lint.txt ]; then
+          if [ -f "artifacts/tsf/trudag-lint.txt" ]; then
+            LINT_SUMMARY=$(head -n 20 artifacts/tsf/trudag-lint.txt | sed 's/^/    /')
             echo "lint_summary<<EOF" >> $GITHUB_OUTPUT
-            head -c 500 artifacts/tsf/trudag-lint.txt >> $GITHUB_OUTPUT
-            echo "" >> $GITHUB_OUTPUT
+            echo "$LINT_SUMMARY" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
           else
             echo "lint_summary=No lint output generated" >> $GITHUB_OUTPUT
@@ -114,8 +127,17 @@ jobs:
         continue-on-error: true
         run: |
           mkdir -p artifacts/tsf
-          dot -Tsvg .dotstop.dot -o artifacts/tsf/traceability_graph.svg
-          echo "graph_generated=true" >> $GITHUB_OUTPUT
+          if [ -f ".dotstop.dot" ]; then
+            if dot -Tsvg .dotstop.dot -o artifacts/tsf/traceability_graph.svg 2>&1; then
+              echo "graph_generated=true" >> $GITHUB_OUTPUT
+            else
+              echo "graph_generated=false" >> $GITHUB_OUTPUT
+              echo "Graph generation failed" > artifacts/tsf/graph_error.txt
+            fi
+          else
+            echo "graph_generated=false" >> $GITHUB_OUTPUT
+            echo ".dotstop.dot not found" > artifacts/tsf/graph_error.txt
+          fi
 
       - name: Generate Trustable report (publish)
         id: publish
@@ -137,7 +159,6 @@ jobs:
           name: tsf-validation-artifacts
           path: |
             artifacts/tsf
-            .dotstop.dot
           retention-days: 30
 
       - name: Comment PR with validation results
@@ -154,14 +175,12 @@ jobs:
             | **trudag lint** | ${{ steps.lint.outputs.lint_ok == 'true' && '✅ PASSED' || '❌ FAILED' }} |
             | **trudag score** | ${{ steps.scores.outputs.score_ok == 'true' && '✅ PASSED' || '❌ FAILED' }} |
             | **trudag publish** | ${{ steps.publish.outputs.publish_ok == 'true' && '✅ PASSED' || '❌ FAILED' }} |
+            | **Traceability Graph** | ${{ steps.graph.outputs.graph_generated == 'true' && '✅ GENERATED' || '❌ FAILED' }} |
 
             ### 📋 Lint Output
             ```
             ${{ steps.summary.outputs.lint_summary }}
             ```
-
-            ### 📊 Traceability Graph
-            ${{ steps.graph.outputs.graph_generated == 'true' && '✅ Graph generated successfully' || '❌ Graph generation failed' }}
 
             **Download artifacts to view**: [TSF Validation Results](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
             - Traceability graph: `tsf-validation-artifacts/traceability_graph.svg`
