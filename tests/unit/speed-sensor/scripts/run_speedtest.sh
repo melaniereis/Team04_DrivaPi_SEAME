@@ -4,7 +4,7 @@
 #
 # Purpose: Execute speed sensor unit tests with coverage reporting
 # ASIL Level: B/D
-# Version: 1.1.0
+# Version: 1.2.0 - Fixed coverage XML generation
 ################################################################################
 
 set -e
@@ -15,7 +15,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/../../common_test_lib.sh"
 
 # Cleanup intermediate files
-trap 'rm -f coverage.info coverage_src_only.info' EXIT INT TERM
+trap 'rm -f coverage.info coverage_src_only.info speed-sensor.xml' EXIT INT TERM
 
 echo "================================================================"
 echo "🚀 STARTING SPEED SENSOR TEST SUITE"
@@ -80,20 +80,38 @@ echo "✅ SUCCESS! Report available at: $PWD/coverage_report/index.html"
 echo "================================================================"
 echo ""
 
-# 6. Save for aggregation if called from master
+# 6. Generate coverage XML for dotstop validator
+echo "📄 Generating Coverage XML for dotstop validator..."
+generate_coverage_xml "coverage_filtered.info" "speed-sensor.xml"
+
+# 7. Save for aggregation if called from master
 if [[ "${CALLED_FROM_MASTER:-0}" == "1" ]]; then
     echo "📦 Saving Coverage for Master Aggregation..."
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     ABSOLUTE_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
     PERSISTENT_DIR="${ABSOLUTE_ROOT}/build/coverage/speed-sensor"
-    
+
     mkdir -p "${PERSISTENT_DIR}"
     [[ -f "coverage_filtered.info" ]] && \
         cp coverage_filtered.info "${PERSISTENT_DIR}/coverage_filtered.info"
+    [[ -f "speed-sensor.xml" ]] && \
+        cp speed-sensor.xml "${PERSISTENT_DIR}/speed-sensor.xml"
     echo "✓ Coverage saved"
 fi
 
-# 7. Cleanup
+# 8. Copy coverage XML to artifacts directory for master script
+if [[ "${CALLED_FROM_MASTER:-0}" == "1" ]]; then
+    MASTER_ARTIFACTS_DIR="${ABSOLUTE_ROOT}/artifacts/verification/coverage"
+    mkdir -p "${MASTER_ARTIFACTS_DIR}"
+    if [[ -f "speed-sensor.xml" ]]; then
+        cp speed-sensor.xml "${MASTER_ARTIFACTS_DIR}/speed-sensor.xml"
+        echo "✓ Coverage XML copied to artifacts directory"
+    else
+        echo "⚠️ Speed sensor coverage XML not found"
+    fi
+fi
+
+# 9. Cleanup
 if [[ "${CI:-false}" == "true" || "${CALLED_FROM_MASTER:-0}" == "1" ]]; then
     echo ""
     echo "ℹ️ Skipping cleanup (CI/Master mode)"
