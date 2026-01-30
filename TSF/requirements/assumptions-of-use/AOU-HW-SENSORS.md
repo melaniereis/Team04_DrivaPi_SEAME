@@ -8,4 +8,4 @@ derived: false
 normative: false
 level: 1.0
 ---
-Adequate GPS or inertial measurement unit (IMU) signal is available for secondary speed measurement, and the wheel encoder generates 30 pulses per revolution and is correctly installed/calibrated.
+The wheel encoder generates 30 pulses per revolution and is correctly installed/calibrated.
