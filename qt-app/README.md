@@ -38,15 +38,21 @@ make -j
 ## Directory
 ```
 qt-app/
-├── inc/feeder/      # Feeder headers
-├── inc/gui/         # GUI headers
-├── proto/kuksa/val/v2/
-├── resources/qml/components/
-├── resources/assets/
-├── src/feeder/
-├── src/gui/
 ├── build/
-... (see tree)
+├── inc/
+│   ├── feeder/
+│   └── gui/
+├── proto/
+│   └── kuksa/
+│       └── val/
+│           └── v2/
+├── resources/
+│   ├── assets/
+│   └── qml/
+|       └── components/
+└── src/
+    ├── feeder/
+    └── gui/
 ```
 
 ## TLS (dev only)
