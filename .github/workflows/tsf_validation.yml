@@ -89,10 +89,10 @@ jobs:
             echo "Warning: dotstop/.dotstop.dot not found"
           fi
 
-      - name: Run trudag lint
-        id: lint
-        continue-on-error: true
-        run: |
+       - name: Run trudag lint
+         id: lint
+         continue-on-error: true
+         run: |
           mkdir -p artifacts/tsf
           if trudag manage lint 2>&1 | tee artifacts/tsf/trudag-lint.txt; then
             echo "lint_ok=true" >> $GITHUB_OUTPUT
