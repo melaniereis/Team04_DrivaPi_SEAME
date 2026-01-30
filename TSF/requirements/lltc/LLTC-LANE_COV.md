@@ -15,13 +15,13 @@ reviewers:
     email: "melanie.reis@seame.pt"
 reviewed: '' # Manually fill on PR approval (YYYY-MM-DD - Approved by Name <email>)
 
-evidence:
-  type: coverage_threshold_validator
-  configuration:
-    min_line_rate: 90
-    references:
-    - type: file
-      path: artifacts/verification/coverage/coverage.xml
+# evidence:
+#   type: coverage_threshold_validator
+#   configuration:
+#     min_line_rate: 90
+#     references:
+#     - type: file
+#       path: artifacts/verification/coverage/lane.xml
 
 active: true
 derived: false

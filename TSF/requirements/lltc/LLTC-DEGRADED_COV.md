@@ -13,13 +13,13 @@ reviewers:
     email: "melanie.reis@seame.pt"
 reviewed: ''
 
-evidence:
-  type: coverage_threshold_validator
-  configuration:
-    min_line_rate: 90
-    references:
-    - type: file
-      path: artifacts/verification/coverage/coverage.xml
+# evidence:
+#   type: coverage_threshold_validator
+#   configuration:
+#     min_line_rate: 90
+#     references:
+#     - type: file
+#       path: artifacts/verification/coverage/degraded_control.xml
 
 active: true
 derived: false

@@ -21,7 +21,7 @@ evidence:
     min_line_rate: 90
     references:
     - type: file
-      path: artifacts/verification/coverage/coverage.xml
+      path: artifacts/verification/coverage/servo-motor.xml
 
 active: true
 derived: false

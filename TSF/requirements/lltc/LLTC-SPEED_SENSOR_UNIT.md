@@ -26,8 +26,8 @@ evidence:
   configuration:
     min_pass_rate: 100
     references:
-    - type: file
-      path: artifacts/verification/tests/junit_results.xml
+      - type: file
+        path: artifacts/verification/tests/speed-sensor.xml
 
 active: true
 derived: false

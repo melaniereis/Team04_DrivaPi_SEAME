@@ -29,7 +29,7 @@ evidence:
     min_pass_rate: 100
     references:
     - type: file
-      path: artifacts/verification/tests/junit_results.xml
+      path: artifacts/verification/tests/dc-motor.xml
 
 active: true
 derived: false
