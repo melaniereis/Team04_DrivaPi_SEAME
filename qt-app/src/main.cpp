@@ -7,9 +7,9 @@
 #include <QPointer>
 #include <QCommandLineParser>
 #include <QCommandLineOption>
-#include "vehicledata.hpp"
-#include "canreader.hpp"
-#include "kuksareader.hpp"
+#include "vehicle_data.hpp"
+#include "can_reader.hpp"
+#include "kuksa_reader.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -21,10 +21,32 @@ int main(int argc, char *argv[])
     parser.setApplicationDescription("Hybrid Dashboard (CAN / Kuksa)");
     parser.addHelpOption();
     
-    // Define the "--kuksa" or "-k" option
-    QCommandLineOption kuksaOption(QStringList() << "k" << "kuksa", 
+    // Define options
+    QCommandLineOption kuksaOption(QStringList() << "k" << "kuksa",
         "Enable Kuksa mode (gRPC). Defaults to CAN if omitted.");
     parser.addOption(kuksaOption);
+
+    QCommandLineOption kuksaAddrOption(QStringList() << "--kuksa-addr",
+        "Kuksa databroker address (host:port)", "addr");
+    QCommandLineOption kuksaTlsOption(QStringList() << "--kuksa-tls",
+        "Use TLS for Kuksa connection");
+    QCommandLineOption kuksaInsecureOption(QStringList() << "--kuksa-insecure",
+        "Use insecure connection (default)");
+    QCommandLineOption kuksaCaOption(QStringList() << "--kuksa-ca",
+        "Root CA certificate path", "path");
+    QCommandLineOption kuksaCertOption(QStringList() << "--kuksa-cert",
+        "Client certificate path (mTLS)", "path");
+    QCommandLineOption kuksaKeyOption(QStringList() << "--kuksa-key",
+        "Client private key path (mTLS)", "path");
+    QCommandLineOption kuksaTokenOption(QStringList() << "--kuksa-token",
+        "Authorization token (JWT)", "token");
+    parser.addOption(kuksaAddrOption);
+    parser.addOption(kuksaTlsOption);
+    parser.addOption(kuksaInsecureOption);
+    parser.addOption(kuksaCaOption);
+    parser.addOption(kuksaCertOption);
+    parser.addOption(kuksaKeyOption);
+    parser.addOption(kuksaTokenOption);
     
     parser.process(app);
     
@@ -47,8 +69,18 @@ int main(int argc, char *argv[])
     if (useKuksa)
     {
         qInfo() << "Starting in KUKSA mode";
-        // KUKSA Reader setup
-        kuksaReader = new KUKSAReader();
+        // KUKSA Reader setup with options
+        KuksaOptions ko;
+        ko.address = parser.value(kuksaAddrOption).isEmpty()
+            ? QStringLiteral("localhost:55555")
+            : parser.value(kuksaAddrOption);
+        ko.use_ssl = parser.isSet(kuksaTlsOption) && !parser.isSet(kuksaInsecureOption);
+        ko.root_ca_path = parser.value(kuksaCaOption);
+        ko.client_cert_path = parser.value(kuksaCertOption);
+        ko.client_key_path = parser.value(kuksaKeyOption);
+        ko.token = parser.value(kuksaTokenOption);
+
+        kuksaReader = new KUKSAReader(ko);
         kuksaReader->moveToThread(workerThread);
         // Start KUKSAReader when thread starts
         QObject::connect(workerThread, &QThread::started, kuksaReader, &KUKSAReader::start);
