@@ -38,7 +38,6 @@ make -j
 ## Directory
 ```
 qt-app/
-├── build/
 ├── inc/
 │   ├── feeder/
 │   └── gui/
