@@ -2,7 +2,7 @@
 
 ## 1. Core Philosophy
 
-The goal of this standard is **Visual Distinction**. You should be able to identify the nature of a symbol (Type, Variable, or Function) purely by its casing, without looking up the definition.
+The goal of this standard is **Visual Distinction** with **one official policy**. Pure C/C++ follows the rules below; Qt code has a mandatory Qt-style exception (not optional, required by the framework).
 
 * **Files:** Compatibility (`snake_case`)
 * **Types & Functions:** Proper Nouns (`PascalCase`)
@@ -209,9 +209,9 @@ int SerialSendString(char* payload) {
 
 ---
 
-## 8. C++ / Qt Framework Exceptions
+## 8. C++ / Qt Framework (Mandatory Qt Exception)
 
-This standard is primarily designed for **C codebases**. When working with **C++ and Qt framework**, the following exceptions apply:
+This standard is primarily designed for **C / pure C++**. **Qt code MUST follow Qt style** (camelCase + `m_`), because Qt tooling and community conventions depend on it. This is not an alternative policy—Qt style is mandatory for Qt files.
 
 ### 8.1 Qt Classes and Methods
 
@@ -219,7 +219,7 @@ Qt framework follows its own established conventions. **Qt-related code should f
 
 * **Qt Class Methods:** `camelCase` (Qt standard convention)
 * **Qt Signals/Slots:** `camelCase`
-* **Qt Member Variables:** `m_camelCase` or `m_snake_case` (Qt uses `m_` prefix)
+* **Qt Member Variables:** `m_camelCase` (single convention; Qt uses `m_` prefix)
 * **Qt Class Names:** `PascalCase` (matches our convention)
 
 **Example (Qt Code):**
@@ -244,9 +244,9 @@ private:
 
 For **pure C++ code that doesn't use Qt** (e.g., the feeder module), apply the C conventions with C++ adaptations:
 
-* **Free Functions:** `PascalCase` with module prefix
+* **Free Functions:** `PascalCase` (class/namespace provides scope)
 * **Namespaces:** `snake_case` (lowercase)
-* **Class Methods:** `PascalCase` (without module prefix, class name provides namespace)
+* **Class Methods:** `PascalCase`
 * **Member Variables:** `snake_case` with optional trailing underscore `variable_name_`
 * **Local Variables:** `snake_case`
 
@@ -277,26 +277,17 @@ public:
     
 private:
     void AttachAuth(grpc::ClientContext& ctx);
-    PublisherOptions opts_;
+    PublisherOptions options_;
     std::unique_ptr<VAL::Stub> stub_;
 };
 
 } // namespace kuksa
 ```
 
-### 8.3 Decision Matrix
+### 8.3 Rationale (Why Qt is an exception, not an option)
 
-| Code Type | File Extension | Naming Style | Example |
-|-----------|---------------|--------------|---------|
-| **C Code** | `.c`, `.h` | This standard | `MotorSetSpeed()` |
-| **Qt C++** | `.cpp`, `.hpp` with Qt | Qt conventions | `getSpeed()`, `m_speed` |
-| **Pure C++** | `.cpp`, `.hpp` without Qt | C conventions adapted | `PublishFloat()`, `opts_` |
-
-### 8.4 Rationale
-
-* **Consistency within framework:** Qt code should look like Qt code
-* **Team familiarity:** Qt developers expect Qt conventions
-* **Interoperability:** Qt MOC (Meta-Object Compiler) expects certain patterns
-* **C++ namespaces:** Class names provide scoping, eliminating need for function prefixes
+* Qt code must match Qt tooling expectations (MOC, signals/slots)
+* Qt developers expect camelCase + `m_`; changing it reduces readability
+* Pure C/C++ keeps PascalCase actions and snake_case data for clarity
 
 ---

@@ -1,6 +1,6 @@
 #!/bin/bash
 ################################################################################
-# Master Unit Test Automation Script
+# Master Unit Test Automation Script with Aggregated Coverage
 #
 # Purpose: Execute all unit tests and generate unified coverage report
 # ASIL Level: B/D
@@ -11,23 +11,24 @@ set -e
 set -u
 set -o pipefail
 
-# Source common library
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/common_test_lib.sh"
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly PROJECT_ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
-# Cleanup temp files
-trap 'rm -f "${DC_MOTOR_OUTPUT:-}" "${SERVO_MOTOR_OUTPUT:-}" "${SPEED_SENSOR_OUTPUT:-}"' EXIT INT TERM
-
-readonly PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 readonly DC_MOTOR_DIR="${SCRIPT_DIR}/dc-motor"
 readonly SERVO_MOTOR_DIR="${SCRIPT_DIR}/servo-motor"
 readonly SPEED_SENSOR_DIR="${SCRIPT_DIR}/speed-sensor"
-readonly ARTIFACTS_DIR="${PROJECT_ROOT}/artifacts/verification"
 
-# Coverage directory
-MASTER_COVERAGE_DIR="${SCRIPT_DIR}/coverage"
-[[ -n "${COVERAGE_DIR:-}" ]] && MASTER_COVERAGE_DIR="$COVERAGE_DIR"
-[[ "$MASTER_COVERAGE_DIR" != /* ]] && MASTER_COVERAGE_DIR="${PROJECT_ROOT}/${MASTER_COVERAGE_DIR}"
+if [[ -n "${COVERAGE_DIR:-}" ]]; then
+    if [[ "$COVERAGE_DIR" == /* ]]; then
+        MASTER_COVERAGE_DIR="$COVERAGE_DIR"
+    else
+        MASTER_COVERAGE_DIR="${PROJECT_ROOT_DIR}/${COVERAGE_DIR}"
+    fi
+else
+    MASTER_COVERAGE_DIR="${SCRIPT_DIR}/coverage"
+fi
+
+readonly ARTIFACTS_DIR="${PROJECT_ROOT_DIR}/artifacts/verification"
 
 mkdir -p "${MASTER_COVERAGE_DIR}"
 mkdir -p "${ARTIFACTS_DIR}/tests"

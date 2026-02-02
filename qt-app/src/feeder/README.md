@@ -51,9 +51,17 @@ sudo systemctl start kuksa-databroker
 ```
 
 Configuration (typically in `/etc/default/kuksa-databroker`):
+
+**Production (with TLS/authorization):**
+```bash
+EXTRA_ARGS="--address 0.0.0.0 --port 55555 --vss /etc/kuksa/vss.json --tls /etc/kuksa/server.crt --tls-key /etc/kuksa/server.key"
+```
+
+**Development/Testing ONLY (⚠️ INSECURE - exposes signals without credentials):**
 ```bash
 EXTRA_ARGS="--address 0.0.0.0 --port 55555 --vss /etc/kuksa/vss.json --insecure --disable-authorization"
 ```
+⚠️ **WARNING:** The test-only configuration above allows any local network client to read or actuate all vehicle signals without encryption or authentication. **Never use in production or on networked deployments.**
 
 ### 2. VSS Signal Definitions
 
@@ -86,8 +94,8 @@ sudo ip link set can0 up
 
 # For testing with virtual CAN
 sudo modprobe vcan
-sudo ip link add dev vcan0 type vcan
-sudo ip link set vcan0 up
+sudo ip link add dev can1 type vcan
+sudo ip link set can1 up
 ```
 
 ## Usage
@@ -105,7 +113,7 @@ Default values:
 ### Custom Interface/Address
 
 ```bash
-./kuksa_feeder vcan0 192.168.1.100:55555
+./kuksa_feeder can1 192.168.1.100:55555
 ### TLS and Authorization
 
 The feeder supports TLS and optional mTLS, plus JWT-based authorization.
@@ -121,10 +129,10 @@ Examples:
 
 ```bash
 # TLS with root CA
-./kuksa_feeder vcan0 kuksa.local:55555 --tls --ca /etc/kuksa/ca.crt
+./kuksa_feeder can1 kuksa.local:55555 --tls --ca /etc/kuksa/ca.crt
 
 # mTLS with token
-./kuksa_feeder vcan0 kuksa.local:55555 --tls --ca /etc/kuksa/ca.crt \
+./kuksa_feeder can1 kuksa.local:55555 --tls --ca /etc/kuksa/ca.crt \
   --cert /etc/kuksa/client.crt --key /etc/kuksa/client.key \
   --token eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
@@ -148,7 +156,7 @@ KUKSA Address: localhost:55555
 
 ## Testing
 
-### 1. Send Test CAN Frame (vcan0)
+### 1. Send Test CAN Frame (can1)
 
 ```bash
 # Install can-utils if needed
@@ -156,7 +164,7 @@ sudo apt-get install can-utils
 
 # Send a speed frame (0x100) with float value 12.5 m/s (45.0 km/h)
 # Convert 12.5 to little-endian hex: 0x41480000
-cansend vcan0 100#00004841
+cansend can1 100#00004841
 ```
 
 ### 2. Verify in KUKSA CLI

@@ -42,7 +42,7 @@ public:
     /**
      * @brief Construct with options (TLS and auth)
      */
-    explicit Publisher(const PublisherOptions& opts);
+    explicit Publisher(const PublisherOptions& options);
     ~Publisher();
 
     /**
@@ -84,12 +84,12 @@ public:
 
 private:
     // Attach authorization metadata if token present
-    void AttachAuth(grpc::ClientContext& ctx);
+    void AttachAuth(grpc::ClientContext& client_context);
 
     // Load file contents into string (returns empty if path empty or read fails)
     static std::string LoadFile(const std::string& path);
 
-    PublisherOptions opts_;
+    PublisherOptions options_;
     std::shared_ptr<grpc::Channel> channel_;
     std::unique_ptr<kuksa::val::v2::VAL::Stub> stub_;
     // Provider stream objects
