@@ -28,16 +28,16 @@ const JS_EVENT_AXIS: u8 = 0x02;
 const JS_EVENT_INIT: u8 = 0x80;
 
 #[derive(Default, Debug, Clone, Copy)]
-pub struct Vector3f {
+pub struct Vector2f {
     x: f64,
     y: f64,
-    z: f64,
 }
 
 #[derive(Default, Debug)]
 pub struct GamepadInput {
-    analog_stick_left: Vector3f,
-    analog_stick_right: Vector3f,
+    analog_stick_left: Vector2f,
+    analog_stick_right: Vector2f,
+    d_pad: Vector2f,
     button_l1: bool,
     button_l2: bool,
     button_r1: bool,
@@ -49,6 +49,8 @@ pub struct GamepadInput {
     button_select: bool,
     button_start: bool,
     button_home: bool,
+    button_l3: bool,
+    button_r3: bool,
 }
 
 pub struct Joystick {
@@ -160,8 +162,12 @@ impl Gamepad {
                     match number {
                         0 => self.input.analog_stick_left.x = value,
                         1 => self.input.analog_stick_left.y = -value,
-                        2 => self.input.analog_stick_right.x = value,
-                        3 => self.input.analog_stick_right.y = -value,
+                        2 => self.input.button_l2 = value == 1.0,
+                        3 => self.input.analog_stick_right.x = value,
+                        4 => self.input.analog_stick_right.y = -value,
+                        5 => self.input.button_r2 = value == 1.0,
+                        6 => self.input.d_pad.x = value,
+                        7 => self.input.d_pad.y = -value,
                         _ => {}
                     }
                 }
@@ -169,17 +175,15 @@ impl Gamepad {
                     match number {
                         0 => self.input.button_a = pressed,
                         1 => self.input.button_b = pressed,
-                        3 => self.input.button_x = pressed,
-                        4 => self.input.button_y = pressed,
-                        6 => self.input.button_l1 = pressed,
-                        7 => self.input.button_r1 = pressed,
-                        8 => self.input.button_l2 = pressed,
-                        9 => self.input.button_r2 = pressed,
-                        10 => self.input.button_select = pressed,
-                        11 => self.input.button_start = pressed,
-                        12 => self.input.button_home = pressed,
-                        13 => self.input.analog_stick_left.z = if pressed { 1.0 } else { 0.0 },
-                        14 => self.input.analog_stick_right.z = if pressed { 1.0 } else { 0.0 },
+                        2 => self.input.button_x = pressed,
+                        3 => self.input.button_y = pressed,
+                        4 => self.input.button_l1 = pressed,
+                        5 => self.input.button_r1 = pressed,
+                        6 => self.input.button_select = pressed,
+                        7 => self.input.button_start = pressed,
+                        8 => self.input.button_home = pressed,
+                        9 => self.input.button_l3 = pressed,
+                        10 => self.input.button_r3 = pressed,
                         _ => {}
                     }
                 }
@@ -248,13 +252,24 @@ impl MotorController {
         Ok(())
     }
 
-    fn stop_motors(&self) -> Result<(), Box<dyn std::error::Error>> {
+    fn stop_dc_motors(&self) -> Result<(), Box<dyn std::error::Error>> {
         self.send_motor_command(0.0, 0.0)
     }
+    fn stop_servo_motors(&self) -> Result<(), Box<dyn std::error::Error>> {
+        self.send_servo_command(90.0)
+    }    
 }
 
 fn run_manual_mode(gamepad: &mut Gamepad, controller: &MotorController) -> Result<(), Box<dyn std::error::Error>> {
     println!("MANUEL MODE - Press B to exit");
+
+    // Track previous values to detect changes
+    let mut prev_motor_speed = 0.0;
+    let mut prev_servo_angle = 90.0;
+    
+    // Threshold for detecting meaningful changes
+    const MOTOR_THRESHOLD: f64 = 10.0;  // Only send if change > 10 counts
+    const SERVO_THRESHOLD: f64 = 1.0;   // Only send if change > 1 degree
 
     loop {
         gamepad.update();
@@ -263,13 +278,14 @@ fn run_manual_mode(gamepad: &mut Gamepad, controller: &MotorController) -> Resul
         // Check exit condition
         if input.button_b {
             println!("Exiting MANUEL mode");
-            controller.stop_motors()?;
+            controller.stop_dc_motors()?;
+            controller.stop_servo_motors()?;
             break;
         }
 
         // Get control inputs
-        let steering = input.analog_stick_right.x;   // Left stick X: -1.0 to 1.0
-        let throttle = input.analog_stick_left.y;  // Right stick Y: -1.0 to 1.0
+        let steering = input.analog_stick_right.x;   // Right stick X: -1.0 to 1.0
+        let throttle = input.analog_stick_left.y;    // Left stick Y: -1.0 to 1.0
 
         // Calculate motor speeds (same for both motors, no differential)
         let motor_speed = throttle * MAX_MOTOR_SPEED;
@@ -277,18 +293,22 @@ fn run_manual_mode(gamepad: &mut Gamepad, controller: &MotorController) -> Resul
         // Calculate servo angle (map -1..1 to 0..180)
         let servo_angle = ((steering + 1.0) / 2.0) * MAX_SERVO_ANGLE;
 
-        // Send CAN commands
-        controller.send_motor_command(motor_speed, motor_speed)?;
-        controller.send_servo_command(servo_angle)?;
+        // Send motor command only if value changed significantly
+        if (motor_speed - prev_motor_speed).abs() > MOTOR_THRESHOLD {
+            controller.send_motor_command(motor_speed, motor_speed)?;
+            prev_motor_speed = motor_speed;
+            println!("Motor updated: {:.0}", motor_speed);
+        }
 
-        // Optional: Print status (comment out for performance)
-        println!(
-            "Motor: {:.0} | Servo: {:.1}°",
-            motor_speed, servo_angle
-        );
+        // Send servo command only if value changed significantly
+        if (servo_angle - prev_servo_angle).abs() > SERVO_THRESHOLD {
+            controller.send_servo_command(servo_angle)?;
+            prev_servo_angle = servo_angle;
+            println!("Servo updated: {:.1}°", servo_angle);
+        }
 
-        // Small delay to avoid flooding CAN bus
-        thread::sleep(Duration::from_millis(50));
+        // Small delay to avoid busy-waiting
+        thread::sleep(Duration::from_millis(10));
     }
 
     Ok(())
@@ -314,7 +334,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         // Check for exit
         if input.button_select {
             println!("Shutting down...");
-            controller.stop_motors()?;
+            controller.stop_dc_motors()?;
+            controller.stop_servo_motors()?;
             break;
         }
 
