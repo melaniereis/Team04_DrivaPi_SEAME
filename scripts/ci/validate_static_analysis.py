@@ -11,7 +11,6 @@ def main():
         os.path.join('artifacts/verification/static-analysis', 'results/cpp.sarif'),
     ], help='SARIF file candidates')
     args = parser.parse_args()
-    base_dir = args.base_dir
     try:
         sys.path.insert(0, 'dotstop')
         from dotstop_extensions.validators import codeql_sarif_validator
