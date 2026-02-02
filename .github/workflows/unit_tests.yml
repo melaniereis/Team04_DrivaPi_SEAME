@@ -91,7 +91,7 @@ jobs:
         if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         run: |
           echo "Generating coverage baseline JSON on default branch: ${{ github.ref_name }}"
-            python3 scripts/ci/generate_coverage_baseline.py --base-dir artifacts/verification/coverage --suites dc-motor servo-motor speed-sensor
+          python3 scripts/ci/generate_coverage_baseline.py --base-dir artifacts/verification/coverage --suites dc-motor servo-motor speed-sensor --sha ${{ github.sha }}
 
       - name: Upload Coverage Baseline
         if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
@@ -123,7 +123,7 @@ jobs:
         if: always()
         run: |
           echo "Validating per-suite coverage changes vs baseline (approval required on change)"
-            python3 scripts/ci/validate_lltc_coverage.py --base-dir artifacts/verification/coverage --suites dc-motor servo-motor speed-sensor --min-line-rate 90
+          python3 scripts/ci/validate_lltc_coverage.py --base-dir artifacts/verification/coverage --suites dc-motor servo-motor speed-sensor --min-line-rate 90
 
       - name: Upload Verification Artifacts (TSF)
         uses: actions/upload-artifact@v6
@@ -145,7 +145,7 @@ jobs:
         if: always()
         run: |
           echo "Checking for SARIF static analysis results..."
-            python3 scripts/ci/validate_static_analysis.py --base-dir artifacts/verification/static-analysis
+          python3 scripts/ci/validate_static_analysis.py --base-dir artifacts/verification/static-analysis
 
       - name: Upload Static Analysis SARIF
         if: always()
