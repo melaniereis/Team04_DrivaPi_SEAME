@@ -101,6 +101,15 @@ jobs:
           path: artifacts/verification/coverage/baseline.json
           retention-days: 30
 
+      - name: Debug baseline gating values
+        if: always()
+        run: |
+         echo "event_name=$GITHUB_EVENT_NAME"
+         echo "ref=$GITHUB_REF"
+         echo "ref_name=$GITHUB_REF_NAME"
+         echo "default_branch=${{ github.event.repository.default_branch }}"
+
+
       - name: Download Coverage Baseline (from default branch)
         if: github.event_name == 'pull_request'
         uses: dawidd6/action-download-artifact@v3
