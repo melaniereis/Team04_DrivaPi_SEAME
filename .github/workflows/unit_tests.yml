@@ -91,26 +91,7 @@ jobs:
         if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         run: |
           echo "Generating coverage baseline JSON on default branch: ${{ github.ref_name }}"
-          python3 - << 'PY'
-          import os, json, xml.etree.ElementTree as ET
-          base_dir = 'artifacts/verification/coverage'
-          os.makedirs(base_dir, exist_ok=True)
-          def read_rates(p):
-              tree = ET.parse(p)
-              r = tree.getroot()
-              lr = float(r.attrib.get('line-rate') or r.attrib.get('lineRate'))
-              br = float(r.attrib.get('branch-rate') or r.attrib.get('branchRate', lr))
-              return lr, br
-          data = {'suites': {}, 'sha': os.environ.get('GITHUB_SHA')}
-          for suite in ['dc-motor','servo-motor','speed-sensor']:
-              f = os.path.join(base_dir, f"{suite}.xml")
-              if os.path.exists(f):
-                  lr, br = read_rates(f)
-                  data['suites'][suite] = {'line_rate': lr, 'branch_rate': br}
-          with open(os.path.join(base_dir,'baseline.json'),'w') as fo:
-              json.dump(data, fo, indent=2)
-          print('Baseline written:', os.path.join(base_dir,'baseline.json'))
-          PY
+            python3 scripts/ci/generate_coverage_baseline.py --base-dir artifacts/verification/coverage --suites dc-motor servo-motor speed-sensor
 
       - name: Upload Coverage Baseline
         if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
@@ -133,87 +114,16 @@ jobs:
 
       - name: Generate Coverage Approvals (PR labels)
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const fs = require('fs');
-            const path = 'artifacts/verification/coverage/approvals.json';
-            const labels = (context.payload.pull_request?.labels || []).map(l=>l.name.toLowerCase());
-            const approveAll = labels.includes('approve-coverage');
-            const suites = {
-              'dc-motor': approveAll || labels.includes('approve-coverage-dc-motor'),
-              'servo-motor': approveAll || labels.includes('approve-coverage-servo-motor'),
-              'speed-sensor': approveAll || labels.includes('approve-coverage-speed-sensor')
-            };
-            const data = { suites: {} };
-            for (const [suite, ok] of Object.entries(suites)) {
-              if (ok) {
-                data.suites[suite] = { approved: true, approved_sha: context.sha, timestamp: new Date().toISOString() };
-              }
-            }
-            fs.mkdirSync('artifacts/verification/coverage', { recursive: true });
-            fs.writeFileSync(path, JSON.stringify(data, null, 2));
-            core.notice(`Approvals file written at ${path}`);
+        run: |
+          LABELS=$(jq -r '.pull_request.labels | map(.name | ascii_downcase) | join(",")' "$GITHUB_EVENT_PATH")
+          SHA=${{ github.sha }}
+          bash scripts/ci/generate_coverage_approvals.sh "$LABELS" "$SHA" artifacts/verification/coverage/approvals.json
 
       - name: Run LLTC Coverage Validation (per-suite, with baseline & approvals)
         if: always()
         run: |
           echo "Validating per-suite coverage changes vs baseline (approval required on change)"
-          python3 - << 'PY'
-          import sys, json, os
-          base_dir = 'artifacts/verification/coverage'
-          # First check if dotstop package is available
-          try:
-              sys.path.insert(0, 'dotstop')
-              from dotstop_extensions.validators import lltc_coverage_change_validator
-              has_validator = True
-          except ImportError:
-              has_validator = False
-              print("Warning: dotstop_extensions.validators not found, skipping LLTC validation")
-
-          if has_validator:
-              inputs = [
-                  ('dc-motor', os.path.join(base_dir,'dc-motor.xml')),
-                  ('servo-motor', os.path.join(base_dir,'servo-motor.xml')),
-                  ('speed-sensor', os.path.join(base_dir,'speed-sensor.xml')),
-              ]
-              baseline = os.path.join(base_dir,'baseline.json')
-              approvals = os.path.join(base_dir,'approvals.json')
-              overall_ok = True
-              summary = []
-              for suite, path in inputs:
-                  if os.path.exists(path):
-                      cfg = {
-                          'path': path,
-                          'suite': suite,
-                          'baseline_path': baseline if os.path.exists(baseline) else None,
-                          'approval_path': approvals if os.path.exists(approvals) else None,
-                          'min_line_rate': 90,
-                          'require_review_on_change': True,
-                          'enforce_individual': True,
-                      }
-                      score, issues = lltc_coverage_change_validator(cfg)
-                      suite_ok = (score >= 1.0) and (not issues)
-                      summary.append((suite, score, [str(e) for e in issues]))
-                      if issues:
-                          overall_ok = False
-                  else:
-                      summary.append((suite, 0.0, [f"Coverage file not found: {path}"]))
-                      overall_ok = False
-
-              # Write summary file for job summary consumption
-              with open('LLTC Coverage Validation Summary.txt','w') as f:
-                  for s, sc, iss in summary:
-                      f.write(f"- {s}: score={sc:.2f} issues={iss}\n")
-              print('LLTC Coverage Validation Summary:')
-              for s, sc, iss in summary:
-                  print(f"  - {s}: score={sc:.2f} issues={iss}")
-              if not overall_ok:
-                  print('Blocking due to coverage change requiring approval or parse errors.')
-                  sys.exit(1)
-          else:
-              print("Skipping LLTC coverage validation - dotstop_extensions not available")
-          PY
+            python3 scripts/ci/validate_lltc_coverage.py --base-dir artifacts/verification/coverage --suites dc-motor servo-motor speed-sensor --min-line-rate 90
 
       - name: Upload Verification Artifacts (TSF)
         uses: actions/upload-artifact@v6
@@ -235,40 +145,7 @@ jobs:
         if: always()
         run: |
           echo "Checking for SARIF static analysis results..."
-          python3 - << 'PY'
-          import os, sys
-          base_dir = 'artifacts/verification/static-analysis'
-          # First check if dotstop package is available
-          try:
-              sys.path.insert(0, 'dotstop')
-              from dotstop_extensions.validators import codeql_sarif_validator
-              has_validator = True
-          except ImportError:
-              has_validator = False
-              print("Warning: dotstop_extensions.validators not found, skipping SARIF validation")
-
-          if has_validator:
-              sarif_path_candidates = [
-                  'results/cpp.sarif',
-                  os.path.join(base_dir, 'cpp.sarif'),
-                  os.path.join(base_dir, 'results/cpp.sarif'),
-              ]
-              sarif_path = None
-              for p in sarif_path_candidates:
-                  if os.path.exists(p):
-                      sarif_path = p
-                      break
-              if sarif_path is None:
-                  print('No SARIF file found; skipping static analysis validation.')
-                  sys.exit(0)
-              score, errs = codeql_sarif_validator({'path': sarif_path, 'hard_fail_on_error': True})
-              print(f'Static Analysis SARIF: path={sarif_path} score={score} errs={errs}')
-              if score <= 0.0 and not (errs is None or len(errs)==0):
-                  print('Blocking due to static analysis errors.')
-                  sys.exit(1)
-          else:
-              print("Skipping SARIF validation - dotstop_extensions not available")
-          PY
+            python3 scripts/ci/validate_static_analysis.py --base-dir artifacts/verification/static-analysis
 
       - name: Upload Static Analysis SARIF
         if: always()
@@ -282,111 +159,6 @@ jobs:
 
       - name: Post Test Results
         if: always()
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const fs = require('fs');
-
-            // Extract test results
-            let testPassed = 0;
-            let testFailed = 0;
-            let dcMotorCount = 0;
-            let servoMotorCount = 0;
-            let speedSensorCount = 0;
-            let testSummary = '';
-
-            if (fs.existsSync('test_output.log')) {
-              const logContent = fs.readFileSync('test_output.log', 'utf8');
-
-              // Extract test counts from [TEST_COUNT] markers
-              const dcMotorCountMatch = logContent.match(/\[TEST_COUNT\] DC Motor:\s*(\d+)\s*tests/i);
-              const servoMotorCountMatch = logContent.match(/\[TEST_COUNT\] Servo Motor:\s*(\d+)\s*tests/i);
-              const speedSensorCountMatch = logContent.match(/\[TEST_COUNT\] Speed Sensor:\s*(\d+)\s*tests/i);
-
-              if (dcMotorCountMatch) {
-                dcMotorCount = parseInt(dcMotorCountMatch[1]);
-              }
-              if (servoMotorCountMatch) {
-                servoMotorCount = parseInt(servoMotorCountMatch[1]);
-              }
-              if (speedSensorCountMatch) {
-                speedSensorCount = parseInt(speedSensorCountMatch[1]);
-              }
-
-              testPassed = dcMotorCount + servoMotorCount + speedSensorCount;
-
-              // Check for failure indicators in status lines
-              const dcMotorFailed = logContent.match(/\[INFO\] DC Motor:\s+FAILED/i);
-              const servoMotorFailed = logContent.match(/\[INFO\] Servo Motor:\s+FAILED/i);
-              const speedSensorFailed = logContent.match(/\[INFO\] Speed Sensor:\s+FAILED/i);
-              testFailed = (dcMotorFailed || servoMotorFailed || speedSensorFailed) ? 1 : 0;
-
-              // Extract test status (PASSED or FAILED)
-              const dcMotorMatch = logContent.match(/\[INFO\] DC Motor:\s+(PASSED|FAILED)/i);
-              const servoMotorMatch = logContent.match(/\[INFO\] Servo Motor:\s+(PASSED|FAILED)/i);
-              const speedSensorMatch = logContent.match(/\[INFO\] Speed Sensor:\s+(PASSED|FAILED)/i);
-
-              // Test status based on output
-              const dcMotorStatus = dcMotorMatch ? dcMotorMatch[1] : (testFailed === 0 ? 'PASSED' : 'FAILED');
-              const servoMotorStatus = servoMotorMatch ? servoMotorMatch[1] : (testFailed === 0 ? 'PASSED' : 'FAILED');
-              const speedSensorStatus = speedSensorMatch ? speedSensorMatch[1] : (testFailed === 0 ? 'PASSED' : 'FAILED');
-
-              // Check for coverage summary
-              const coverageMatch = logContent.match(/lines.*?(\d+\.\d+)%.*?functions.*?(\d+\.\d+)%.*?branches.*?(\d+\.\d+)%/s);
-              const coverageInfo = coverageMatch ?
-                `\n#### 📊 Coverage\n- **Lines**: ${coverageMatch[1]}%\n- **Functions**: ${coverageMatch[2]}%\n- **Branches**: ${coverageMatch[3]}%\n` :
-                '\n#### 📊 Coverage\nCoverage report available in artifacts.\n';
-
-              // Add coverage change validation info
-              let lltcSummary = '';
-              try {
-                const valLog = fs.readFileSync('LLTC Coverage Validation Summary.txt','utf8');
-                lltcSummary = `\n#### 🔍 Coverage Change Validation\n${valLog}\n`;
-              } catch(e) {}
-
-              testSummary = `
-            ### 🧪 Unit Test Results
-
-            **Overall Status**: ${testPassed > 0 && testFailed === 0 ? '✅ PASSED' : '❌ FAILED'}
-
-            - **DC Motor Tests**: ${dcMotorStatus} (${dcMotorCount} tests)
-            - **Servo Motor Tests**: ${servoMotorStatus} (${servoMotorCount} tests)
-            - **Speed Sensor Tests**: ${speedSensorStatus} (${speedSensorCount} tests)
-            - **Total**: ${testPassed} tests
-            ${coverageInfo}
-            ${lltcSummary}
-            ---
-            Full coverage reports available in workflow artifacts
-            `;
-            }
-
-            // Always add to job summary
-            await core.summary
-              .addHeading('🧪 Unit Test Results', 2)
-              .addRaw(testSummary || '🧪 Unit tests completed. Check logs for details.')
-              .write();
-
-            // Try to post as comment (PR or commit)
-            try {
-              if (context.eventName === 'pull_request') {
-                await github.rest.issues.createComment({
-                  issue_number: context.issue.number,
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  body: testSummary || '🧪 Unit tests completed. Check logs for details.'
-                });
-                console.log('✅ Posted comment on PR');
-              } else {
-                // For push events, try to create a commit comment
-                await github.rest.repos.createCommitComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  commit_sha: context.sha,
-                  body: testSummary || '🧪 Unit tests completed. Check logs for details.'
-                });
-                console.log('✅ Posted comment on commit');
-              }
-            } catch (error) {
-              console.log('⚠️ Could not post comment (insufficient permissions), but results are in job summary');
-              console.log(error.message);
-            }
+        run: |
+          bash scripts/ci/summarize_test_results.sh test_output.log LLTC\ Coverage\ Validation\ Summary.txt > test_summary.txt
+          cat test_summary.txt
