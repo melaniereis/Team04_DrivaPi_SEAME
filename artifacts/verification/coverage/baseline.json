@@ -1,0 +1,18 @@
+{
+  "timestamp": "2026-02-02T16:45:02Z",
+  "commit_sha": "manual-baseline-init",
+  "suites": {
+    "dc-motor": {
+      "line-rate": 0.91,
+      "branch-rate": 0.9
+    },
+    "servo-motor": {
+      "line-rate": 0.92,
+      "branch-rate": 0.91
+    },
+    "speed-sensor": {
+      "line-rate": 0.93,
+      "branch-rate": 0.92
+    }
+  }
+}
