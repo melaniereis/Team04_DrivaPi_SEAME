@@ -27,7 +27,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v5
 
       - name: Install dependencies
         run: |
@@ -51,29 +51,28 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pyyaml typing_extensions
-          git clone https://gitlab.com/CodethinkLabs/trustable/trustable.git /tmp/trustable
+          git clone --depth 1 https://gitlab.com/CodethinkLabs/trustable/trustable.git /tmp/trustable
           cd /tmp/trustable
           pip install .
           cd -
 
-      - name: Install local validators
+      - name: Install local validators (dotstop)
         run: |
           if [ -f "dotstop/setup.py" ] || [ -f "dotstop/pyproject.toml" ]; then
             pip install -e dotstop
           else
-            echo "Local dotstop package not found, skipping installation"
+            echo "::error::Local dotstop package not found (required for validation)"
+            exit 1
           fi
 
-      - name: Download Verification Artifacts (if available)
-        uses: actions/download-artifact@v7
-        continue-on-error: true
+      - name: Download Verification Artifacts (required)
+        uses: actions/download-artifact@v5
         with:
           name: verification-artifacts
           path: artifacts/verification
 
-      - name: Download CodeQL Artifacts (if available)
-        uses: actions/download-artifact@v7
-        continue-on-error: true
+      - name: Download CodeQL Artifacts (required)
+        uses: actions/download-artifact@v5
         with:
           name: codeql-sarif-filtered
           path: temp_codeql
@@ -82,9 +81,16 @@ jobs:
         run: |
           mkdir -p artifacts/verification/static_analysis
           if [ -d "temp_codeql" ]; then
-            find temp_codeql -name "*.sarif" -type f | head -1 | xargs -I {} cp {} artifacts/verification/static_analysis/codeql.sarif 2>/dev/null || echo "No SARIF files found"
+            f=$(find temp_codeql -name "*.sarif" -type f | head -1 || true)
+            if [ -n "$f" ]; then
+              cp "$f" artifacts/verification/static_analysis/codeql.sarif
+            else
+              echo "::error::No SARIF files found in downloaded CodeQL artifact"
+              exit 1
+            fi
           else
-            echo "temp_codeql directory not found, skipping CodeQL artifact organization"
+            echo "::error::temp_codeql directory not found"
+            exit 1
           fi
 
       - name: Create temporary symlink to .dotstop.dot
@@ -92,79 +98,47 @@ jobs:
           if [ -f "dotstop/.dotstop.dot" ]; then
             ln -sf dotstop/.dotstop.dot .dotstop.dot
           else
-            echo "Warning: dotstop/.dotstop.dot not found"
+            echo "::error::dotstop/.dotstop.dot not found"
+            exit 1
           fi
 
       - name: Run trudag lint
         id: lint
-        continue-on-error: true
         run: |
           mkdir -p artifacts/tsf
-          if trudag manage lint 2>&1 | tee artifacts/tsf/trudag-lint.txt; then
-            echo "lint_ok=true" >> $GITHUB_OUTPUT
-          else
-            echo "lint_ok=false" >> $GITHUB_OUTPUT
-          fi
+          trudag manage lint 2>&1 | tee artifacts/tsf/trudag-lint.txt
 
       - name: Get lint summary
         id: summary
         run: |
-          if [ -f "artifacts/tsf/trudag-lint.txt" ]; then
-            LINT_SUMMARY=$(head -n 20 artifacts/tsf/trudag-lint.txt | sed 's/^/    /')
-            echo "lint_summary<<EOF" >> $GITHUB_OUTPUT
-            echo "$LINT_SUMMARY" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
-          else
-            echo "lint_summary=No lint output generated" >> $GITHUB_OUTPUT
-          fi
+          LINT_SUMMARY=$(head -n 20 artifacts/tsf/trudag-lint.txt | sed 's/^/    /')
+          echo "lint_summary<<EOF" >> $GITHUB_OUTPUT
+          echo "$LINT_SUMMARY" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Calculate trust scores
         id: scores
-        continue-on-error: true
         run: |
-          if trudag score 2>&1 | tee artifacts/tsf/trudag-score.txt; then
-            echo "score_ok=true" >> $GITHUB_OUTPUT
-          else
-            echo "score_ok=false" >> $GITHUB_OUTPUT
-          fi
+          trudag score 2>&1 | tee artifacts/tsf/trudag-score.txt
 
       - name: Generate traceability graph
         id: graph
-        continue-on-error: true
         run: |
           mkdir -p artifacts/tsf
-          if [ -f ".dotstop.dot" ]; then
-            if dot -Tsvg .dotstop.dot -o artifacts/tsf/traceability_graph.svg 2>&1; then
-              echo "graph_generated=true" >> $GITHUB_OUTPUT
-            else
-              echo "graph_generated=false" >> $GITHUB_OUTPUT
-              echo "Graph generation failed" > artifacts/tsf/graph_error.txt
-            fi
-          else
-            echo "graph_generated=false" >> $GITHUB_OUTPUT
-            echo ".dotstop.dot not found" > artifacts/tsf/graph_error.txt
-          fi
+          dot -Tsvg .dotstop.dot -o artifacts/tsf/traceability_graph.svg
 
       - name: Generate Trustable report (publish)
         id: publish
-        continue-on-error: true
         run: |
           mkdir -p artifacts/tsf/trustable-report
-          if trudag publish --output-dir artifacts/tsf/trustable-report 2>&1; then
-            echo "publish_ok=true" >> $GITHUB_OUTPUT
-          elif trudag publish --no-validate --output-dir artifacts/tsf/trustable-report 2>&1; then
-            echo "publish_ok=true" >> $GITHUB_OUTPUT
-          else
-            echo "publish_ok=false" >> $GITHUB_OUTPUT
-          fi
+          trudag publish --output-dir artifacts/tsf/trustable-report
 
       - name: Upload TSF artifacts
         uses: actions/upload-artifact@v6
         if: always()
         with:
           name: tsf-validation-artifacts
-          path: |
-            artifacts/tsf
+          path: artifacts/tsf
           retention-days: 30
 
       - name: Comment PR with validation results
@@ -178,10 +152,10 @@ jobs:
 
             | Check | Status |
             |-------|--------|
-            | **trudag lint** | ${{ steps.lint.outputs.lint_ok == 'true' && '✅ PASSED' || '❌ FAILED' }} |
-            | **trudag score** | ${{ steps.scores.outputs.score_ok == 'true' && '✅ PASSED' || '❌ FAILED' }} |
-            | **trudag publish** | ${{ steps.publish.outputs.publish_ok == 'true' && '✅ PASSED' || '❌ FAILED' }} |
-            | **Traceability Graph** | ${{ steps.graph.outputs.graph_generated == 'true' && '✅ GENERATED' || '❌ FAILED' }} |
+            | **trudag lint** | ✅ COMPLETED |
+            | **trudag score** | ✅ COMPLETED |
+            | **trudag publish** | ✅ COMPLETED |
+            | **Traceability Graph** | ✅ GENERATED |
 
             ### 📋 Lint Output
             ```

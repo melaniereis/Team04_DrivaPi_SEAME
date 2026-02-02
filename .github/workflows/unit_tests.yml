@@ -30,7 +30,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v5
 
       - name: Install dependencies
         run: |
@@ -39,7 +39,8 @@ jobs:
             build-essential \
             lcov \
             ruby \
-            ruby-dev
+            ruby-dev \
+            jq
 
       - name: Install Ceedling and gcovr
         run: |
@@ -73,53 +74,10 @@ jobs:
 
       - name: Download Static Analysis SARIF (from firmware_static job)
         if: always()
-        uses: actions/download-artifact@v4
-        continue-on-error: true
+        uses: actions/download-artifact@v5
         with:
           name: codeql-sarif-filtered
           path: artifacts/verification/static-analysis
-
-      - name: Upload Coverage XML (for dotstop validator)
-        if: always()
-        uses: actions/upload-artifact@v6
-        with:
-          name: coverage-xml-reports
-          path: artifacts/verification/coverage/*.xml
-          retention-days: 30
-
-      - name: Generate Coverage Baseline (default branch)
-        if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-        run: |
-          echo "Generating coverage baseline JSON on default branch: ${{ github.ref_name }}"
-          python3 scripts/ci/generate_coverage_baseline.py --base-dir artifacts/verification/coverage --suites dc-motor servo-motor speed-sensor --sha ${{ github.sha }}
-
-      - name: Upload Coverage Baseline
-        if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-        uses: actions/upload-artifact@v6
-        with:
-          name: coverage-baseline
-          path: artifacts/verification/coverage/baseline.json
-          retention-days: 30
-
-      - name: Debug baseline gating values
-        if: always()
-        run: |
-         echo "event_name=$GITHUB_EVENT_NAME"
-         echo "ref=$GITHUB_REF"
-         echo "ref_name=$GITHUB_REF_NAME"
-         echo "default_branch=${{ github.event.repository.default_branch }}"
-
-
-      - name: Download Coverage Baseline (from default branch)
-        if: github.event_name == 'pull_request'
-        uses: dawidd6/action-download-artifact@v3
-        continue-on-error: true
-        with:
-          workflow: tsf_validation.yml
-          workflow_conclusion: success
-          branch: ${{ github.event.repository.default_branch }}
-          name: coverage-baseline
-          path: artifacts/verification/coverage
 
       - name: Generate Coverage Approvals (PR labels)
         if: github.event_name == 'pull_request'
@@ -128,15 +86,30 @@ jobs:
           SHA=${{ github.sha }}
           bash scripts/ci/generate_coverage_approvals.sh "$LABELS" "$SHA" artifacts/verification/coverage/approvals.json
 
-      - name: Run LLTC Coverage Validation (per-suite, with baseline & approvals)
+      - name: Verify Baseline & Approvals in Repository
         if: always()
         run: |
-          echo "Validating per-suite coverage changes vs baseline (approval required on change)"
-          python3 scripts/ci/validate_lltc_coverage.py --base-dir artifacts/verification/coverage --suites dc-motor servo-motor speed-sensor --min-line-rate 90
+          test -f "artifacts/verification/coverage/baseline.json" || \
+            { echo "::error::Missing baseline.json at artifacts/verification/coverage/baseline.json"; exit 1; }
+          test -f "artifacts/verification/coverage/approvals.json" || \
+            { echo "::error::Missing approvals.json at artifacts/verification/coverage/approvals.json"; exit 1; }
+
+      - name: Run LLTC Coverage Validation
+        if: always()
+        run: |
+          python3 scripts/ci/validate_lltc_coverage.py \
+            --base-dir artifacts/verification/coverage \
+            --suites dc-motor servo-motor speed-sensor \
+            --min-line-rate 90.0
+
+      - name: Static Analysis Validation (fail-closed)
+        if: always()
+        run: |
+          python3 scripts/ci/validate_static_analysis.py --base-dir artifacts/verification/static-analysis
 
       - name: Upload Verification Artifacts (TSF)
-        uses: actions/upload-artifact@v6
         if: always()
+        uses: actions/upload-artifact@v6
         with:
           name: verification-artifacts
           path: artifacts/verification
@@ -150,24 +123,17 @@ jobs:
           path: build/coverage/html
           retention-days: 30
 
-      - name: Static Analysis Validation (optional)
-        if: always()
-        run: |
-          echo "Checking for SARIF static analysis results..."
-          python3 scripts/ci/validate_static_analysis.py --base-dir artifacts/verification/static-analysis
-
       - name: Upload Static Analysis SARIF
         if: always()
-        run: |
-          if ls artifacts/verification/static-analysis/*.sarif 1>/dev/null 2>&1; then
-            echo "Found SARIF files, uploading..."
-            ls -la artifacts/verification/static-analysis/*.sarif
-          else
-            echo "No SARIF files found to upload"
-          fi
+        uses: actions/upload-artifact@v6
+        with:
+          name: static-analysis-sarif
+          path: artifacts/verification/static-analysis/*.sarif
+          if-no-files-found: error
+          retention-days: 30
 
       - name: Post Test Results
         if: always()
         run: |
-          bash scripts/ci/summarize_test_results.sh test_output.log LLTC\ Coverage\ Validation\ Summary.txt > test_summary.txt
+          bash scripts/ci/summarize_test_results.sh test_output.log "LLTC Coverage Validation Summary.txt" > test_summary.txt
           cat test_summary.txt

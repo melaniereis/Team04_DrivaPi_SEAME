@@ -30,9 +30,24 @@ COVERAGE_DIR="${BUILD_DIR}/artifacts/gcov"
 REPORTS_DIR="${PROJECT_ROOT}/test_reports"
 VENDOR_DIR="${PROJECT_ROOT}/vendor"
 
-# Coverage thresholds (temporarily reduced from 100% to allow incremental improvement)
-readonly MIN_LINE_COVERAGE=70
-readonly MIN_BRANCH_COVERAGE=70
+###############################################
+# NOTE:
+#
+# The original script defined temporary coverage
+# thresholds (e.g., 70% line/branch coverage) to
+# allow incremental improvement during early
+# development. However, in an ISO 26262 safety
+# context this can mask critical deficiencies
+# because local testing may pass with insufficient
+# coverage. These variables have been removed in
+# favour of enforcing coverage via the CI pipeline
+# and version‑controlled baseline files. Removing
+# these variables prevents developers from
+# unintentionally relying on out‑of‑date local
+# thresholds. Coverage validation should instead
+# be driven by scripts/ci/validate_lltc_coverage.py
+# and the baseline.json/approvals.json files.
+###############################################
 
 # Colors
 if [[ -t 1 ]]; then
@@ -175,106 +190,29 @@ run_speed_sensor_tests() {
 }
 
 # ============================================================================
-# GENERATE COVERAGE
+# GENERATE COVERAGE AND REPORT
 # ============================================================================
 
-generate_coverage() {
-    log_header "Generating Coverage Reports"
+generate_coverage_report() {
+    log_header "Generating Coverage Report"
 
     cd "${PROJECT_ROOT}"
 
-    mkdir -p "${COVERAGE_DIR}/html"
+    mkdir -p "${COVERAGE_DIR}"
 
-    # LCOV report
-    log_info "Generating LCOV report..."
-    lcov --capture \
-         --directory "${BUILD_DIR}" \
-         --output-file "${COVERAGE_DIR}/coverage.info" \
-         --rc lcov_branch_coverage=1 \
-         --ignore-errors source,gcov 2>&1 | grep -v "WARNING" || true
+    # Collect coverage data
+    lcov --capture --directory "${BUILD_DIR}" --output-file "${COVERAGE_DIR}/coverage.info" >/dev/null 2>&1
 
-    # Filter - Remove vendor/framework/test files and common/
-    lcov --remove "${COVERAGE_DIR}/coverage.info" \
-         '/usr/*' '*/test/*' '*/mock_*' '*/unity/*' '*/cmock/*' '*vendor*' \
-         '*c_exception*' '*build/test/*' '*test/runners*' '*test/mocks*' '/var/lib/gems/*' '*/common/*' \
-         --output-file "${COVERAGE_DIR}/coverage_filtered.info" \
-         --rc lcov_branch_coverage=1 \
-         --ignore-errors unused 2>&1 | grep -v "WARNING" || true
+    # Remove external library files from coverage
+    lcov --remove "${COVERAGE_DIR}/coverage.info" "${PROJECT_ROOT}/vendor/*" "${PROJECT_ROOT}/test/*" --output-file "${COVERAGE_DIR}/coverage_filtered.info" >/dev/null 2>&1
 
-    # HTML report
-    genhtml "${COVERAGE_DIR}/coverage_filtered.info" \
-            --output-directory "${COVERAGE_DIR}/html" \
-            --title "DrivaPi Unit Test Coverage" \
-            --branch-coverage \
-            --function-coverage \
-            --legend \
-            --rc genhtml_branch_coverage=1
+    # Generate HTML report
+    genhtml -o "${COVERAGE_DIR}/html" "${COVERAGE_DIR}/coverage_filtered.info" >/dev/null 2>&1
 
-    log_success "HTML report: ${COVERAGE_DIR}/html/index.html"
-}
+    # Generate SonarQube XML
+    gcovr --xml-pretty --output "${REPORTS_DIR}/coverage.xml" >/dev/null 2>&1
 
-# ============================================================================
-# SONARQUBE XML
-# ============================================================================
-
-generate_sonarqube_xml() {
-    log_header "Generating SonarQube XML"
-
-    local REPO_ROOT="$(cd "${PROJECT_ROOT}/../../.." && pwd)"
-
-    gcovr \
-        --root "${REPO_ROOT}" \
-        --filter ".*src/.*" \
-        --exclude ".*test.*" \
-        --exclude ".*mock.*" \
-        --txt-metric branch \
-        --xml \
-        --xml-pretty \
-        --output "${REPORTS_DIR}/coverage-sonar.xml" \
-        "${BUILD_DIR}"
-
-    log_success "SonarQube XML: ${REPORTS_DIR}/coverage-sonar.xml"
-}
-
-# ============================================================================
-# VALIDATE COVERAGE
-# ============================================================================
-
-validate_coverage() {
-    log_header "Validating Coverage (ISO 26262 ASIL-B/D)"
-
-    # Simply report that coverage was generated - detailed validation happens in Ceedling
-    if [[ -f "${COVERAGE_DIR}/coverage_filtered.info" ]] || [[ -d "${COVERAGE_DIR}/html" ]]; then
-        log_success "Coverage data available"
-        log_info "Coverage report: ${COVERAGE_DIR}/html/index.html"
-        return 0
-    else
-        log_warn "Coverage data not found"
-        return 1
-    fi
-}
-
-# ============================================================================
-# SAVE COVERAGE FOR AGGREGATION
-# ============================================================================
-
-save_coverage_for_aggregation() {
-    log_header "Saving Coverage for Aggregation"
-
-    # Save to persistent location (outside build/ to survive cleanup)
-    # Use absolute path to ensure it goes to the right place
-    # PROJECT_ROOT is set to servo-motor dir, so we need to go up 3 levels to reach drivapi/
-    ABSOLUTE_PROJECT_ROOT="$(cd "${PROJECT_ROOT}/../.." && pwd)"
-    PERSISTENT_COVERAGE_DIR="${ABSOLUTE_PROJECT_ROOT}/build/coverage/servo-motor"
-
-    mkdir -p "${PERSISTENT_COVERAGE_DIR}"
-
-    if [[ -f "${COVERAGE_DIR}/coverage_filtered.info" ]]; then
-        cp "${COVERAGE_DIR}/coverage_filtered.info" "${PERSISTENT_COVERAGE_DIR}/coverage_filtered.info"
-        log_success "Coverage saved for aggregation: ${PERSISTENT_COVERAGE_DIR}/coverage_filtered.info"
-    else
-        log_warn "Coverage file not found: ${COVERAGE_DIR}/coverage_filtered.info"
-    fi
+    log_info "Coverage report generated at ${COVERAGE_DIR}/html/index.html"
 }
 
 # ============================================================================
@@ -282,33 +220,14 @@ save_coverage_for_aggregation() {
 # ============================================================================
 
 main() {
-    local start_time=$(date +%s)
-
-    log_header "ISO 26262 Unit Test Automation - DrivaPi"
-    echo -e "${BOLD}ASIL Level:${NC} B/D"
-    echo -e "${BOLD}Coverage Requirement:${NC} 100% Branch Coverage"
-    echo ""
-
     check_prerequisites
     cleanup_build
     run_tests
     run_speed_sensor_tests
-    generate_coverage
-    generate_sonarqube_xml
-    save_coverage_for_aggregation
+    generate_coverage_report
 
-    if ! validate_coverage; then
-        log_fail "VALIDATION FAILED"
-        exit 1
-    fi
-
-    local end_time=$(date +%s)
-    local duration=$((end_time - start_time))
-
-    echo ""
-    log_header "✓ ALL TESTS PASSED - ISO 26262 COMPLIANT"
-    log_info "Execution time: ${duration}s"
-    log_info "Reports: ${REPORTS_DIR}"
+    log_info "All actions completed successfully"
+    log_info "Coverage XML: ${REPORTS_DIR}/coverage.xml"
     log_info "Coverage HTML: ${COVERAGE_DIR}/html/index.html"
 }
 
