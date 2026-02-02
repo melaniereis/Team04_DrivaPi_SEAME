@@ -7,11 +7,13 @@
 # Version: 2.3.1 - Fixed coverage file finding
 ################################################################################
 
+
 set -e
 set -u
 set -o pipefail
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/common_test_lib.sh"
 readonly PROJECT_ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 readonly DC_MOTOR_DIR="${SCRIPT_DIR}/dc-motor"
