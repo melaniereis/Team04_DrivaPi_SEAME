@@ -4,122 +4,55 @@
 #
 # Purpose: Execute speed sensor unit tests with coverage reporting
 # ASIL Level: B/D
-# Version: 1.2.0 - Fixed coverage XML generation
+# Version: 1.3.0
 ################################################################################
 
-set -e
-set -o pipefail
+set -e -u -o pipefail
 
-# Source common library for logging functions
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/../../common_test_lib.sh"
 
-# Cleanup intermediate files
-trap 'rm -f coverage.info coverage_src_only.info speed-sensor.xml' EXIT INT TERM
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+BUILD_DIR="${PROJECT_ROOT}/build"
+COVERAGE_DIR="${BUILD_DIR}/artifacts/gcov"
+REPORTS_DIR="${PROJECT_ROOT}/test_reports"
+VENDOR_DIR="${PROJECT_ROOT}/vendor"
+mkdir -p "${REPORTS_DIR}"
 
-echo "================================================================"
-echo "🚀 STARTING SPEED SENSOR TEST SUITE"
-echo "================================================================"
+main() {
+  log_section "ISO 26262 Speed Sensor Tests - DrivaPi"
+  echo -e "${BOLD}ASIL Level:${NC} B/D"
+  echo -e "${BOLD}Coverage Requirement:${NC} 100% Branch Coverage"
 
-# 1. Cleanup
-echo ""
-echo "🧹 Cleaning up..."
-ceedling clobber
+  check_prerequisites || exit 1
+  cleanup_build "${BUILD_DIR}"
+  ensure_vendor "${VENDOR_DIR}" || exit 1
 
-# 2. Run tests
-echo ""
-echo "🧪 Running Tests..."
-test_output=$(mktemp)
-ceedling gcov:all > "$test_output" 2>&1
+  cd "${PROJECT_ROOT}"
+  run_ceedling_tests "${REPORTS_DIR}/test_output.log" || exit 1
 
-# Check for failures - if the output does NOT contain "0 Failures", then we have failures
-if ! grep -q "0 Failures" "$test_output"; then
-    # Test failed - print output and exit
-    cat "$test_output"
-    rm -f "$test_output"
-    echo ""
-    echo "✗ Speed Sensor Tests FAILED"
-    exit 1
-else
-    # Test passed
-    cat "$test_output"
-    rm -f "$test_output"
-fi
+  # Common coverage generation (captures, filters, generates HTML and XML)
+  generate_lcov_coverage "${BUILD_DIR}" "${COVERAGE_DIR}"
 
-# 3. Capture coverage
-echo ""
-echo "📸 Capturing Coverage Data..."
-lcov --capture --directory build --output-file coverage.info \
-    --rc branch_coverage=1 --quiet
+  # Copy filtered coverage to a predictable location (for run_all_tests.sh)
+  cp -f "${COVERAGE_DIR}/coverage_filtered.info" "${PROJECT_ROOT}/coverage_filtered.info"
+  cp -f "${COVERAGE_DIR}/coverage.xml"          "${PROJECT_ROOT}/speed-sensor.xml"
 
-# 4. Filter coverage
-echo "📋 Filtering coverage data..."
-lcov --extract coverage.info '*/src/*' \
-    -o coverage_src_only.info --rc branch_coverage=1 --quiet \
-    >/dev/null 2>&1 || cp coverage.info coverage_src_only.info
+  # Save persistent copy (used for baseline comparisons)
+  ABS_ROOT="$(cd "${PROJECT_ROOT}/../.." && pwd)"
+  PERSIST_DIR="${ABS_ROOT}/build/coverage/speed-sensor"
+  mkdir -p "${PERSIST_DIR}"
+  cp -f "${COVERAGE_DIR}/coverage_filtered.info" "${PERSIST_DIR}/coverage_filtered.info"
+  cp -f "${COVERAGE_DIR}/coverage.xml"          "${PERSIST_DIR}/speed-sensor.xml"
 
-lcov -r coverage_src_only.info '/usr/*' '*vendor*' '*cmock*' '*unity*' '*c_exception*' \
-    '*build/test/*' '*test/runners*' '*test/mocks*' '/var/lib/gems/*' '*test/*' \
-    --ignore-errors unused \
-    -o coverage_filtered.info --rc branch_coverage=1 --quiet \
-    >/dev/null 2>&1 || cp coverage_src_only.info coverage_filtered.info
+  # Copy into artifacts/verification/coverage if invoked from run_all_tests.sh
+  if [[ "${CALLED_FROM_MASTER:-0}" = "1" ]]; then
+    ART_DIR="${ABS_ROOT}/artifacts/verification/coverage"
+    mkdir -p "${ART_DIR}"
+    cp -f "${COVERAGE_DIR}/coverage.xml" "${ART_DIR}/speed-sensor.xml"
+  fi
 
-# 5. Generate HTML
-echo ""
-echo "📊 Generating HTML Report..."
-if ! genhtml coverage_filtered.info --output-directory coverage_report \
-    --branch-coverage --function-coverage \
-    --rc genhtml_branch_coverage=1 --quiet >/dev/null 2>&1; then
-    mkdir -p coverage_report
-    echo "⚠️ genhtml had issues, but coverage files saved"
-fi
+  log_section "✓ SPEED SENSOR TESTS PASSED"
+}
 
-echo ""
-echo "================================================================"
-echo "✅ SUCCESS! Report available at: $PWD/coverage_report/index.html"
-echo "================================================================"
-echo ""
-
-# 6. Generate coverage XML for dotstop validator
-echo "📄 Generating Coverage XML for dotstop validator..."
-generate_coverage_xml "coverage_filtered.info" "speed-sensor.xml"
-
-# 7. Save for aggregation if called from master
-if [[ "${CALLED_FROM_MASTER:-0}" == "1" ]]; then
-    echo "📦 Saving Coverage for Master Aggregation..."
-    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    ABSOLUTE_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-    PERSISTENT_DIR="${ABSOLUTE_ROOT}/build/coverage/speed-sensor"
-
-    mkdir -p "${PERSISTENT_DIR}"
-    [[ -f "coverage_filtered.info" ]] && \
-        cp coverage_filtered.info "${PERSISTENT_DIR}/coverage_filtered.info"
-    [[ -f "speed-sensor.xml" ]] && \
-        cp speed-sensor.xml "${PERSISTENT_DIR}/speed-sensor.xml"
-    echo "✓ Coverage saved"
-fi
-
-# 8. Copy coverage XML to artifacts directory for master script
-if [[ "${CALLED_FROM_MASTER:-0}" == "1" ]]; then
-    MASTER_ARTIFACTS_DIR="${ABSOLUTE_ROOT}/artifacts/verification/coverage"
-    mkdir -p "${MASTER_ARTIFACTS_DIR}"
-    if [[ -f "speed-sensor.xml" ]]; then
-        cp speed-sensor.xml "${MASTER_ARTIFACTS_DIR}/speed-sensor.xml"
-        echo "✓ Coverage XML copied to artifacts directory"
-    else
-        echo "⚠️ Speed sensor coverage XML not found"
-    fi
-fi
-
-# 9. Cleanup
-if [[ "${CI:-false}" == "true" || "${CALLED_FROM_MASTER:-0}" == "1" ]]; then
-    echo ""
-    echo "ℹ️ Skipping cleanup (CI/Master mode)"
-else
-    echo ""
-    echo "🧹 Cleaning up..."
-    ceedling clobber || true
-fi
-
-echo ""
-echo "✓ Speed Sensor Tests PASSED"
+main "$@"

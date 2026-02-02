@@ -202,52 +202,28 @@ EOF
     fi
 
 
-    # Generate individual coverage XML files for each suite, but only if real coverage exists
-    mkdir -p "${ARTIFACTS_DIR}/coverage"
-
-    echo ""
-    log_header "Generating Coverage XML Files"
-
-    # DC Motor
-    if [[ -f "$dc_cov" ]]; then
-        if generate_coverage_xml_simple "$dc_cov" "${ARTIFACTS_DIR}/coverage/dc-motor.xml"; then
-            echo "  ✓ dc-motor.xml"
-        else
-            echo "  ✗ dc-motor.xml - generation failed"
+    # Generate per-suite coverage XML
+        mkdir -p "${ARTIFACTS_DIR}/coverage"
+        for suite in dc-motor servo-motor speed-sensor; do
+          cov_file=""
+          case "$suite" in
+            dc-motor)    cov_file="$dc_cov" ;;
+            servo-motor) cov_file="$servo_cov" ;;
+            speed-sensor) cov_file="$speed_cov" ;;
+          esac
+          if [[ -f "$cov_file" ]]; then
+            # generate_coverage_xml is defined in common_test_lib.sh
+            if generate_coverage_xml "$cov_file" "${ARTIFACTS_DIR}/coverage/${suite}.xml"; then
+              echo "✓ ${suite}.xml created"
+            else
+              echo "✗ ${suite}.xml - generation failed"
+              exit 2
+            fi
+          else
+            echo "✗ ${suite}.xml - coverage file not found at: $cov_file"
             exit 2
-        fi
-    else
-        echo "  ✗ dc-motor.xml - coverage file not found at: $dc_cov"
-        exit 2
-    fi
-
-    # Servo Motor
-    if [[ -f "$servo_cov" ]]; then
-        if generate_coverage_xml_simple "$servo_cov" "${ARTIFACTS_DIR}/coverage/servo-motor.xml"; then
-            echo "  ✓ servo-motor.xml"
-        else
-            echo "  ✗ servo-motor.xml - generation failed"
-            exit 2
-        fi
-    else
-        echo "  ✗ servo-motor.xml - coverage file not found at: $servo_cov"
-        exit 2
-    fi
-
-    # Speed Sensor
-    if [[ -f "$speed_cov" ]]; then
-        if generate_coverage_xml_simple "$speed_cov" "${ARTIFACTS_DIR}/coverage/speed-sensor.xml"; then
-            echo "  ✓ speed-sensor.xml"
-        else
-            echo "  ✗ speed-sensor.xml - generation failed"
-            exit 2
-        fi
-    else
-        echo "  ✗ speed-sensor.xml - coverage file not found at: $speed_cov"
-        exit 2
-    fi
-
-    # Verify all files exist
+          fi
+        done
     echo ""
     log_header "Coverage XML Files Status"
     for suite in dc-motor servo-motor speed-sensor; do
