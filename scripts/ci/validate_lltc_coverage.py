@@ -1,5 +1,4 @@
 import sys
-import json
 import os
 import argparse
 
@@ -37,7 +36,6 @@ def main():
                     'enforce_individual': True,
                 }
                 score, issues = lltc_coverage_change_validator(cfg)
-                suite_ok = (score >= 1.0) and (not issues)
                 summary.append((suite, score, [str(e) for e in issues]))
                 if issues:
                     overall_ok = False
