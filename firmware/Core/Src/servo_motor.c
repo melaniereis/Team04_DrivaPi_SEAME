@@ -57,13 +57,6 @@ int SetServoAngle(uint8_t channel, uint16_t angle_deg)
 int ServoSweep(uint8_t channel, uint16_t start_angle, uint16_t end_angle,
 uint16_t step_angle)
 {
-//	double freq = (double)SERVO_DEFAULT_FREQ_HZ;
-//	if (PCA9685_SetFrequency(hi2c, addr7, freq) != HAL_OK)
-//	{
-//		const char *msg = "Servo_Sweep: Failed to set frequency, continuing anyway\r\n";
-//		HAL_UART_Transmit(&huart1, (uint8_t *)msg, strlen(msg), HAL_MAX_DELAY);
-//	}
-
 	if (step_angle == 0)
 		step_angle = 1;
 
