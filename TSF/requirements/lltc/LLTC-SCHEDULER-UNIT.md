@@ -27,3 +27,4 @@ normative: true
 level: 4.0
 ---
 Unit tests shall verify that the scheduler is initialized with the correct task periods and priorities.
+---
