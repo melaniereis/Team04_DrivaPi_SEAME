@@ -20,7 +20,7 @@ VENDOR_DIR="${PROJECT_ROOT}/vendor"
 mkdir -p "${REPORTS_DIR}"
 
 main() {
-  log_section "ISO 26262 Speed Sensor Tests - DrivaPi"
+  log_section "ISO 26262 DC Motor Tests - DrivaPi"
   echo -e "${BOLD}ASIL Level:${NC} A/QM"
   echo -e "${BOLD}Coverage Gate (CI):${NC} >= 90% line coverage per suite"
 
