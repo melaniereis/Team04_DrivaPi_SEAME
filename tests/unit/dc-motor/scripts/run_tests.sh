@@ -1,10 +1,10 @@
 #!/bin/bash
 ################################################################################
-# ISO 26262 Unit Test Automation Script - Robust Version
+# ISO 26262 Unit Test Automation Script
 #
 # Purpose: Execute unit tests with robust coverage reporting
 # ASIL Level: A/QM (project policy)
-# Version: 1.1.0
+# Version: 1.1.1
 ################################################################################
 
 set -e
@@ -22,7 +22,54 @@ VENDOR_DIR="${PROJECT_ROOT}/vendor"
 
 # Initialize Colors for non-TTY runners
 if [[ -t 1 ]]; then
-    readonly RED='\033]'; then
+    readonly RED='\033${NC} $*"; }
+log_success() { echo -e "${BOLD}${GREEN}✓ $*${NC}"; }
+log_fail() { echo -e "${BOLD}${RED}✗ $*${NC}"; }
+
+check_prerequisites() {
+    log_header "Checking Prerequisites"
+
+    local missing=()
+    command -v ruby >/dev/null 2>&1 |
+
+| missing+=("ruby")
+    command -v gcc >/dev/null 2>&1 |
+
+| missing+=("gcc")
+    command -v gcov >/dev/null 2>&1 |
+
+| missing+=("gcov")
+    command -v lcov >/dev/null 2>&1 |
+
+| missing+=("lcov")
+    command -v genhtml >/dev/null 2>&1 |
+
+| missing+=("genhtml")
+
+    if! gem list -i ceedling >/dev/null 2>&1; then
+        missing+=("ceedling")
+    fi
+
+    if [[ ${#missing[@]} -gt 0 ]]; then
+        log_fail "Missing tools: ${missing[*]}"
+        exit 1
+    fi
+
+    log_success "All prerequisites satisfied"
+}
+
+generate_robust_coverage() {
+    log_header "Generating Coverage Report"
+
+    cd "${PROJECT_ROOT}"
+    mkdir -p "${COVERAGE_DIR}"
+
+    # Call the library function with paths relative to the suite root
+    # This uses --ignore-errors to prevent blocking on non-fatal warnings
+    generate_lcov_coverage "${BUILD_DIR}" "${COVERAGE_DIR}"
+
+    # Sync result for dotstop validator and CI summary
+    if]; then
         cp "${COVERAGE_DIR}/coverage.xml" "${REPORTS_DIR}/coverage.xml"
         log_info "Coverage XML synced to: ${REPORTS_DIR}/coverage.xml"
     fi
@@ -41,7 +88,7 @@ main() {
     run_ceedling_tests "${REPORTS_DIR}/test_output.log"
 
     # 4. Coverage Analysis (Dynamic Analysis)
-    # This fulfills ASIL A requirements for Statement Coverage [1]
+    # This fulfills ASIL A requirements for Statement Coverage [2]
     generate_robust_coverage
 
     log_success "All actions completed successfully"
