@@ -40,6 +40,7 @@ extern "C" {
 #include "servo_motor.h"
 #include "dc_motor_test.h"
 #include "motor_utils.h"
+#include "sensors.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -57,7 +58,7 @@ typedef enum threads_s
 	servo_motor_e,
 	speed_sensor_e,
 	can_tx_e,
-	can_rx_e
+	can_rx_e,
 }	t_e_threads;
 
 typedef struct can_message_s
@@ -82,7 +83,9 @@ typedef struct can_message_s
 #define THREAD_STACK_SIZE	1024
 #define QUEUE_SIZE         	10
 #define CMD_SPEED           44u
-#define CMD_STEERING        45u 
+#define CMD_STEERING        45u
+
+/* CAN Message IDs */
 
 /* USER CODE END PD */
 
@@ -112,7 +115,7 @@ int		CanSend(t_can_message* msg);
 /* USER CODE END EFP */
 
 /* USER CODE BEGIN 1 */
-extern thread_t				g_threads[6];
+extern thread_t				g_threads[8];
 extern TX_QUEUE             g_queueSpeedCmd;
 extern TX_QUEUE             g_queueSteerCmd;
 extern TX_EVENT_FLAGS_GROUP	g_eventFlags;
@@ -124,4 +127,3 @@ extern float				g_vehicleSpeed;
 }
 #endif
 #endif /* __APP_THREADX_H */
-

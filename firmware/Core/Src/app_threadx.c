@@ -43,7 +43,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-thread_t				g_threads[6];
+thread_t				g_threads[8];
 TX_QUEUE                g_queueSpeedCmd;
 TX_QUEUE                g_queueSteerCmd;
 TX_EVENT_FLAGS_GROUP    g_eventFlags;
@@ -57,17 +57,17 @@ float                   g_vehicleSpeed;
 /* USER CODE END PFP */
 
 /**
-* @brief  Application ThreadX Initialization.
-* @param memory_ptr: memory pointer
-* @retval int
-*/
-UINT App_ThreadX_Init(void *memory_ptr)
+  * @brief  Application ThreadX Initialization.
+  * @param memory_ptr: memory pointer
+  * @retval int
+  */
+UINT App_ThreadX_Init(VOID *memory_ptr)
 {
-	UINT ret = TX_SUCCESS;
-/* USER CODE BEGIN App_ThreadX_MEM_POOL */
+  UINT ret = TX_SUCCESS;
+  /* USER CODE BEGIN App_ThreadX_MEM_POOL */
 
-/* USER CODE END App_ThreadX_MEM_POOL */
-/* USER CODE BEGIN App_ThreadX_Init */
+  /* USER CODE END App_ThreadX_MEM_POOL */
+  /* USER CODE BEGIN App_ThreadX_Init */
 
 	g_vehicleSpeed = 0;
 
@@ -88,31 +88,33 @@ UINT App_ThreadX_Init(void *memory_ptr)
 	HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
 	PCA9685_InitAllDevices();
 
+	/* Initialize sensor resources (mutex, data structures) */
+
 	msg = "Initializing threads...\r\n";
 	HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
 	ThreadInit();
 
-/* USER CODE END App_ThreadX_Init */
+  /* USER CODE END App_ThreadX_Init */
 
-	return ret;
+  return ret;
 }
-//We will lose this upon editing inside STM32CubeIDE:
-/**
-* @brief  Function that implements the kernel's initialization.
-* @param  None
-* @retval None
-*/
+
+  /**
+  * @brief  Function that implements the kernel's initialization.
+  * @param  None
+  * @retval None
+  */
 void MX_ThreadX_Init(void)
 {
-/* USER CODE BEGIN Before_Kernel_Start */
+  /* USER CODE BEGIN Before_Kernel_Start */
 
-/* USER CODE END Before_Kernel_Start */
+  /* USER CODE END Before_Kernel_Start */
 
-	tx_kernel_enter();
+  tx_kernel_enter();
 
-/* USER CODE BEGIN Kernel_Start_Error */
+  /* USER CODE BEGIN Kernel_Start_Error */
 
-/* USER CODE END Kernel_Start_Error */
+  /* USER CODE END Kernel_Start_Error */
 }
 
 /* USER CODE BEGIN 1 */

@@ -30,8 +30,12 @@ int SetServoAngle(uint8_t channel, uint16_t angle_deg)
 	uint16_t pulse = SERVO_MIN_PULSE + (range * angle_deg) / 180u;
 
 	HAL_StatusTypeDef st = PCA9685_SetPWM(PCA9685_ADDR_SERVO, channel, 0, pulse);
-	if (st != HAL_OK)
+	if (st != HAL_OK){
+		UartPrintf("FALHOU\r\n");
 		return 0;
+	}
+	else
+		UartPrintf("FUNCIONOU\r\n");
 
 	return 1;
 }
