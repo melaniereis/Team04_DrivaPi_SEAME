@@ -51,7 +51,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pyyaml typing_extensions
-          git clone 1 https://gitlab.com/CodethinkLabs/trustable/trustable.git /tmp/trustable
+          git clone https://gitlab.com/CodethinkLabs/trustable/trustable.git /tmp/trustable
           cd /tmp/trustable
           pip install .
           cd -
