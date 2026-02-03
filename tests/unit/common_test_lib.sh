@@ -73,7 +73,7 @@ check_prerequisites() {
     command -v gcov >/dev/null 2>&1 || missing+=("gcov")
     command -v lcov >/dev/null 2>&1 || missing+=("lcov")
     command -v genhtml >/dev/null 2>&1 || missing+=("genhtml")
-    
+
     if ! gem list -i ceedling >/dev/null 2>&1; then
         missing+=("ceedling")
     fi
@@ -110,13 +110,13 @@ cleanup_build() {
 
 ensure_vendor() {
     local vendor_dir="$1"
-    
+
     if [[ -d "$vendor_dir/unity/src" ]]; then
         return 0
     fi
 
     log_header "Restoring Ceedling Vendor Assets"
-    
+
     local gem_path
     gem_path=$(ruby -r rubygems -e "spec = Gem::Specification.find_by_name('ceedling'); puts spec.full_gem_path if spec" 2>/dev/null || true)
 
@@ -266,30 +266,32 @@ aggregate_coverage() {
 generate_coverage_xml() {
     local coverage_info="$1"
     local output_xml="$2"
-    
+
     if [[ ! -f "$coverage_info" ]]; then
         log_error "Coverage info file not found: $coverage_info. Not generating XML."
         return 2
     fi
-    
+
     log_info "Generating coverage XML from: $coverage_info"
-    
+
     # Parse lcov data and convert to Cobertura XML format
     # This extracts line-rate from lcov coverage data
-    local line_rate=0.95
-    local branch_rate=0.95
-    
+    local line_rate=0.0
+    local branch_rate=0.0
+
     # Get coverage metrics using lcov with branch coverage enabled
     local lcov_output=$(lcov --summary "$coverage_info" --rc branch_coverage=1 2>/dev/null || true)
-    
+
     # Extract line coverage percentage (e.g., "lines.......: 100.0% (210 of 210 lines)")
-    local line_percent=95.0
     if [[ $lcov_output =~ lines[^:]*:[[:space:]]*([0-9.]+)% ]]; then
-        line_percent="${BASH_REMATCH[1]}"
+        local line_percent="${BASH_REMATCH[1]}"
         # Convert percentage to decimal rate (0.0-1.0)
         line_rate=$(awk "BEGIN {printf \"%.4f\", $line_percent / 100}")
+    else
+        log_error "Failed to parse line coverage from lcov output."
+        return 1
     fi
-    
+
     # Extract branch coverage if available (e.g., "branches....: 97.4% (74 of 76 branches)")
     if [[ $lcov_output =~ branches[^:]*:[[:space:]]*([0-9.]+)% ]]; then
         local branch_percent="${BASH_REMATCH[1]}"
@@ -298,7 +300,7 @@ generate_coverage_xml() {
         # If no branch coverage, use line rate as fallback
         branch_rate="$line_rate"
     fi
-    
+
         # Create Cobertura XML structure
         cat > "$output_xml" << EOF
 <?xml version="1.0" ?>
@@ -316,7 +318,7 @@ generate_coverage_xml() {
     </packages>
 </coverage>
 EOF
-    
+
     log_success "Coverage XML generated: $output_xml (line-rate: $line_rate, branch-rate: $branch_rate)"
     return 0
 }
@@ -361,12 +363,12 @@ run_test_suite() {
 generate_test_report() {
     local output_file="$1"
     local report_file="$2"
-    
+
     # Extract test counts
     local passed=$(grep -oP 'Tests \d+, \d+ failures' "$output_file" | grep -oP '\d+(?=, \d+ failures)' | head -1 || echo 0)
     local failures=$(grep -oP 'Tests \d+, \d+ failures' "$output_file" | grep -oP '\d+(?= failures)' | head -1 || echo 0)
     local total=$(grep -oP '^\d+(?= Tests)' "$output_file" | awk '{s+=$1} END {print s}' || echo 0)
-    
+
     if [[ -z "$passed" ]] || [[ "$passed" == "0" ]]; then
         passed=$((total - failures))
     fi
@@ -386,12 +388,12 @@ EOF
 generate_junit_xml() {
     local output_file="$1"
     local xml_file="$2"
-    
+
     # Extract test info
     local passed=$(grep -oP 'Tests \d+, \d+ failures' "$output_file" | grep -oP '\d+(?=, \d+ failures)' | head -1 || echo 0)
     local failures=$(grep -oP 'Tests \d+, \d+ failures' "$output_file" | grep -oP '\d+(?= failures)' | head -1 || echo 0)
     local total=$(grep -oP '^\d+(?= Tests)' "$output_file" | awk '{s+=$1} END {print s}' || echo 0)
-    
+
     if [[ -z "$passed" ]] || [[ "$passed" == "0" ]]; then
         passed=$((total - failures))
     fi

@@ -20,33 +20,17 @@ COVERAGE_DIR="${BUILD_DIR}/artifacts/gcov"
 REPORTS_DIR="${PROJECT_ROOT}/test_reports"
 VENDOR_DIR="${PROJECT_ROOT}/vendor"
 
-# Initialize Colors for non-TTY runners
-if [[ -t 1 ]]; then
-    readonly RED='\033${NC} $*"; }
-log_success() { echo -e "${BOLD}${GREEN}✓ $*${NC}"; }
-log_fail() { echo -e "${BOLD}${RED}✗ $*${NC}"; }
-
 check_prerequisites() {
     log_header "Checking Prerequisites"
 
     local missing=()
-    command -v ruby >/dev/null 2>&1 |
+    command -v ruby >/dev/null 2>&1 || missing+=("ruby")
+    command -v gcc >/dev/null 2>&1 || missing+=("gcc")
+    command -v gcov >/dev/null 2>&1 || missing+=("gcov")
+    command -v lcov >/dev/null 2>&1 || missing+=("lcov")
+    command -v genhtml >/dev/null 2>&1 || missing+=("genhtml")
 
-| missing+=("ruby")
-    command -v gcc >/dev/null 2>&1 |
-
-| missing+=("gcc")
-    command -v gcov >/dev/null 2>&1 |
-
-| missing+=("gcov")
-    command -v lcov >/dev/null 2>&1 |
-
-| missing+=("lcov")
-    command -v genhtml >/dev/null 2>&1 |
-
-| missing+=("genhtml")
-
-    if! gem list -i ceedling >/dev/null 2>&1; then
+    if ! gem list -i ceedling >/dev/null 2>&1; then
         missing+=("ceedling")
     fi
 
@@ -69,7 +53,7 @@ generate_robust_coverage() {
     generate_lcov_coverage "${BUILD_DIR}" "${COVERAGE_DIR}"
 
     # Sync result for dotstop validator and CI summary
-    if]; then
+    if [[ -f "${COVERAGE_DIR}/coverage.xml" ]]; then
         cp "${COVERAGE_DIR}/coverage.xml" "${REPORTS_DIR}/coverage.xml"
         log_info "Coverage XML synced to: ${REPORTS_DIR}/coverage.xml"
     fi
