@@ -3,16 +3,16 @@
 	"commit_sha": "manual-baseline-init",
 	"suites": {
 		"dc-motor": {
-			"line-rate": 0.91,
-			"branch-rate": 0.9
+			"line_rate": 1.0000,
+			"branch_rate": 0.9750
 		},
 		"servo-motor": {
-			"line-rate": 0.92,
-			"branch-rate": 0.91
+			"line_rate": 1.0000,
+			"branch_rate": 0.9670
 		},
 		"speed-sensor": {
-			"line-rate": 0.93,
-			"branch-rate": 0.92
+			"line_rate": 1.0000,
+			"branch_rate": 1.0000
 		}
 	}
 }
