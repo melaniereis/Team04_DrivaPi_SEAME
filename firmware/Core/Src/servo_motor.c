@@ -106,7 +106,7 @@ void ServoMotor(ULONG initial_input)
 		{
 			float angle_f = *((float *)msg.data);
 			uint16_t angle = (uint16_t)angle_f;
-			SetServoAngle(SERVO_CH, angle)
+			SetServoAngle(SERVO_CH, angle);
 
 		}
 		tx_thread_sleep(10);
