@@ -135,7 +135,7 @@ def junit_pass_rate_validator(configuration: dict[str, yaml]) -> tuple[float, li
         else:
             score = 1.0 if pass_rate >= min_pass else (pass_rate / min_pass)
 
-        return (min(max(score, 0.0), 1.0), [])
+        return (score, [])
 
     except Exception as e:
         return (0.0, [e])
@@ -216,7 +216,7 @@ def coverage_threshold_validator(configuration: Dict) -> Tuple[float, List[Excep
                 if prev_branch is not None and prev_branch > 1.0: prev_branch /= 100.0
 
                 if prev_line is None or prev_branch is None:
-                    return (0.0,)
+                    return (0.0, [ValueError("Baseline data missing/corrupted")])
 
                 changed = abs(line_rate - prev_line) > epsilon
                 if branch_rate is not None and prev_branch is not None:
@@ -232,7 +232,7 @@ def coverage_threshold_validator(configuration: Dict) -> Tuple[float, List[Excep
                     }
                     return (0.0, [ValueError("Coverage changed since baseline and requires an approval by modifying baseline file")])
         score = min(max((line_rate * 100.0) / min_cov, 0.0), 1.0)
-        return (score,)
+        return (score, [])
     except Exception as e:
         return (0.0, [e])
 
@@ -290,9 +290,7 @@ def lltc_coverage_change_validator(configuration: Dict) -> Tuple[float, List[Exc
                 if prev_branch is not None and prev_branch > 1.0: prev_branch /= 100.0
 
                 if prev_line is None or prev_branch is None:
-                    error_msg = f"Baseline data missing/corrupted for {suite_name}. Keys: {list(prev.keys())}"
-                    errors.append(ValueError(error_msg))
-                    scores.append(0.0); continue
+                    return (0.0, [ValueError("Baseline data missing/corrupted")])
 
                 changed = abs(lr - prev_line) > epsilon
                 if br is not None and prev_branch is not None:
