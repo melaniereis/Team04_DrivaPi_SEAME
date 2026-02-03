@@ -51,7 +51,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pyyaml typing_extensions
-          git clone --depth 1 https://gitlab.com/CodethinkLabs/trustable/trustable.git /tmp/trustable
+          git clone 1 https://gitlab.com/CodethinkLabs/trustable/trustable.git /tmp/trustable
           cd /tmp/trustable
           pip install .
           cd -
@@ -134,7 +134,7 @@ jobs:
           trudag publish --output-dir artifacts/tsf/trustable-report
 
       - name: Upload TSF artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: tsf-validation-artifacts
@@ -152,15 +152,15 @@ jobs:
 
             | Check | Status |
             |-------|--------|
-            | **trudag lint** | ✅ COMPLETED |
-            | **trudag score** | ✅ COMPLETED |
-            | **trudag publish** | ✅ COMPLETED |
-            | **Traceability Graph** | ✅ GENERATED |
-
+            | **trudag lint** | ${{ steps.lint.outputs.lint_ok == 'true' && '✅ PASSED' || '❌ FAILED' }} |
+            | **trudag score** | ${{ steps.scores.outputs.score_ok == 'true' && '✅ PASSED' || '❌ FAILED' }} |
+            | **trudag publish** | ${{ steps.publish.outputs.publish_ok == 'true' && '✅ PASSED' || '❌ FAILED' }} |
             ### 📋 Lint Output
             ```
             ${{ steps.summary.outputs.lint_summary }}
             ```
+            ### 📊 Traceability Graph
+            ${{ steps.graph.outputs.graph_generated == 'true' && '✅ Graph generated successfully' || '❌ Graph generation failed' }}
 
             **Download artifacts to view**: [TSF Validation Results](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
             - Traceability graph: `tsf-validation-artifacts/traceability_graph.svg`

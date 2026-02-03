@@ -21,7 +21,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install ARM toolchain
         run: |
@@ -81,13 +81,13 @@ jobs:
 
       - name: Upload SARIF artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: codeql-sarif-filtered
           path: results/cpp.sarif
           retention-days: 30
 
-      - name: Parse CodeQL results (fail-closed)
+      - name: Parse CodeQL results
         id: codeql_results
         if: always()
         run: |
