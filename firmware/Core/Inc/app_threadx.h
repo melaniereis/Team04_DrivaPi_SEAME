@@ -40,7 +40,6 @@ extern "C" {
 #include "servo_motor.h"
 #include "dc_motor_test.h"
 #include "motor_utils.h"
-#include "sensors.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
