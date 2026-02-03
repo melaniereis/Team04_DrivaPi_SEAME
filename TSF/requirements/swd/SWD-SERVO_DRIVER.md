@@ -28,3 +28,4 @@ normative: true
 level: 3.0
 ---
 The 'servo_motor' component shall implement angle validation (clamp 0-180) and linear mapping to hardware-specific PWM counts via PCA9685. Inputs beyond range shall be saturated to avoid mechanical end-stops
+---
