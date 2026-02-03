@@ -19,8 +19,9 @@ extern UART_HandleTypeDef huart1;
 
 float read_speed_sensor(void)
 {
-    static ULONG last_time_ticks = 0;
-    static uint32_t last_count = 0;
+	return 0.0f;
+	static ULONG last_time_ticks = 0;
+	static uint32_t last_count = 0;
     static uint8_t is_first_run = 1;
 
 
