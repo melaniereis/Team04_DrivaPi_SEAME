@@ -33,6 +33,7 @@ Verify that all DrivaPi components work together correctly across their interfac
 
 **Evidence**:
 - Runtime logs from [rust/controller/src/main.rs](rust/controller/src/main.rs) showing decoded PS3 input (e.g., `println!("Button test: {:?}", data);`) alongside the CAN payloads sent.
+- Video evidence: [docs/tests/joystick_integration.mp4](docs/tests/joystick_integration.mp4) demonstrating PS3 controller input successfully decoded and processed by the Raspberry Pi.
 
 ---
 
@@ -108,6 +109,10 @@ Log I2C transaction status (ACK/NACK) from STM32 firmware and parse logs program
 - All valid commands receive ACK from motor controllers
 - I2C errors handled without system crash
 - Failsafe triggers within 100ms of timeout or communication failure
+
+**Evidence**:
+- Test implementation files: [docs/tests/motors-integration/src/](docs/tests/motors-integration/src/) and [docs/tests/motors-integration/inc/](docs/tests/motors-integration/inc/) containing I2C integration test code (`i2c_integration_test.c/h`), PCA9685 driver (`pca9685.c/h`), and test main (`main.c/h`)
+- Video evidence: [docs/tests/motors_integration.mp4](docs/tests/motors_integration.mp4) demonstrating successful I2C communication with motor controllers and proper motor actuation
 
 ---
 
