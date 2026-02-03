@@ -1,17 +1,15 @@
 #!/bin/bash
 ################################################################################
-# ISO 26262 Unit Test Automation Script
+# Servo Motor Unit Test Automation
 #
-# Purpose: Execute unit tests with robust coverage reporting
+# Purpose: Execute servo motor unit tests with coverage reporting
 # ASIL Level: A/QM (project policy)
-# Version: 1.1.1
+# Version: 1.3.1
 ################################################################################
 
-set -e
-set -u
-set -o pipefail
+set -e -u -o pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/../../common_test_lib.sh"
 
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
@@ -19,64 +17,38 @@ BUILD_DIR="${PROJECT_ROOT}/build"
 COVERAGE_DIR="${BUILD_DIR}/artifacts/gcov"
 REPORTS_DIR="${PROJECT_ROOT}/test_reports"
 VENDOR_DIR="${PROJECT_ROOT}/vendor"
-
-check_prerequisites() {
-    log_header "Checking Prerequisites"
-
-    local missing=()
-    command -v ruby >/dev/null 2>&1 || missing+=("ruby")
-    command -v gcc >/dev/null 2>&1 || missing+=("gcc")
-    command -v gcov >/dev/null 2>&1 || missing+=("gcov")
-    command -v lcov >/dev/null 2>&1 || missing+=("lcov")
-    command -v genhtml >/dev/null 2>&1 || missing+=("genhtml")
-
-    if ! gem list -i ceedling >/dev/null 2>&1; then
-        missing+=("ceedling")
-    fi
-
-    if [[ ${#missing[@]} -gt 0 ]]; then
-        log_fail "Missing tools: ${missing[*]}"
-        exit 1
-    fi
-
-    log_success "All prerequisites satisfied"
-}
-
-generate_robust_coverage() {
-    log_header "Generating Coverage Report"
-
-    cd "${PROJECT_ROOT}"
-    mkdir -p "${COVERAGE_DIR}"
-
-    # Call the library function with paths relative to the suite root
-    # This uses --ignore-errors to prevent blocking on non-fatal warnings
-    generate_lcov_coverage "${BUILD_DIR}" "${COVERAGE_DIR}"
-
-    # Sync result for dotstop validator and CI summary
-    if [[ -f "${COVERAGE_DIR}/coverage.xml" ]]; then
-        cp "${COVERAGE_DIR}/coverage.xml" "${REPORTS_DIR}/coverage.xml"
-        log_info "Coverage XML synced to: ${REPORTS_DIR}/coverage.xml"
-    fi
-}
+mkdir -p "${REPORTS_DIR}"
 
 main() {
-    # 1. Verification of environment
-    check_prerequisites
+  log_section "ISO 26262 Servo Motor Tests - DrivaPi"
+  echo -e "${BOLD}ASIL Level:${NC} A/QM"
+  echo -e "${BOLD}Coverage Gate (CI):${NC} >= 90% line coverage per suite"
 
-    # 2. Cleanup and setup
-    cleanup_build "${BUILD_DIR}"
-    ensure_vendor "${VENDOR_DIR}"
+  check_prerequisites || exit 1
+  cleanup_build "${BUILD_DIR}"
+  ensure_vendor "${VENDOR_DIR}" || exit 1
 
-    # 3. Test Execution (Unit Testing - Unity/Ceedling)
-    # This fulfills the ISO 26262 Part 6 requirement for software unit testing [1]
-    run_ceedling_tests "${REPORTS_DIR}/test_output.log"
+  cd "${PROJECT_ROOT}"
+  run_ceedling_tests "${REPORTS_DIR}/test_output.log" || exit 1
 
-    # 4. Coverage Analysis (Dynamic Analysis)
-    # This fulfills ASIL A requirements for Statement Coverage [2]
-    generate_robust_coverage
+  generate_lcov_coverage "${BUILD_DIR}" "${COVERAGE_DIR}"
 
-    log_success "All actions completed successfully"
-    log_info "Coverage HTML: ${COVERAGE_DIR}/html/index.html"
+  cp -f "${COVERAGE_DIR}/coverage_filtered.info" "${PROJECT_ROOT}/coverage_filtered.info"
+  cp -f "${COVERAGE_DIR}/coverage.xml"          "${PROJECT_ROOT}/speed-sensor.xml"
+
+  ABS_ROOT="$(cd "${PROJECT_ROOT}/../.." && pwd)"
+  PERSIST_DIR="${ABS_ROOT}/build/coverage/servo-motor"
+  mkdir -p "${PERSIST_DIR}"
+  cp -f "${COVERAGE_DIR}/coverage_filtered.info" "${PERSIST_DIR}/coverage_filtered.info"
+  cp -f "${COVERAGE_DIR}/coverage.xml"          "${PERSIST_DIR}/servo-motor.xml"
+
+  if [[ "${CALLED_FROM_MASTER:-0}" = "1" ]]; then
+    ART_DIR="${ABS_ROOT}/artifacts/verification/coverage"
+    mkdir -p "${ART_DIR}"
+    cp -f "${COVERAGE_DIR}/coverage.xml" "${ART_DIR}/servo-motor.xml"
+  fi
+
+  log_section "✓ SERVO MOTOR TESTS PASSED"
 }
 
 main "$@"
