@@ -9,7 +9,7 @@ jobs:
     name: Build full STM32 firmware (compile only)
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
       pull-requests: write
     steps:
       - name: Checkout repository
@@ -42,7 +42,7 @@ jobs:
         with:
           name: firmware-elf
           path: firmware/Debug/firmware.elf
-      
+
       - name: Comment PR with build result (success)
         if: ${{ success() && github.event_name == 'pull_request' }}
         uses: peter-evans/create-or-update-comment@v5
