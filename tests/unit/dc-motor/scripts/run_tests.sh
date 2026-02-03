@@ -22,7 +22,7 @@ VENDOR_DIR="${PROJECT_ROOT}/vendor"
 
 # Initialize Colors for non-TTY runners
 if [[ -t 1 ]]; then
-    readonly RED='\033]; then
+    readonly RED='\033]'; then
         cp "${COVERAGE_DIR}/coverage.xml" "${REPORTS_DIR}/coverage.xml"
         log_info "Coverage XML synced to: ${REPORTS_DIR}/coverage.xml"
     fi
