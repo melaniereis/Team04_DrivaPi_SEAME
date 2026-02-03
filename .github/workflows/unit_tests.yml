@@ -57,6 +57,7 @@ jobs:
           gcovr --version
 
       - name: Run Tests (Master Script)
+        shell: bash
         run: |
           chmod +x tests/unit/run_all_tests.sh
           bash tests/unit/run_all_tests.sh 2>&1 | tee test_output.log
