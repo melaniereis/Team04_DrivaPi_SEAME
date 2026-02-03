@@ -223,13 +223,6 @@ def coverage_threshold_validator(configuration: Dict) -> Tuple[float, List[Excep
                     if abs(branch_rate - prev_branch) > epsilon: changed = True
 
                 if changed:
-                    details = {
-                        "suite": suite_name,
-                        "prev_line_rate": prev_line,
-                        "curr_line_rate": line_rate,
-                        "prev_branch_rate": prev_branch,
-                        "curr_branch_rate": branch_rate,
-                    }
                     return (0.0, [ValueError("Coverage changed since baseline and requires an approval by modifying baseline file")])
         score = min(max((line_rate * 100.0) / min_cov, 0.0), 1.0)
         return (score, [])
