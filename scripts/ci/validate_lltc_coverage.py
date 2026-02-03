@@ -3,17 +3,24 @@
 Hardened LLTC coverage change validator.
 
 This script wraps the dotstop LLTC coverage change validator with additional
-defensive checks to meet ISO 26262 and ISO 21434 expectations.  It explicitly
-fails closed when safety tooling is unavailable or when mandatory inputs are
-missing or malformed.  It also allows the caller to specify custom paths for
-the baseline and approvals files instead of implicitly relying on
-ephemeral CI artifacts.
+defensive checks to meet ISO 26262 and ISO 21434 expectations.
+
+Key policy for this repository:
+- Project scope: ASIL A + QM
+- CI gate: >= 90% line coverage per suite (dc-motor, servo-motor, speed-sensor)
+- Coverage regressions vs the version-controlled baseline require an explicit approval
+  (via approvals.json), rather than lowering the global threshold.
+
+IMPORTANT:
+- Baseline & approvals are version-controlled in tests/verification/coverage/
+- Generated coverage XML evidence is produced under artifacts/verification/coverage/
 
 Usage:
-    python3 validate_lltc_coverage.py --base-dir build_dir \
+    python3 validate_lltc_coverage.py \
+        --base-dir artifacts/verification/coverage \
         --suites dc-motor servo-motor speed-sensor \
-        --baseline artifacts/verification/coverage/baseline.json \
-        --approvals artifacts/verification/coverage/approvals.json \
+        --baseline tests/verification/coverage/baseline.json \
+        --approvals tests/verification/coverage/approvals.json \
         --min-line-rate 90.0
 """
 
@@ -25,11 +32,7 @@ from typing import List, Tuple
 
 
 def load_json(path: str) -> dict:
-    """Load a JSON file safely.
-
-    Exits the program with an error if the file is missing, not JSON or
-    cannot be parsed.  Returns the parsed object on success.
-    """
+    """Load a JSON file safely (fail-closed)."""
     if not path:
         print("::error::No JSON path provided.")
         sys.exit(1)
@@ -46,13 +49,7 @@ def load_json(path: str) -> dict:
 
 
 def validate_baseline_structure(baseline: dict, suites: List[str]) -> None:
-    """Perform a lightweight validation of the baseline JSON structure.
-
-    The baseline must be a dictionary containing a "suites" mapping.  Each
-    requested suite must have an entry with numeric line‑rate and branch‑rate
-    between 0.0 and 1.0 (inclusive).  On any violation, the program exits
-    with a non‑zero status.
-    """
+    """Validate baseline JSON structure and rate ranges (0..1 inclusive)."""
     if not isinstance(baseline, dict):
         print("::error::Baseline JSON must be an object.")
         sys.exit(1)
@@ -60,14 +57,16 @@ def validate_baseline_structure(baseline: dict, suites: List[str]) -> None:
     if not isinstance(suites_data, dict):
         print("::error::Baseline JSON missing required 'suites' section.")
         sys.exit(1)
+
     for suite in suites:
         entry = suites_data.get(suite)
         if not isinstance(entry, dict):
             print(f"::error::Baseline JSON missing entry for suite '{suite}'.")
             sys.exit(1)
-        # Accept both dashed and underscored keys for compatibility.
+
         line_key = "line-rate" if "line-rate" in entry else "line_rate"
         branch_key = "branch-rate" if "branch-rate" in entry else "branch_rate"
+
         for key, val in [("line", entry.get(line_key)), ("branch", entry.get(branch_key))]:
             if val is None:
                 print(f"::error::Baseline JSON missing {key} rate for suite '{suite}'.")
@@ -91,7 +90,7 @@ def main() -> None:
     parser.add_argument(
         "--base-dir",
         default="artifacts/verification/coverage",
-        help="Directory containing generated coverage XML files.",
+        help="Directory containing generated coverage XML files (evidence output).",
     )
     parser.add_argument(
         "--suites",
@@ -108,13 +107,14 @@ def main() -> None:
     parser.add_argument(
         "--baseline",
         default=None,
-        help="Path to a baseline.json file committed in the repository. If not provided, "
-        "defaults to <base-dir>/baseline.json.",
+        help="Path to baseline.json (version-controlled). If not provided, defaults to "
+        "tests/verification/coverage/baseline.json.",
     )
     parser.add_argument(
         "--approvals",
         default=None,
-        help="Path to an approvals.json file. If not provided, defaults to <base-dir>/approvals.json.",
+        help="Path to approvals.json (version-controlled). If not provided, defaults to "
+        "tests/verification/coverage/approvals.json.",
     )
     args = parser.parse_args()
 
@@ -127,25 +127,19 @@ def main() -> None:
         print(f"Import error: {exc}")
         sys.exit(1)
 
-    # Resolve baseline and approvals paths.
     base_dir = args.base_dir
-    baseline_path = args.baseline or os.path.join(base_dir, "baseline.json")
-    approvals_path = args.approvals or os.path.join(base_dir, "approvals.json")
+    baseline_path = args.baseline or os.path.join("tests", "verification", "coverage", "baseline.json")
+    approvals_path = args.approvals or os.path.join("tests", "verification", "coverage", "approvals.json")
 
-    # Validate baseline existence and structure.
     baseline_json = load_json(baseline_path)
     validate_baseline_structure(baseline_json, args.suites)
 
-    # Optionally validate approvals JSON if present; warn if missing.
     if os.path.exists(approvals_path):
         _ = load_json(approvals_path)
     else:
         print(f"::notice::Approvals file not found at {approvals_path}. Continuing without approvals.")
 
-    # Build list of input tuples (suite name, XML path).
-    inputs: List[Tuple[str, str]] = [
-        (suite, os.path.join(base_dir, f"{suite}.xml")) for suite in args.suites
-    ]
+    inputs: List[Tuple[str, str]] = [(suite, os.path.join(base_dir, f"{suite}.xml")) for suite in args.suites]
     overall_ok = True
     summary: List[Tuple[str, float, List[str]]] = []
 
@@ -164,17 +158,18 @@ def main() -> None:
             "require_review_on_change": True,
             "enforce_individual": True,
         }
+
         try:
             score, issues = lltc_coverage_change_validator(cfg)
         except Exception as e:
             summary.append((suite, 0.0, [f"Validator error: {e}"]))
             overall_ok = False
             continue
+
         summary.append((suite, score, [str(issue) for issue in issues]))
         if issues:
             overall_ok = False
 
-    # Write human‑readable summary to file.
     summary_file = "LLTC Coverage Validation Summary.txt"
     try:
         with open(summary_file, "w", encoding="utf-8") as f:
@@ -183,7 +178,6 @@ def main() -> None:
     except Exception as e:
         print(f"::warning::Failed to write summary file: {e}")
 
-    # Print summary to console for GitHub logs.
     print("LLTC Coverage Validation Summary:")
     for s_name, s_score, s_issues in summary:
         print(f"  - {s_name}: score={s_score:.2f} issues={s_issues}")

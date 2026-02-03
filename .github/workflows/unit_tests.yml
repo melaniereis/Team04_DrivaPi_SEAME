@@ -30,7 +30,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install dependencies
         run: |
@@ -51,7 +51,7 @@ jobs:
         run: |
           echo "=== Tool Versions ==="
           gcc --version
-          cmake --version
+          cmake --version || true
           ceedling version
           lcov --version
           gcovr --version
@@ -74,7 +74,7 @@ jobs:
 
       - name: Download Static Analysis SARIF (from firmware_static job)
         if: always()
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v4
         with:
           name: codeql-sarif-filtered
           path: artifacts/verification/static-analysis
@@ -84,22 +84,24 @@ jobs:
         run: |
           LABELS=$(jq -r '.pull_request.labels | map(.name | ascii_downcase) | join(",")' "$GITHUB_EVENT_PATH")
           SHA=${{ github.sha }}
-          bash scripts/ci/generate_coverage_approvals.sh "$LABELS" "$SHA" artifacts/verification/coverage/approvals.json
+          bash scripts/ci/generate_coverage_approvals.sh "$LABELS" "$SHA" tests/verification/coverage/approvals.json
 
       - name: Verify Baseline & Approvals in Repository
         if: always()
         run: |
-          test -f "artifacts/verification/coverage/baseline.json" || \
-            { echo "::error::Missing baseline.json at artifacts/verification/coverage/baseline.json"; exit 1; }
-          test -f "artifacts/verification/coverage/approvals.json" || \
-            { echo "::error::Missing approvals.json at artifacts/verification/coverage/approvals.json"; exit 1; }
+          test -f "tests/verification/coverage/baseline.json" || \
+            { echo "::error::Missing baseline.json at tests/verification/coverage/baseline.json"; exit 1; }
+          test -f "tests/verification/coverage/approvals.json" || \
+            { echo "::error::Missing approvals.json at tests/verification/coverage/approvals.json"; exit 1; }
 
-      - name: Run LLTC Coverage Validation
+      - name: Run LLTC Coverage Validation (ASIL A/QM gate = 90% line-rate)
         if: always()
         run: |
           python3 scripts/ci/validate_lltc_coverage.py \
             --base-dir artifacts/verification/coverage \
             --suites dc-motor servo-motor speed-sensor \
+            --baseline tests/verification/coverage/baseline.json \
+            --approvals tests/verification/coverage/approvals.json \
             --min-line-rate 90.0
 
       - name: Static Analysis Validation (fail-closed)
@@ -109,7 +111,7 @@ jobs:
 
       - name: Upload Verification Artifacts (TSF)
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: verification-artifacts
           path: artifacts/verification
@@ -117,7 +119,7 @@ jobs:
 
       - name: Upload Coverage HTML
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-html
           path: build/coverage/html
@@ -125,7 +127,7 @@ jobs:
 
       - name: Upload Static Analysis SARIF
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: static-analysis-sarif
           path: artifacts/verification/static-analysis/*.sarif

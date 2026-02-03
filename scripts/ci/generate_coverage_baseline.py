@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Generate a version-controlled coverage baseline (baseline.json)."""
+"""Generate a version-controlled coverage baseline (baseline.json).
+
+Policy:
+- Project scope: ASIL A + QM
+- Baseline is committed under tests/verification/coverage/baseline.json
+- Evidence XML is generated under artifacts/verification/coverage/*.xml
+"""
 
 import argparse
 import json
@@ -22,17 +28,17 @@ def read_rates(path: str):
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Generate coverage baseline JSON from Cobertura XML files.")
-    parser.add_argument("--base-dir", default="artifacts/verification/coverage")
+    parser.add_argument("--evidence-dir", default="artifacts/verification/coverage",
+                        help="Directory containing generated per-suite XML coverage evidence.")
     parser.add_argument("--suites", nargs="+", default=["dc-motor", "servo-motor", "speed-sensor"])
     parser.add_argument("--sha", default=None)
-    parser.add_argument("--out", default=None)
+    parser.add_argument("--out", default=None,
+                        help="Output baseline.json path (defaults to tests/verification/coverage/baseline.json).")
     args = parser.parse_args()
 
-    base_dir = args.base_dir
-    os.makedirs(base_dir, exist_ok=True)
-
     sha = args.sha or os.environ.get("GITHUB_SHA") or "unknown"
-    out_path = args.out or os.path.join(base_dir, "baseline.json")
+    out_path = args.out or os.path.join("tests", "verification", "coverage", "baseline.json")
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
 
     data = {
         "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -42,7 +48,7 @@ def main() -> int:
 
     missing = []
     for suite in args.suites:
-        xml_path = os.path.join(base_dir, f"{suite}.xml")
+        xml_path = os.path.join(args.evidence_dir, f"{suite}.xml")
         if not os.path.exists(xml_path):
             missing.append(xml_path)
             continue

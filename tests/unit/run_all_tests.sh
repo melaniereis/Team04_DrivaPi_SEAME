@@ -3,7 +3,7 @@
 # Master Unit Test Automation Script with Aggregated Coverage
 #
 # Purpose: Execute all unit tests and generate unified coverage report
-# ASIL Level: B/D
+# ASIL Level: A/QM (project policy)
 # Version: 2.3.1 - Fixed coverage file finding
 ################################################################################
 
@@ -35,16 +35,11 @@ mkdir -p "${MASTER_COVERAGE_DIR}"
 mkdir -p "${ARTIFACTS_DIR}/tests"
 mkdir -p "${ARTIFACTS_DIR}/coverage"
 
-# ============================================================================
-# MAIN
-# ============================================================================
-
 main() {
     echo ""
     log_section "ISO 26262 Master Test Runner - DrivaPi (v2.3.1)"
     echo ""
 
-    # Run all test suites
     local dc_pass=0 servo_pass=0 speed_pass=0
     DC_MOTOR_OUTPUT=$(mktemp)
     SERVO_MOTOR_OUTPUT=$(mktemp)
@@ -62,7 +57,6 @@ main() {
     [[ ${speed_pass:-0} -eq 0 ]] && log_pass "Speed Sensor: PASSED" || log_fail "Speed Sensor: FAILED"
     echo ""
 
-    # Validate test outputs
     for f in "$DC_MOTOR_OUTPUT" "$SERVO_MOTOR_OUTPUT" "$SPEED_SENSOR_OUTPUT"; do
       [[ -s "$f" ]] || { log_fail "Test output missing, aborting."; exit 2; }
     done
@@ -76,12 +70,13 @@ main() {
         "${ARTIFACTS_DIR}/tests/servo-motor.xml" \
         "${ARTIFACTS_DIR}/tests/speed-sensor.xml"
 
-    # Count tests
-    local dc_tests=$(count_tests "$DC_MOTOR_OUTPUT")
-    local servo_tests=$(count_tests "$SERVO_MOTOR_OUTPUT")
-    local speed_tests=$(count_tests "$SPEED_SENSOR_OUTPUT")
+    local dc_tests
+    local servo_tests
+    local speed_tests
+    dc_tests=$(count_tests "$DC_MOTOR_OUTPUT")
+    servo_tests=$(count_tests "$SERVO_MOTOR_OUTPUT")
+    speed_tests=$(count_tests "$SPEED_SENSOR_OUTPUT")
 
-    # Test summary
     cat > "${ARTIFACTS_DIR}/tests/summary.json" << EOF
 {
   "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
@@ -94,7 +89,6 @@ main() {
 }
 EOF
 
-    # Console summary
     echo ""
     echo "[TEST_COUNT] DC Motor: ${dc_tests} tests"
     echo "[TEST_COUNT] Servo Motor: ${servo_tests} tests"
@@ -103,7 +97,6 @@ EOF
 
     log_success "Test reports generated: ${ARTIFACTS_DIR}/tests/"
 
-    # Resolve coverage paths
     local dc_cov="${DC_MOTOR_DIR}/build/artifacts/gcov/coverage_filtered.info"
     local servo_cov="${SERVO_MOTOR_DIR}/build/artifacts/gcov/coverage_filtered.info"
     local speed_cov="${SPEED_SENSOR_DIR}/coverage_filtered.info"
@@ -112,7 +105,6 @@ EOF
     [[ ! -f "$servo_cov" ]] && servo_cov="${PROJECT_ROOT_DIR}/build/coverage/servo-motor/coverage_filtered.info"
     [[ ! -f "$speed_cov" ]] && speed_cov="${PROJECT_ROOT_DIR}/build/coverage/speed-sensor/coverage_filtered.info"
 
-    # Per-suite coverage XML
     mkdir -p "${ARTIFACTS_DIR}/coverage"
     for suite in dc-motor servo-motor speed-sensor; do
       cov_file=""
@@ -144,7 +136,6 @@ EOF
         fi
     done
 
-    # Aggregate coverage
     if [[ -f "$dc_cov" && -f "$servo_cov" && -f "$speed_cov" ]]; then
         aggregate_coverage "${MASTER_COVERAGE_DIR}" "$dc_cov" "$servo_cov" "$speed_cov"
         cp "${MASTER_COVERAGE_DIR}/coverage_filtered.info" "${ARTIFACTS_DIR}/coverage/coverage.info"
@@ -159,7 +150,7 @@ EOF
 
     echo ""
     if [[ $dc_pass -eq 0 && $servo_pass -eq 0 && $speed_pass -eq 0 ]]; then
-        log_section "✓ ALL TESTS PASSED - ISO 26262 COMPLIANT"
+        log_section "✓ ALL TESTS PASSED - CI QUALITY GATES APPLY"
         log_info "Reports: ${ARTIFACTS_DIR}/"
         exit 0
     else

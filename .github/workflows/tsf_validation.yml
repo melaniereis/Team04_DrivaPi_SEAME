@@ -27,7 +27,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install dependencies
         run: |
@@ -66,13 +66,13 @@ jobs:
           fi
 
       - name: Download Verification Artifacts (required)
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v4
         with:
           name: verification-artifacts
           path: artifacts/verification
 
       - name: Download CodeQL Artifacts (required)
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v4
         with:
           name: codeql-sarif-filtered
           path: temp_codeql
@@ -134,7 +134,7 @@ jobs:
           trudag publish --output-dir artifacts/tsf/trustable-report
 
       - name: Upload TSF artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: tsf-validation-artifacts

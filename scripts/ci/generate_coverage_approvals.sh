@@ -37,5 +37,6 @@ for suite in "dc-motor" "servo-motor" "speed-sensor"; do
   fi
 done
 json+="}}"
+
 echo "$json" > "$OUTPUT_PATH"
 echo "Approvals file written at $OUTPUT_PATH"

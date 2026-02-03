@@ -2,25 +2,21 @@
 ################################################################################
 # ISO 26262 Unit Test Automation Script
 #
-# Purpose: Execute unit tests with 100% branch coverage validation
-# ASIL Level: B/D
+# Purpose: Execute unit tests with coverage reporting
+# ASIL Level: A/QM (project policy)
 # Author: DrivaPi Team
-# Version: 1.0.0
+# Version: 1.0.1
 #
-# Features:
-# - Automatic build cleanup
-# - Unit test execution with Ceedling
-# - LCOV coverage report generation
-# - SonarQube XML export
-# - Branch coverage validation (100% required)
-# - Color-coded output
+# Notes:
+# - Coverage gating is enforced in CI (scripts/ci/validate_lltc_coverage.py)
+# - Project gate: >= 90% line coverage per suite (ASIL A/QM decision)
+# - Regressions vs baseline require approvals rather than lowering the threshold
 ################################################################################
 
 set -e
 set -u
 set -o pipefail
 
-# Source common library
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/../../common_test_lib.sh"
 
@@ -30,26 +26,6 @@ COVERAGE_DIR="${BUILD_DIR}/artifacts/gcov"
 REPORTS_DIR="${PROJECT_ROOT}/test_reports"
 VENDOR_DIR="${PROJECT_ROOT}/vendor"
 
-###############################################
-# NOTE:
-#
-# The original script defined temporary coverage
-# thresholds (e.g., 70% line/branch coverage) to
-# allow incremental improvement during early
-# development. However, in an ISO 26262 safety
-# context this can mask critical deficiencies
-# because local testing may pass with insufficient
-# coverage. These variables have been removed in
-# favour of enforcing coverage via the CI pipeline
-# and version‑controlled baseline files. Removing
-# these variables prevents developers from
-# unintentionally relying on out‑of‑date local
-# thresholds. Coverage validation should instead
-# be driven by scripts/ci/validate_lltc_coverage.py
-# and the baseline.json/approvals.json files.
-###############################################
-
-# Colors
 if [[ -t 1 ]]; then
     readonly RED='\033[0;31m'
     readonly GREEN='\033[0;32m'
@@ -61,10 +37,6 @@ if [[ -t 1 ]]; then
 else
     readonly RED='' GREEN='' YELLOW='' BLUE='' CYAN='' BOLD='' NC=''
 fi
-
-# ============================================================================
-# LOGGING
-# ============================================================================
 
 log_header() {
     echo -e "${BOLD}${CYAN}============================================================================${NC}"
@@ -78,15 +50,10 @@ log_error() { echo -e "${RED}[ERROR]${NC} $*" >&2; }
 log_success() { echo -e "${BOLD}${GREEN}✓ $*${NC}"; }
 log_fail() { echo -e "${BOLD}${RED}✗ $*${NC}"; }
 
-# ============================================================================
-# PREREQUISITE CHECKS
-# ============================================================================
-
 check_prerequisites() {
     log_header "Checking Prerequisites"
 
     local missing=()
-
     command -v ruby >/dev/null 2>&1 || missing+=("ruby")
     command -v gcc >/dev/null 2>&1 || missing+=("gcc")
     command -v gcov >/dev/null 2>&1 || missing+=("gcov")
@@ -107,10 +74,6 @@ check_prerequisites() {
     log_success "All prerequisites satisfied"
 }
 
-# ============================================================================
-# CLEANUP
-# ============================================================================
-
 cleanup_build() {
     log_header "Cleaning Previous Build"
 
@@ -125,13 +88,11 @@ cleanup_build() {
     rm -rf "${REPORTS_DIR}"
     mkdir -p "${REPORTS_DIR}"
 
-    # Pre-create Ceedling output folders to satisfy path validation and mock includes
     mkdir -p "${BUILD_DIR}/test/mocks" "${BUILD_DIR}/gcov/out"
 
     log_success "Cleanup complete"
 }
 
-# Ensure Ceedling vendor (Unity/CMock) exists; CI doesn't commit this folder
 ensure_vendor() {
     if [[ -d "${VENDOR_DIR}/unity/src" ]]; then
         return
@@ -150,15 +111,10 @@ ensure_vendor() {
     fi
 }
 
-# ============================================================================
-# RUN TESTS
-# ============================================================================
-
 run_tests() {
     log_header "Running Unit Tests"
 
     cd "${PROJECT_ROOT}"
-
     ensure_vendor
 
     local log_file="${REPORTS_DIR}/test_output.log"
@@ -175,12 +131,6 @@ run_tests() {
 run_speed_sensor_tests() {
     log_header "Speed Sensor Coverage Note"
 
-    # Note: The speed-sensor/ folder contains a comprehensive standalone test (404 lines)
-    # that requires complex mock setup. The main project already includes robust speed sensor testing:
-    # - test_speed_sensor_functions.c: Unit tests for speed calculation logic
-    # - test_threadx_speed_sensor.c: Integration tests with ThreadX
-    # These tests provide good coverage of speed sensor functionality.
-
     log_info "Speed sensor tests executed:"
     log_info "  ✓ test_speed_sensor_functions.c"
     log_info "  ✓ test_threadx_speed_sensor.c"
@@ -189,35 +139,21 @@ run_speed_sensor_tests() {
     log_info "  cd speed-sensor && ./run_speedtest.sh"
 }
 
-# ============================================================================
-# GENERATE COVERAGE AND REPORT
-# ============================================================================
-
 generate_coverage_report() {
     log_header "Generating Coverage Report"
 
     cd "${PROJECT_ROOT}"
-
     mkdir -p "${COVERAGE_DIR}"
 
-    # Collect coverage data
     lcov --capture --directory "${BUILD_DIR}" --output-file "${COVERAGE_DIR}/coverage.info" >/dev/null 2>&1
-
-    # Remove external library files from coverage
     lcov --remove "${COVERAGE_DIR}/coverage.info" "${PROJECT_ROOT}/vendor/*" "${PROJECT_ROOT}/test/*" --output-file "${COVERAGE_DIR}/coverage_filtered.info" >/dev/null 2>&1
 
-    # Generate HTML report
     genhtml -o "${COVERAGE_DIR}/html" "${COVERAGE_DIR}/coverage_filtered.info" >/dev/null 2>&1
 
-    # Generate SonarQube XML
     gcovr --xml-pretty --output "${REPORTS_DIR}/coverage.xml" >/dev/null 2>&1
 
     log_info "Coverage report generated at ${COVERAGE_DIR}/html/index.html"
 }
-
-# ============================================================================
-# MAIN
-# ============================================================================
 
 main() {
     check_prerequisites
