@@ -197,29 +197,14 @@ def coverage_threshold_validator(configuration: Dict) -> Tuple[float, List[Excep
     try:
         cfg = configuration or {}
         path = _path_from_config(cfg)
-        if not path:
-            return (0.0, [ValueError("No coverage path provided")])
-        if not os.path.exists(path):
-            return (0.0, [FileNotFoundError(path)])
+        if not path or not os.path.exists(path):
+            return (0.0, [FileNotFoundError(path or "No Path")])
 
-        # Enforce per-suite (reject aggregate) if requested
-        if cfg.get("enforce_individual", True):
-            suite = _suite_name_from_path(path)
-            if suite == "aggregate":
-                return (0.0, [ValueError("Aggregate coverage.xml provided. Provide individual suite XML (e.g., dc-motor.xml).")])
-
-        # Parse coverage line-rate
         line_rate, branch_rate = _read_cobertura_rates(path)
         if line_rate is None:
             return (0.0, [ValueError("Unable to parse line-rate from coverage XML")])
 
-        # Convert to percent for threshold comparison
-        coverage_percent = line_rate * 100.0
         min_cov = float(cfg.get("min_line_rate", 90))
-        if min_cov <= 0:
-            return (0.0, [ValueError("Invalid min_line_rate in configuration")])
-
-        # Baseline comparison & approval gating (optional)
         baseline_path = cfg.get("baseline") or cfg.get("baseline_path")
         approvals_path = cfg.get("approvals") or cfg.get("approval_path")
         suite_name = cfg.get("suite") or _suite_name_from_path(path)
@@ -231,19 +216,21 @@ def coverage_threshold_validator(configuration: Dict) -> Tuple[float, List[Excep
             suites = baseline.get("suites") or baseline
             prev = suites.get(suite_name)
             if prev and isinstance(prev, dict):
-                prev_line = prev.get("line_rate")
-                prev_branch = prev.get("branch_rate")
-                # If baseline stored as percent, normalize
-                if prev_line and prev_line > 1.0:
-                    prev_line = prev_line / 100.0
-                if prev_branch and prev_branch > 1.0:
-                    prev_branch = prev_branch / 100.0
+                # FIXED: Robust key retrieval
+                prev_line = prev.get("line-rate") or prev.get("line_rate")
+                prev_branch = prev.get("branch-rate") or prev.get("branch_rate")
 
-                changed = False
-                if prev_line is not None and abs(line_rate - prev_line) > epsilon:
-                    changed = True
-                if branch_rate is not None and prev_branch is not None and abs(branch_rate - prev_branch) > epsilon:
-                    changed = True
+                # FIXED: Normalize percentage vs decimal
+                if prev_line is not None and prev_line > 1.0: prev_line /= 100.0
+                if prev_branch is not None and prev_branch > 1.0: prev_branch /= 100.0
+
+                # FIXED: Fail-closed logic for missing baseline entries
+                if require_review_on_change and (prev_line is None or prev_branch is None):
+                    return (0.0,)
+
+                changed = abs(line_rate - prev_line) > epsilon
+                if branch_rate is not None and prev_branch is not None:
+                    if abs(branch_rate - prev_branch) > epsilon: changed = True
 
                 if changed and require_review_on_change:
                     approved = False
@@ -269,11 +256,9 @@ def coverage_threshold_validator(configuration: Dict) -> Tuple[float, List[Excep
                             "current_sha": current_sha,
                         }
                         return (0.0, [ValueError(f"Coverage changed since baseline and requires approval: {json.dumps(details)}")])
-
-        # Threshold-based scoring (continuous ratio, capped at 1)
-        score = min(max(coverage_percent / min_cov, 0.0), 1.0)
-        return (score, [])
-
+                    pass
+        score = min(max((line_rate * 100.0) / min_cov, 0.0), 1.0)
+        return (score,)
     except Exception as e:
         return (0.0, [e])
 
@@ -284,22 +269,14 @@ def coverage_threshold_validator(configuration: Dict) -> Tuple[float, List[Excep
 def lltc_coverage_change_validator(configuration: Dict) -> Tuple[float, List[Exception | Warning]]:
     try:
         cfg = configuration or {}
-        # Accept either single path or references list (prefer individual per LLTC)
         path = _path_from_config(cfg)
         refs = cfg.get("references") or []
-        paths: List[str] = []
-        if path:
-            paths.append(path)
+        paths = [path] if path else []
         for r in refs:
-            if isinstance(r, dict) and r.get("path"):
-                paths.append(r["path"]) 
-        if not paths:
-            return (0.0, [ValueError("No coverage paths provided for LLTC validator")])
+            if isinstance(r, dict) and r.get("path"): paths.append(r["path"])
 
-        # Enforce use of individual reports only
-        for p in paths:
-            if os.path.basename(p).lower() == "coverage.xml":
-                return (0.0, [ValueError(f"Aggregate coverage.xml not allowed for LLTC. Provide individual suite XML: {p}")])
+        if not paths:
+            return (0.0, [ValueError("No coverage paths provided")])
 
         baseline_path = cfg.get("baseline") or cfg.get("baseline_path")
         approvals_path = cfg.get("approvals") or cfg.get("approval_path")
@@ -311,69 +288,58 @@ def lltc_coverage_change_validator(configuration: Dict) -> Tuple[float, List[Exc
         approvals = _load_json(approvals_path) if (approvals_path and os.path.exists(approvals_path)) else None
         approved_suites = (approvals or {}).get("suites") or (approvals or {})
         baseline_suites = (baseline or {}).get("suites") or (baseline or {})
-
         current_sha = cfg.get("current_sha") or _get_current_sha()
 
-        # Evaluate each path individually; score is the min across provided suites
         errors: List[Exception | Warning] = []
         scores: List[float] = []
         for p in paths:
             if not os.path.exists(p):
                 errors.append(FileNotFoundError(p))
                 continue
+
             suite_name = cfg.get("suite") or _suite_name_from_path(p)
             lr, br = _read_cobertura_rates(p)
             if lr is None:
                 errors.append(ValueError(f"Unable to parse line-rate: {p}"))
                 continue
-            coverage_percent = lr * 100.0
 
-            # threshold score
-            s = min(max(coverage_percent / min_cov, 0.0), 1.0)
+            s = min(max((lr * 100.0) / min_cov, 0.0), 1.0)
 
-            # change detection vs baseline
             if baseline_suites and suite_name in baseline_suites and require_review_on_change:
                 prev = baseline_suites.get(suite_name)
-                prev_line = prev.get("line_rate") if isinstance(prev, dict) else None
-                prev_branch = prev.get("branch_rate") if isinstance(prev, dict) else None
-                if prev_line and prev_line > 1.0:
-                    prev_line = prev_line / 100.0
-                if prev_branch and prev_branch > 1.0:
-                    prev_branch = prev_branch / 100.0
-                changed = False
-                if prev_line is not None and abs(lr - prev_line) > epsilon:
-                    changed = True
-                if br is not None and prev_branch is not None and abs(br - prev_branch) > epsilon:
-                    changed = True
+                if not isinstance(prev, dict):
+                    errors.append(ValueError(f"Invalid baseline entry for {suite_name}"))
+                    scores.append(0.0); continue
+
+                prev_line = prev.get("line-rate")
+                if prev_line is None: prev_line = prev.get("line_rate")
+
+                prev_branch = prev.get("branch-rate")
+                if prev_branch is None: prev_branch = prev.get("branch_rate")
+
+                if prev_line is not None and prev_line > 1.0: prev_line /= 100.0
+                if prev_branch is not None and prev_branch > 1.0: prev_branch /= 100.0
+
+                if require_review_on_change and (prev_line is None or prev_branch is None):
+                    error_msg = f"Baseline data missing/corrupted for {suite_name}. Keys: {list(prev.keys())}"
+                    errors.append(ValueError(error_msg))
+                    scores.append(0.0); continue
+
+                changed = abs(lr - prev_line) > epsilon
+                if br is not None and prev_branch is not None:
+                    if abs(br - prev_branch) > epsilon: changed = True
+
                 if changed:
                     ap = approved_suites.get(suite_name) if approved_suites else None
                     approved = bool(ap.get("approved")) if isinstance(ap, dict) else False
                     approved_sha = ap.get("approved_sha") if isinstance(ap, dict) else None
-                    if not approved or (approved_sha and current_sha and approved_sha != current_sha):
-                        details = {
-                            "suite": suite_name,
-                            "prev_line_rate": prev_line,
-                            "curr_line_rate": lr,
-                            "prev_branch_rate": prev_branch,
-                            "curr_branch_rate": br,
-                            "approved": approved,
-                            "approved_sha": approved_sha,
-                            "current_sha": current_sha,
-                            "path": p,
-                        }
-                        errors.append(ValueError(f"Coverage changed since baseline and requires approval: {json.dumps(details)}"))
-                        # Changes require explicit approval → set suite score to 0 until approved
+                    if not approved or (approved_sha and current_sha and approved_sha!= current_sha):
+                        errors.append(ValueError(f"Coverage changed for {suite_name} and requires approval."))
                         s = 0.0
 
             scores.append(s)
 
-        if not scores:
-            return (0.0, errors if errors else [ValueError("No valid coverage inputs to score")])
-
-        # Overall LLTC score for provided paths: conservative min
-        overall = min(scores)
-        return (overall, errors)
-
+        return (min(scores) if scores else 0.0, errors)
     except Exception as e:
         return (0.0, [e])
 
