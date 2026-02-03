@@ -80,8 +80,6 @@ jobs:
           name: codeql-sarif-filtered
           path: artifacts/verification/static-analysis
 
-
-
       - name: Verify Baseline in Repository
         if: always()
         run: |
