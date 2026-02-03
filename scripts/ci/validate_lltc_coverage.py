@@ -9,19 +9,18 @@ Key policy for this repository:
 - Project scope: ASIL A + QM
 - CI gate: >= 90% line coverage per suite (dc-motor, servo-motor, speed-sensor)
 - Coverage regressions vs the version-controlled baseline require an explicit approval
-  (via approvals.json), rather than lowering the global threshold.
+    by modifying the baseline file, rather than lowering the global threshold.
 
 IMPORTANT:
-- Baseline & approvals are version-controlled in tests/verification/coverage/
+- Baseline is version-controlled in tests/verification/coverage/
 - Generated coverage XML evidence is produced under artifacts/verification/coverage/
 
 Usage:
-    python3 validate_lltc_coverage.py \
-        --base-dir artifacts/verification/coverage \
-        --suites dc-motor servo-motor speed-sensor \
-        --baseline tests/verification/coverage/baseline.json \
-        --approvals tests/verification/coverage/approvals.json \
-        --min-line-rate 90.0
+        python3 validate_lltc_coverage.py \
+                --base-dir artifacts/verification/coverage \
+                --suites dc-motor servo-motor speed-sensor \
+                --baseline tests/verification/coverage/baseline.json \
+                --min-line-rate 90.0
 """
 
 import argparse
@@ -85,7 +84,7 @@ def validate_baseline_structure(baseline: dict, suites: List[str]) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Validate per-suite coverage changes versus a baseline and approvals file."
+        description="Validate per-suite coverage changes versus a baseline file."
     )
     parser.add_argument(
         "--base-dir",
@@ -110,12 +109,6 @@ def main() -> None:
         help="Path to baseline.json (version-controlled). If not provided, defaults to "
         "tests/verification/coverage/baseline.json.",
     )
-    parser.add_argument(
-        "--approvals",
-        default=None,
-        help="Path to approvals.json (version-controlled). If not provided, defaults to "
-        "tests/verification/coverage/approvals.json.",
-    )
     args = parser.parse_args()
 
     # Fail closed if the dotstop validator cannot be imported.
@@ -129,15 +122,9 @@ def main() -> None:
 
     base_dir = args.base_dir
     baseline_path = args.baseline or os.path.join("tests", "verification", "coverage", "baseline.json")
-    approvals_path = args.approvals or os.path.join("tests", "verification", "coverage", "approvals.json")
 
     baseline_json = load_json(baseline_path)
     validate_baseline_structure(baseline_json, args.suites)
-
-    if os.path.exists(approvals_path):
-        _ = load_json(approvals_path)
-    else:
-        print(f"::notice::Approvals file not found at {approvals_path}. Continuing without approvals.")
 
     inputs: List[Tuple[str, str]] = [(suite, os.path.join(base_dir, f"{suite}.xml")) for suite in args.suites]
     overall_ok = True
@@ -153,7 +140,6 @@ def main() -> None:
             "path": xml_path,
             "suite": suite,
             "baseline_path": baseline_path,
-            "approval_path": approvals_path if os.path.exists(approvals_path) else None,
             "min_line_rate": args.min_line_rate,
             "require_review_on_change": True,
             "enforce_individual": True,

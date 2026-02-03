@@ -38,7 +38,6 @@ def _read_cobertura_rates(path: str) -> Tuple[Optional[float], Optional[float]]:
                 return None
         line_rate = _to_float(root.attrib.get("line-rate") or root.attrib.get("lineRate"))
         branch_rate = _to_float(root.attrib.get("branch-rate") or root.attrib.get("branchRate"))
-        # Fallbacks: try metrics node
         if line_rate is None or branch_rate is None:
             metrics = root.find(".//metrics")
             if metrics is not None:
@@ -127,7 +126,6 @@ def junit_pass_rate_validator(configuration: dict[str, yaml]) -> tuple[float, li
         min_pass = cfg.get("min_pass_rate") or cfg.get("min_pass") or 100
         min_pass = float(min_pass)
 
-        # Optional hard-fail: any failure -> score 0
         hard_fail = bool(cfg.get("hard_fail", False))
         if hard_fail and (failures > 0 or errors > 0):
             return (0.0, [ValueError(f"Unit tests have failures or errors: failures={failures}, errors={errors}")])
@@ -158,7 +156,6 @@ def codeql_sarif_validator(configuration: dict[str, yaml]) -> tuple[float, list[
         with open(path, 'r', encoding='utf-8') as f:
             sarif_data = json.load(f)
 
-        # Severity counts
         errors = 0
         warnings = 0
         notes = 0
@@ -172,7 +169,6 @@ def codeql_sarif_validator(configuration: dict[str, yaml]) -> tuple[float, list[
                 elif lvl == "note":
                     notes += 1
 
-        # Configurable weights (industry-style severity weighting)
         w_error = float(cfg.get("weight_error", 0.10))
         w_warning = float(cfg.get("weight_warning", 0.02))
         w_note = float(cfg.get("weight_note", 0.0))
@@ -180,7 +176,6 @@ def codeql_sarif_validator(configuration: dict[str, yaml]) -> tuple[float, list[
         penalty = (errors * w_error) + (warnings * w_warning) + (notes * w_note)
         score = max(0.0, 1.0 - penalty)
 
-        # Optional hard-fail if any error
         if bool(cfg.get("hard_fail_on_error", True)) and errors > 0:
             score = 0.0
 
@@ -206,9 +201,7 @@ def coverage_threshold_validator(configuration: Dict) -> Tuple[float, List[Excep
 
         min_cov = float(cfg.get("min_line_rate", 90))
         baseline_path = cfg.get("baseline") or cfg.get("baseline_path")
-        approvals_path = cfg.get("approvals") or cfg.get("approval_path")
         suite_name = cfg.get("suite") or _suite_name_from_path(path)
-        require_review_on_change = bool(cfg.get("require_review_on_change", True))
         epsilon = float(cfg.get("delta_epsilon", 1e-6))
 
         if baseline_path and os.path.exists(baseline_path):
@@ -216,47 +209,28 @@ def coverage_threshold_validator(configuration: Dict) -> Tuple[float, List[Excep
             suites = baseline.get("suites") or baseline
             prev = suites.get(suite_name)
             if prev and isinstance(prev, dict):
-                # FIXED: Robust key retrieval
                 prev_line = prev.get("line-rate") or prev.get("line_rate")
                 prev_branch = prev.get("branch-rate") or prev.get("branch_rate")
 
-                # FIXED: Normalize percentage vs decimal
                 if prev_line is not None and prev_line > 1.0: prev_line /= 100.0
                 if prev_branch is not None and prev_branch > 1.0: prev_branch /= 100.0
 
-                # FIXED: Fail-closed logic for missing baseline entries
-                if require_review_on_change and (prev_line is None or prev_branch is None):
+                if prev_line is None or prev_branch is None:
                     return (0.0,)
 
                 changed = abs(line_rate - prev_line) > epsilon
                 if branch_rate is not None and prev_branch is not None:
                     if abs(branch_rate - prev_branch) > epsilon: changed = True
 
-                if changed and require_review_on_change:
-                    approved = False
-                    approved_sha = None
-                    if approvals_path and os.path.exists(approvals_path):
-                        approvals = _load_json(approvals_path) or {}
-                        ap_suites = approvals.get("suites") or approvals
-                        ap = ap_suites.get(suite_name)
-                        if ap and isinstance(ap, dict):
-                            approved = bool(ap.get("approved"))
-                            approved_sha = ap.get("approved_sha")
-                    current_sha = cfg.get("current_sha") or _get_current_sha()
-                    if not approved or (approved_sha and current_sha and approved_sha != current_sha):
-                        # Block with detailed error explaining deltas
-                        details = {
-                            "suite": suite_name,
-                            "prev_line_rate": prev_line,
-                            "curr_line_rate": line_rate,
-                            "prev_branch_rate": prev_branch,
-                            "curr_branch_rate": branch_rate,
-                            "approved": approved,
-                            "approved_sha": approved_sha,
-                            "current_sha": current_sha,
-                        }
-                        return (0.0, [ValueError(f"Coverage changed since baseline and requires approval: {json.dumps(details)}")])
-                    pass
+                if changed:
+                    details = {
+                        "suite": suite_name,
+                        "prev_line_rate": prev_line,
+                        "curr_line_rate": line_rate,
+                        "prev_branch_rate": prev_branch,
+                        "curr_branch_rate": branch_rate,
+                    }
+                    return (0.0, [ValueError("Coverage changed since baseline and requires an approval by modifying baseline file")])
         score = min(max((line_rate * 100.0) / min_cov, 0.0), 1.0)
         return (score,)
     except Exception as e:
@@ -279,16 +253,11 @@ def lltc_coverage_change_validator(configuration: Dict) -> Tuple[float, List[Exc
             return (0.0, [ValueError("No coverage paths provided")])
 
         baseline_path = cfg.get("baseline") or cfg.get("baseline_path")
-        approvals_path = cfg.get("approvals") or cfg.get("approval_path")
         min_cov = float(cfg.get("min_line_rate", 90))
         epsilon = float(cfg.get("delta_epsilon", 1e-6))
-        require_review_on_change = bool(cfg.get("require_review_on_change", True))
 
         baseline = _load_json(baseline_path) if (baseline_path and os.path.exists(baseline_path)) else None
-        approvals = _load_json(approvals_path) if (approvals_path and os.path.exists(approvals_path)) else None
-        approved_suites = (approvals or {}).get("suites") or (approvals or {})
         baseline_suites = (baseline or {}).get("suites") or (baseline or {})
-        current_sha = cfg.get("current_sha") or _get_current_sha()
 
         errors: List[Exception | Warning] = []
         scores: List[float] = []
@@ -305,7 +274,7 @@ def lltc_coverage_change_validator(configuration: Dict) -> Tuple[float, List[Exc
 
             s = min(max((lr * 100.0) / min_cov, 0.0), 1.0)
 
-            if baseline_suites and suite_name in baseline_suites and require_review_on_change:
+            if baseline_suites and suite_name in baseline_suites:
                 prev = baseline_suites.get(suite_name)
                 if not isinstance(prev, dict):
                     errors.append(ValueError(f"Invalid baseline entry for {suite_name}"))
@@ -320,7 +289,7 @@ def lltc_coverage_change_validator(configuration: Dict) -> Tuple[float, List[Exc
                 if prev_line is not None and prev_line > 1.0: prev_line /= 100.0
                 if prev_branch is not None and prev_branch > 1.0: prev_branch /= 100.0
 
-                if require_review_on_change and (prev_line is None or prev_branch is None):
+                if prev_line is None or prev_branch is None:
                     error_msg = f"Baseline data missing/corrupted for {suite_name}. Keys: {list(prev.keys())}"
                     errors.append(ValueError(error_msg))
                     scores.append(0.0); continue
@@ -330,12 +299,8 @@ def lltc_coverage_change_validator(configuration: Dict) -> Tuple[float, List[Exc
                     if abs(br - prev_branch) > epsilon: changed = True
 
                 if changed:
-                    ap = approved_suites.get(suite_name) if approved_suites else None
-                    approved = bool(ap.get("approved")) if isinstance(ap, dict) else False
-                    approved_sha = ap.get("approved_sha") if isinstance(ap, dict) else None
-                    if not approved or (approved_sha and current_sha and approved_sha!= current_sha):
-                        errors.append(ValueError(f"Coverage changed for {suite_name} and requires approval."))
-                        s = 0.0
+                    errors.append(ValueError(f"Coverage changed for {suite_name} and requires an approval by modifying baseline file."))
+                    s = 0.0
 
             scores.append(s)
 
