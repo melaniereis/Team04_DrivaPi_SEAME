@@ -19,4 +19,4 @@ derived: false
 normative: true
 level: 2.0
 ---
-Throttle commands (0-100%) shall produce proportional wheel speeds, and direction commands shall correctly reverse motor rotation.
+Throttle commands (0-100%) shall produce proportional wheel speeds, and direction commands shall correctly define motor rotation.
