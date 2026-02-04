@@ -88,8 +88,6 @@ UINT App_ThreadX_Init(VOID *memory_ptr)
 	HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
 	PCA9685_InitAllDevices();
 
-	/* Initialize sensor resources (mutex, data structures) */
-
 	msg = "Initializing threads...\r\n";
 	HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
 	ThreadInit();
@@ -121,3 +119,4 @@ void MX_ThreadX_Init(void)
 
 
 /* USER CODE END 1 */
+
