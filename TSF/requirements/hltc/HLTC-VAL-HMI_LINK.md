@@ -19,4 +19,4 @@ derived: false
 normative: true
 level: 2.0
 ---
-The HMI connection indicator shall remain active (connected) throughout a full operational session, and control commands sent from the HMI shall be executed without perceived loss.
+The HMI connection shall be stable during a full operational session, and control commands sent from the HMI shall be executed without perceived loss.
