@@ -19,5 +19,5 @@ derived: false
 normative: true
 level: 2.0
 ---
-Vision obstacle recognition shall meet agreed confidence/precision thresholds in the defined ODD scenarios.
+Vision obstacle recognition shall meet agreed confidence/precision thresholds in the defined Operational Design Domain (ODD) scenarios.
 ---
