@@ -28,5 +28,5 @@ derived: false
 normative: true
 level: 4.0
 ---
-Unit tests must achieve >90% Line Coverage for fault monitoring code paths.
+Unit tests for fault monitoring code must achieve >90% Line Coverage.
 ---
