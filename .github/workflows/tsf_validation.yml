@@ -4,12 +4,9 @@ on:
   pull_request:
   push:
 
-# Maximum permissions for this workflow.
-# Individual jobs reduce these as needed (least privilege).
 permissions:
   contents: read
   actions: read
-  issues: write
   security-events: write
 
 jobs:
@@ -18,16 +15,13 @@ jobs:
     permissions:
       contents: read
       actions: read
-      issues: none
       security-events: none
 
   run-codeql:
     uses: ./.github/workflows/firmware_static.yml
-    # Must allow security-events:write because the called workflow defines a job that requests it
     permissions:
       contents: read
       actions: read
-      issues: none
       security-events: write
 
   tsf-validation:
@@ -36,7 +30,6 @@ jobs:
     permissions:
       contents: read
       actions: read
-      issues: none
       security-events: none
 
     steps:
@@ -147,7 +140,7 @@ jobs:
             echo "publish_ok=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Create PR comment body (markdown)
+      - name: Create TSF comment body (markdown)
         if: always()
         run: |
           mkdir -p artifacts/tsf
@@ -190,51 +183,3 @@ jobs:
           name: tsf-comment
           path: artifacts/tsf/tsf_comment.md
           retention-days: 30
-
-  comment-pr:
-    name: Comment PR with results
-    needs: [tsf-validation, run-tests]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-
-    permissions:
-      contents: read
-      actions: read
-      issues: write
-      security-events: none
-
-    steps:
-      - name: Download TSF comment
-        uses: actions/download-artifact@v7
-        with:
-          name: tsf-comment
-          path: .
-
-      - name: Download unit test summary
-        uses: actions/download-artifact@v7
-        with:
-          name: unit-test-summary
-          path: .
-
-      - name: Post PR comment
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-
-            const tsf = fs.existsSync('tsf_comment.md')
-              ? fs.readFileSync('tsf_comment.md', 'utf8')
-              : '## 🔍 TSF Validation Results\n\n⚠️ TSF comment artifact not found.\n';
-
-            const unit = fs.existsSync('unit_test_summary.md')
-              ? fs.readFileSync('unit_test_summary.md', 'utf8')
-              : '### 🧪 Unit Test Results\n\n⚠️ Unit test summary artifact not found.\n';
-
-            const body = [tsf.trim(), '', '---', unit.trim()].join('\n');
-
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body
-            });

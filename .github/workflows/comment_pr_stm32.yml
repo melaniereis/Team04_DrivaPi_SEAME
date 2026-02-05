@@ -1,0 +1,67 @@
+# .github/workflows/comment_pr_on_stm32_ci_workflow_run.yml
+name: Comment PR (STM32 CI Build Result)
+
+on:
+  workflow_run:
+    workflows: ["STM32 CI"]
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: read
+  issues: write
+
+jobs:
+  comment:
+    name: Comment PR from STM32 CI result
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ensure this run is for a PR
+        id: prcheck
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const prs = context.payload.workflow_run.pull_requests || [];
+            if (prs.length === 0) {
+              core.setOutput("has_pr", "false");
+              return;
+            }
+            core.setOutput("has_pr", "true");
+            core.setOutput("pr_number", String(prs[0].number));
+
+      - name: Stop if not a PR run
+        if: steps.prcheck.outputs.has_pr != 'true'
+        run: echo "No PR associated with this workflow_run; skipping."
+
+      - name: Post PR comment (success/failure)
+        if: steps.prcheck.outputs.has_pr == 'true'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const prNumber = Number("${{ steps.prcheck.outputs.pr_number }}");
+            const run = context.payload.workflow_run;
+
+            const conclusion = run.conclusion || "unknown";
+            const status = run.status || "unknown";
+            const runUrl = run.html_url;
+
+            const ok = conclusion === "success";
+            const header = ok
+              ? "✅ STM32 CI: firmware build succeeded"
+              : "❌ STM32 CI: firmware build failed";
+
+            const body = [
+              header,
+              "",
+              `- **Status**: ${status}`,
+              `- **Conclusion**: ${conclusion}`,
+              `- **Run**: ${runUrl}`
+            ].join("\n");
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body
+            });

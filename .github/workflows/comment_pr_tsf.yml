@@ -1,0 +1,109 @@
+name: Comment PR (TSF Validation Results)
+
+on:
+  workflow_run:
+    workflows: ["TSF Validation (PR)"]
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: read
+  issues: write
+
+jobs:
+  comment:
+    name: Comment PR from TSF artifacts
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ensure this run is for a PR
+        id: prcheck
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const prs = context.payload.workflow_run.pull_requests || [];
+            if (prs.length === 0) {
+              core.setOutput("has_pr", "false");
+              return;
+            }
+            core.setOutput("has_pr", "true");
+            core.setOutput("pr_number", String(prs[0].number));
+
+      - name: Stop if not a PR run
+        if: steps.prcheck.outputs.has_pr != 'true'
+        run: echo "No PR associated with this workflow_run; skipping."
+
+      - name: Download artifacts (zip) for this workflow run
+        if: steps.prcheck.outputs.has_pr == 'true'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const run_id = context.payload.workflow_run.id;
+
+            const { data } = await github.rest.actions.listWorkflowRunArtifacts({ owner, repo, run_id });
+
+            function findArtifact(name) {
+              return data.artifacts.find(a => a.name === name);
+            }
+
+            async function downloadZip(artifactName, outFile) {
+              const art = findArtifact(artifactName);
+              if (!art) return false;
+
+              const zip = await github.rest.actions.downloadArtifact({
+                owner, repo,
+                artifact_id: art.id,
+                archive_format: "zip"
+              });
+
+              fs.writeFileSync(outFile, Buffer.from(zip.data));
+              return true;
+            }
+
+            const ok1 = await downloadZip("tsf-comment", "tsf-comment.zip");
+            const ok2 = await downloadZip("unit-test-summary", "unit-test-summary.zip");
+
+            core.setOutput("has_tsf", ok1 ? "true" : "false");
+            core.setOutput("has_unit", ok2 ? "true" : "false");
+
+      - name: Unzip artifacts
+        if: steps.prcheck.outputs.has_pr == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y unzip
+          if [ -f tsf-comment.zip ]; then unzip -o tsf-comment.zip -d tsf-comment; fi
+          if [ -f unit-test-summary.zip ]; then unzip -o unit-test-summary.zip -d unit-test-summary; fi
+          ls -la tsf-comment || true
+          ls -la unit-test-summary || true
+
+      - name: Post PR comment
+        if: steps.prcheck.outputs.has_pr == 'true'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+
+            const prNumber = Number("${{ steps.prcheck.outputs.pr_number }}");
+
+            const tsfPath = "tsf-comment/tsf_comment.md";
+            const unitPath = "unit-test-summary/unit_test_summary.md";
+
+            const tsf = fs.existsSync(tsfPath)
+              ? fs.readFileSync(tsfPath, "utf8").trim()
+              : "## 🔍 TSF Validation Results\n\n⚠️ TSF comment artifact not found.\n";
+
+            const unit = fs.existsSync(unitPath)
+              ? fs.readFileSync(unitPath, "utf8").trim()
+              : "### 🧪 Unit Test Results\n\n⚠️ Unit test summary artifact not found.\n";
+
+            const body = [tsf, "", "---", unit].join("\n");
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body
+            });
