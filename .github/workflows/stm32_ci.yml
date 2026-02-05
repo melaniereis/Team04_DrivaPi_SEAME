@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   build-firmware:
@@ -43,31 +44,46 @@ jobs:
           name: firmware-elf
           path: firmware/Debug/firmware.elf
 
-      - name: Comment PR with build result (success)
-        if: ${{ success() && github.event_name == 'pull_request' }}
-        uses: peter-evans/create-or-update-comment@v4
-        permissions:
-          issues: write
+  comment-pr:
+    name: Comment PR with build result
+    needs: build-firmware
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    permissions:
+      contents: read
+      issues: write
+
+    steps:
+      - name: Post PR comment (success)
+        if: ${{ needs.build-firmware.result == 'success' }}
+        uses: peter-evans/create-or-update-comment@v5
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
             ✅ STM32 CI: firmware.elf was built successfully.
 
-      - name: Comment PR with build result (failure)
-        if: ${{ failure() && github.event_name == 'pull_request' }}
-        uses: peter-evans/create-or-update-comment@v4
-        permissions:
-          issues: write
+      - name: Post PR comment (failure)
+        if: ${{ needs.build-firmware.result != 'success' }}
+        uses: peter-evans/create-or-update-comment@v5
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
             ❌ STM32 CI: firmware.elf build failed. Check the workflow logs for details.
 
-      - name: Comment commit with build result (success)
-        if: ${{ success() && github.event_name == 'push' }}
+  comment-commit:
+    name: Comment commit with build result
+    needs: build-firmware
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Post commit comment (success)
+        if: ${{ needs.build-firmware.result == 'success' }}
         uses: actions/github-script@v7
-        permissions:
-          contents: read
         with:
           script: |
             await github.rest.repos.createCommitComment({
@@ -77,11 +93,9 @@ jobs:
               body: "✅ STM32 CI: firmware.elf was built successfully."
             });
 
-      - name: Comment commit with build result (failure)
-        if: ${{ failure() && github.event_name == 'push' }}
+      - name: Post commit comment (failure)
+        if: ${{ needs.build-firmware.result != 'success' }}
         uses: actions/github-script@v7
-        permissions:
-          contents: read
         with:
           script: |
             await github.rest.repos.createCommitComment({
