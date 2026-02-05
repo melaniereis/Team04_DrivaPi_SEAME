@@ -4,20 +4,40 @@ on:
   pull_request:
   push:
 
+# Maximum permissions for this workflow.
+# Individual jobs reduce these as needed (least privilege).
 permissions:
   contents: read
   actions: read
+  issues: write
+  security-events: write
 
 jobs:
   run-tests:
     uses: ./.github/workflows/unit_tests.yml
+    permissions:
+      contents: read
+      actions: read
+      issues: none
+      security-events: none
 
   run-codeql:
     uses: ./.github/workflows/firmware_static.yml
+    # Must allow security-events:write because the called workflow defines a job that requests it
+    permissions:
+      contents: read
+      actions: read
+      issues: none
+      security-events: write
 
   tsf-validation:
     needs: [run-tests, run-codeql]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      issues: none
+      security-events: none
 
     steps:
       - name: Checkout repository
@@ -127,6 +147,32 @@ jobs:
             echo "publish_ok=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Create PR comment body (markdown)
+        if: always()
+        run: |
+          mkdir -p artifacts/tsf
+          cat > artifacts/tsf/tsf_comment.md <<EOF
+          ## 🔍 TSF Validation Results
+
+          | Check | Status |
+          |-------|--------|
+          | **trudag lint** | ${{ steps.lint.outputs.lint_ok == 'true' && '✅ PASSED' || '❌ FAILED' }} |
+          | **trudag score** | ${{ steps.scores.outputs.score_ok == 'true' && '✅ PASSED' || '❌ FAILED' }} |
+          | **trudag publish** | ${{ steps.publish.outputs.publish_ok == 'true' && '✅ PASSED' || '❌ FAILED' }} |
+
+          ### 📋 Lint Output
+          \`\`\`
+          ${{ steps.summary.outputs.lint_summary }}
+          \`\`\`
+
+          ### 📊 Traceability Graph
+          ${{ steps.graph.outputs.graph_generated == 'true' && '✅ Graph generated successfully' || '❌ Graph generation failed' }}
+
+          **Download artifacts to view**: [TSF Validation Results](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          - Traceability graph: \`tsf-validation-artifacts/traceability_graph.svg\`
+          - Full TSF reports in artifact archive
+          EOF
+
       - name: Upload TSF artifacts
         uses: actions/upload-artifact@v6
         if: always()
@@ -137,29 +183,54 @@ jobs:
             .dotstop.dot
           retention-days: 30
 
+      - name: Upload TSF comment artifact
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: tsf-comment
+          path: artifacts/tsf/tsf_comment.md
+          retention-days: 30
+
   comment-pr:
-    name: Comment PR with validation results
-    needs: [run-tests, tsf-validation]
+    name: Comment PR with results
+    needs: [tsf-validation, run-tests]
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
 
     permissions:
       contents: read
+      actions: read
       issues: write
+      security-events: none
 
     steps:
+      - name: Download TSF comment
+        uses: actions/download-artifact@v7
+        with:
+          name: tsf-comment
+          path: .
+
       - name: Download unit test summary
         uses: actions/download-artifact@v7
         with:
           name: unit-test-summary
-          path: comment_artifacts
+          path: .
 
-      - name: Post comment (unit tests)
+      - name: Post PR comment
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
-            const body = fs.readFileSync('comment_artifacts/unit_test_summary.md', 'utf8');
+
+            const tsf = fs.existsSync('tsf_comment.md')
+              ? fs.readFileSync('tsf_comment.md', 'utf8')
+              : '## 🔍 TSF Validation Results\n\n⚠️ TSF comment artifact not found.\n';
+
+            const unit = fs.existsSync('unit_test_summary.md')
+              ? fs.readFileSync('unit_test_summary.md', 'utf8')
+              : '### 🧪 Unit Test Results\n\n⚠️ Unit test summary artifact not found.\n';
+
+            const body = [tsf.trim(), '', '---', unit.trim()].join('\n');
 
             await github.rest.issues.createComment({
               issue_number: context.issue.number,
