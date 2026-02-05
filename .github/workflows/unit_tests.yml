@@ -71,14 +71,152 @@ jobs:
 
       - name: Generate test summary (markdown file)
         if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            let testPassed = 0;
+            let testFailed = 0;
+            let dcMotorCount = 0;
+            let servoMotorCount = 0;
+            let speedSensorCount = 0;
+            let testSummary = '';
+
+            if (fs.existsSync('test_output.log')) {
+              const logContent = fs.readFileSync('test_output.log', 'utf8');
+
+              const dcMotorCountMatch = logContent.match(/\[TEST_COUNT\] DC Motor:\s*(\d+)\s*tests/i);
+              const servoMotorCountMatch = logContent.match(/\[TEST_COUNT\] Servo Motor:\s*(\d+)\s*tests/i);
+              const speedSensorCountMatch = logContent.match(/\[TEST_COUNT\] Speed Sensor:\s*(\d+)\s*tests/i);
+
+              if (dcMotorCountMatch) dcMotorCount = parseInt(dcMotorCountMatch[1]);
+              if (servoMotorCountMatch) servoMotorCount = parseInt(servoMotorCountMatch[1]);
+              if (speedSensorCountMatch) speedSensorCount = parseInt(speedSensorCountMatch[1]);
+
+              testPassed = dcMotorCount + servoMotorCount + speedSensorCount;
+
+              const dcMotorFailed = logContent.match(/\[INFO\] DC Motor:\s+FAILED/i);
+              const servoMotorFailed = logContent.match(/\[INFO\] Servo Motor:\s+FAILED/i);
+              const speedSensorFailed = logContent.match(/\[INFO\] Speed Sensor:\s+FAILED/i);
+              testFailed = (dcMotorFailed || servoMotorFailed || speedSensorFailed) ? 1 : 0;
+
+              const dcMotorMatch = logContent.match(/\[INFO\] DC Motor:\s+(PASSED|FAILED)/i);
+              const servoMotorMatch = logContent.match(/\[INFO\] Servo Motor:\s+(PASSED|FAILED)/i);
+              const speedSensorMatch = logContent.match(/\[INFO\] Speed Sensor:\s+(PASSED|FAILED)/i);
+
+              const dcMotorStatus = dcMotorMatch ? dcMotorMatch[1] : (testFailed === 0 ? 'PASSED' : 'FAILED');
+              const servoMotorStatus = servoMotorMatch ? servoMotorMatch[1] : (testFailed === 0 ? 'PASSED' : 'FAILED');
+              const speedSensorStatus = speedSensorMatch ? speedSensorMatch[1] : (testFailed === 0 ? 'PASSED' : 'FAILED');
+
+              const coverageMatch = logContent.match(/lines.*?(\d+\.\d+)%.*?functions.*?(\d+\.\d+)%.*?branches.*?(\d+\.\d+)%/s);
+              const coverageInfo = coverageMatch
+                ? `\n#### 📊 Coverage\n- **Lines**: ${coverageMatch[1]}%\n- **Functions**: ${coverageMatch[2]}%\n- **Branches**: ${coverageMatch[3]}%\n`
+                : '\n#### 📊 Coverage\nCoverage report available in artifacts.\n';
+
+              testSummary = `
+            ### 🧪 Unit Test Results
+
+            **Overall Status**: ${testPassed > 0 && testFailed === 0 ? '✅ PASSED' : '❌ FAILED'}
+
+            - **DC Motor Tests**: ${dcMotorStatus} (${dcMotorCount} tests)
+            - **Servo Motor Tests**: ${servoMotorStatus} (${servoMotorCount} tests)
+            - **Speed Sensor Tests**: ${speedSensorStatus} (${speedSensorCount} tests)
+            - **Total**: ${testPassed} tests
+            ${coverageInfo}
+            ---
+            Full coverage reports available in workflow artifacts
+            `;
+            } else {
+              testSummary = '### 🧪 Unit Test Results\n\n⚠️ `test_output.log` not found. Check workflow logs.\n';
+            }
+
+            fs.writeFileSync('unit_test_summary.md', testSummary);
+
+            await core.summary
+              .addHeading('🧪 Unit Test Results', 2)
+              .addRaw(testSummary)
+              .write();
+
+      - name: Upload unit test summary artifact
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: unit-test-summary
+          path: unit_test_summary.md
+          retention-days: 30
+name: "Unit Tests & TSF Artifacts"
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: unit-tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit_tests:
+    name: Run Tests & Generate TSF Evidence
+    runs-on: ubuntu-latest
+
+    env:
+      BUILD_DIR: build/host
+      COVERAGE_DIR: build/coverage
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
         run: |
-          cat > unit_test_summary.md <<'EOF'
-          ### 🧪 Unit Test Results
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            lcov \
+            ruby \
+            ruby-dev
 
-          🧪 Unit tests completed. Check logs for details.
-          EOF
+      - name: Install Ceedling and gcovr
+        run: |
+          sudo gem install ceedling
+          pip3 install gcovr
 
-      - name: Post Test Results (job summary + prepare comment body)
+      - name: Verify tool versions
+        run: |
+          echo "=== Tool Versions ==="
+          gcc --version
+          cmake --version
+          ceedling version
+          lcov --version
+          gcovr --version
+
+      - name: Run Tests (Master Script)
+        run: |
+          chmod +x tests/unit/run_all_tests.sh
+          bash tests/unit/run_all_tests.sh 2>&1 | tee test_output.log
+
+      - name: Upload Verification Artifacts (TSF)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: verification-artifacts
+          path: artifacts/verification
+          retention-days: 30
+
+      - name: Upload Coverage HTML
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html
+          path: build/coverage/html
+          retention-days: 30
+
+      - name: Generate test summary (markdown file)
         if: always()
         uses: actions/github-script@v7
         with:
@@ -140,10 +278,8 @@ jobs:
               testSummary = '### 🧪 Unit Test Results\n\n⚠️ `test_output.log` not found. Check workflow logs.\n';
             }
 
-            // Write comment body to file for the next job.
             fs.writeFileSync('unit_test_summary.md', testSummary);
 
-            // Always add to job summary
             await core.summary
               .addHeading('🧪 Unit Test Results', 2)
               .addRaw(testSummary)
@@ -156,64 +292,3 @@ jobs:
           name: unit-test-summary
           path: unit_test_summary.md
           retention-days: 30
-
-  comment-pr:
-    name: Comment PR with unit test results
-    needs: unit_tests
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-
-    permissions:
-      contents: read
-      issues: write
-
-    steps:
-      - name: Download unit test summary
-        uses: actions/download-artifact@v7
-        with:
-          name: unit-test-summary
-          path: .
-
-      - name: Post comment
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            const body = fs.readFileSync('unit_test_summary.md', 'utf8');
-
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body
-            });
-
-  comment-commit:
-    name: Comment commit with unit test results
-    needs: unit_tests
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push'
-
-    permissions:
-      contents: write
-
-    steps:
-      - name: Download unit test summary
-        uses: actions/download-artifact@v7
-        with:
-          name: unit-test-summary
-          path: .
-
-      - name: Post commit comment
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            const body = fs.readFileSync('unit_test_summary.md', 'utf8');
-
-            await github.rest.repos.createCommitComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              commit_sha: context.sha,
-              body
-            });

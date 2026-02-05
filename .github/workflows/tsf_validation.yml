@@ -137,36 +137,9 @@ jobs:
             .dotstop.dot
           retention-days: 30
 
-      - name: Comment PR with validation results
-        if: github.event_name == 'pull_request'
-        uses: peter-evans/create-or-update-comment@v5
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            ## 🔍 TSF Validation Results
-
-            | Check | Status |
-            |-------|--------|
-            | **trudag lint** | ${{ steps.lint.outputs.lint_ok == 'true' && '✅ PASSED' || '❌ FAILED' }} |
-            | **trudag score** | ${{ steps.scores.outputs.score_ok == 'true' && '✅ PASSED' || '❌ FAILED' }} |
-            | **trudag publish** | ${{ steps.publish.outputs.publish_ok == 'true' && '✅ PASSED' || '❌ FAILED' }} |
-
-            ### 📋 Lint Output
-            ```
-            ${{ steps.summary.outputs.lint_summary }}
-            ```
-
-            ### 📊 Traceability Graph
-            ${{ steps.graph.outputs.graph_generated == 'true' && '✅ Graph generated successfully' || '❌ Graph generation failed' }}
-
-            **Download artifacts to view**: [TSF Validation Results](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
-            - Traceability graph: `tsf-validation-artifacts/traceability_graph.svg`
-            - Full TSF reports in artifact archive
-
   comment-pr:
-    name: Comment PR (TSF summary)
-    needs: tsf-validation
+    name: Comment PR with validation results
+    needs: [run-tests, tsf-validation]
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
 
@@ -175,10 +148,22 @@ jobs:
       issues: write
 
     steps:
-      - name: Post comment placeholder
-        uses: peter-evans/create-or-update-comment@v5
+      - name: Download unit test summary
+        uses: actions/download-artifact@v7
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            ✅ TSF validation completed. Please check the workflow logs and uploaded artifacts for details.
+          name: unit-test-summary
+          path: comment_artifacts
+
+      - name: Post comment (unit tests)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('comment_artifacts/unit_test_summary.md', 'utf8');
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            });
