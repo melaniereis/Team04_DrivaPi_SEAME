@@ -22,8 +22,9 @@ def read_rates(path: str):
     if lr is None:
         raise ValueError(f"Missing line-rate in XML: {path}")
     line_rate = float(lr)
-    branch_rate = float(br) if br is not None else line_rate
-    return line_rate, branch_rate
+    branch_rate = float(br) if br is not None else None
+    branch_available = br is not None
+    return line_rate, branch_rate, branch_available
 
 
 def main() -> int:
@@ -52,8 +53,12 @@ def main() -> int:
         if not os.path.exists(xml_path):
             missing.append(xml_path)
             continue
-        lr, br = read_rates(xml_path)
-        data["suites"][suite] = {"line-rate": lr, "branch-rate": br}
+        lr, br, br_avail = read_rates(xml_path)
+        data["suites"][suite] = {
+            "line-rate": lr,
+            "branch-rate": br,
+            "branch-rate-available": br_avail,
+        }
 
     if missing:
         print("::error::Missing coverage XML files:\n  - " + "\n  - ".join(missing))
