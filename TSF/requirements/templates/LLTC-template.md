@@ -47,6 +47,6 @@ score:
 active: true
 derived: false
 normative: true
-level: 4.0  # 1.0=URD, 2.0=SRD, 3.0=SWD, 3.0=LLTC
+level: 4.0  # 1.0=URD, 2.0=SRD, 3.0=SWD, 4.0=LLTC
 ---
 <STATEMENT>
