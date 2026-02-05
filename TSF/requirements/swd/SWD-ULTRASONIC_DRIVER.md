@@ -24,3 +24,4 @@ normative: true
 level: 3.0
 ---
 The ultrasonic driver shall measure front distance, filter noise, and signal <50cm threshold to control loop as vision fallback.
+---

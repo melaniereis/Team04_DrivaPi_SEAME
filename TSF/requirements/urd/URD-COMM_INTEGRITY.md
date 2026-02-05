@@ -5,7 +5,6 @@ text: |
   "Maintains communication integrity and handles degraded operation."
 verification_method: "System Testing"
 children:
-  - id: SRD-COMM-CAN_VALIDATION
   - id: SRD-COMM-TIMEOUT_MGMT
   - id: SRD-SAFE-DEGRADED_OPS
   - id: HLTC-VAL-COMM_INTEGRITY
@@ -22,5 +21,5 @@ derived: false
 normative: true
 level: 1.0
 ---
-The firmware shall accept only predefined CAN command messages and ignore or discard any unexpected or invalid CAN frames.
+The system shall detect communication timeouts, stale data and bus congestion on the CAN or internal bus, and enter a safe or degraded mode if they occur.
 ---
