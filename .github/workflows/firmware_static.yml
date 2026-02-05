@@ -7,6 +7,7 @@ on:
 permissions:
   contents: read
   actions: read
+  security-events: read
 
 concurrency:
   group: codeql-${{ github.workflow }}-${{ github.ref }}
@@ -16,6 +17,10 @@ jobs:
   codeql-analyze:
     name: CodeQL Analysis (build + analyze)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      security-events: read
 
     steps:
       - name: Checkout repository
@@ -102,6 +107,11 @@ jobs:
           echo "warnings=$WARNINGS" >> $GITHUB_OUTPUT
           echo "notes=$NOTES" >> $GITHUB_OUTPUT
 
+          echo "📊 CodeQL results"
+          echo "   High/Critical: $ERRORS"
+          echo "   Warnings:      $WARNINGS"
+          echo "   Notes:         $NOTES"
+
           if [ "$ERRORS" -gt 0 ]; then
             echo "status=❌ FAILED" >> $GITHUB_OUTPUT
           else
@@ -124,13 +134,11 @@ jobs:
     name: Upload SARIF to GitHub Security
     needs: codeql-analyze
     runs-on: ubuntu-latest
-
     permissions:
       contents: read
       actions: read
       security-events: write
 
-    # Only upload on trusted contexts:
     if: >
       github.event_name == 'push' ||
       (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
