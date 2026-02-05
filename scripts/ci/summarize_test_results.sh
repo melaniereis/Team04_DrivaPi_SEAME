@@ -8,8 +8,10 @@ TEST_LOG="$1"
 LLTC_SUMMARY_FILE="$2"
 
 if [[ ! -f "$TEST_LOG" ]]; then
-  echo "🧪 Unit tests completed. Check logs for details."
-  exit 0
+  echo "::error::Test log not found: $TEST_LOG"
+  echo "🧪 Unit tests were NOT summarized because the log file is missing."
+  echo "Check the workflow steps that generate '$TEST_LOG' (tests likely failed or did not run)."
+  exit 1
 fi
 
 log_content=$(cat "$TEST_LOG")
