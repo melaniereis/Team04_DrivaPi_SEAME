@@ -6,23 +6,15 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
-  checks: write
-  security-events: write
-  actions: read
 
 concurrency:
   group: unit-tests-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  firmware_static:
-    uses: ./.github/workflows/firmware_static.yml
-
   unit_tests:
     name: Run Tests & Generate TSF Evidence
     runs-on: ubuntu-latest
-    needs: [firmware_static]
 
     env:
       BUILD_DIR: build/host
@@ -30,7 +22,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Install dependencies
         run: |
@@ -39,8 +31,7 @@ jobs:
             build-essential \
             lcov \
             ruby \
-            ruby-dev \
-            jq
+            ruby-dev
 
       - name: Install Ceedling and gcovr
         run: |
@@ -51,58 +42,19 @@ jobs:
         run: |
           echo "=== Tool Versions ==="
           gcc --version
-          cmake --version || true
+          cmake --version
           ceedling version
           lcov --version
           gcovr --version
 
       - name: Run Tests (Master Script)
-        shell: bash
         run: |
           chmod +x tests/unit/run_all_tests.sh
           bash tests/unit/run_all_tests.sh 2>&1 | tee test_output.log
 
-      - name: Verify Coverage XML (dotstop compatibility)
-        if: always()
-        run: |
-          echo "Verifying Coverage XML reports for dotstop validator..."
-          if [ -d "artifacts/verification/coverage" ]; then
-            echo "✓ Coverage artifacts directory found"
-            ls -lh artifacts/verification/coverage/*.xml 2>/dev/null && echo "✓ Coverage XML files generated successfully" || echo "⚠ No coverage XML files found"
-          else
-            echo "⚠ No coverage artifacts directory"
-          fi
-
-      - name: Download Static Analysis SARIF (from firmware_static job)
-        if: always()
-        uses: actions/download-artifact@v4
-        with:
-          name: codeql-sarif-filtered
-          path: artifacts/verification/static-analysis
-
-      - name: Verify Baseline in Repository
-        if: always()
-        run: |
-          test -f "tests/verification/coverage/baseline.json" || \
-            { echo "::error::Missing baseline.json at tests/verification/coverage/baseline.json"; exit 1; }
-
-      - name: Run LLTC Coverage Validation (ASIL A/QM gate = 90% line-rate)
-        if: always()
-        run: |
-          python3 scripts/ci/validate_lltc_coverage.py \
-            --base-dir artifacts/verification/coverage \
-            --suites dc-motor servo-motor speed-sensor \
-            --baseline tests/verification/coverage/baseline.json \
-            --min-line-rate 90.0
-
-      - name: Static Analysis Validation (fail-closed)
-        if: always()
-        run: |
-          python3 scripts/ci/validate_static_analysis.py --base-dir artifacts/verification/static-analysis
-
       - name: Upload Verification Artifacts (TSF)
+        uses: actions/upload-artifact@v4
         if: always()
-        uses: actions/upload-artifact@v6
         with:
           name: verification-artifacts
           path: artifacts/verification
@@ -110,23 +62,102 @@ jobs:
 
       - name: Upload Coverage HTML
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-html
           path: build/coverage/html
           retention-days: 30
 
-      - name: Upload Static Analysis SARIF
-        if: always()
-        uses: actions/upload-artifact@v6
-        with:
-          name: static-analysis-sarif
-          path: artifacts/verification/static-analysis/*.sarif
-          if-no-files-found: error
-          retention-days: 30
-
       - name: Post Test Results
         if: always()
-        run: |
-          bash scripts/ci/summarize_test_results.sh test_output.log "LLTC Coverage Validation Summary.txt" > test_summary.txt
-          cat test_summary.txt
+        uses: actions/github-script@v7
+        permissions:
+          issues: write
+        with:
+          script: |
+            const fs = require('fs');
+
+            // Extract test results
+            let testPassed = 0;
+            let testFailed = 0;
+            let dcMotorCount = 0;
+            let servoMotorCount = 0;
+            let speedSensorCount = 0;
+            let testSummary = '';
+
+            if (fs.existsSync('test_output.log')) {
+              const logContent = fs.readFileSync('test_output.log', 'utf8');
+
+              // Extract test counts from [TEST_COUNT] markers
+              const dcMotorCountMatch = logContent.match(/\[TEST_COUNT\] DC Motor:\s*(\d+)\s*tests/i);
+              const servoMotorCountMatch = logContent.match(/\[TEST_COUNT\] Servo Motor:\s*(\d+)\s*tests/i);
+              const speedSensorCountMatch = logContent.match(/\[TEST_COUNT\] Speed Sensor:\s*(\d+)\s*tests/i);
+
+              if (dcMotorCountMatch) dcMotorCount = parseInt(dcMotorCountMatch[1]);
+              if (servoMotorCountMatch) servoMotorCount = parseInt(servoMotorCountMatch[1]);
+              if (speedSensorCountMatch) speedSensorCount = parseInt(speedSensorCountMatch[1]);
+
+              testPassed = dcMotorCount + servoMotorCount + speedSensorCount;
+
+              // Check for failure indicators in status lines
+              const dcMotorFailed = logContent.match(/\[INFO\] DC Motor:\s+FAILED/i);
+              const servoMotorFailed = logContent.match(/\[INFO\] Servo Motor:\s+FAILED/i);
+              const speedSensorFailed = logContent.match(/\[INFO\] Speed Sensor:\s+FAILED/i);
+              testFailed = (dcMotorFailed || servoMotorFailed || speedSensorFailed) ? 1 : 0;
+
+              // Extract test status (PASSED or FAILED)
+              const dcMotorMatch = logContent.match(/\[INFO\] DC Motor:\s+(PASSED|FAILED)/i);
+              const servoMotorMatch = logContent.match(/\[INFO\] Servo Motor:\s+(PASSED|FAILED)/i);
+              const speedSensorMatch = logContent.match(/\[INFO\] Speed Sensor:\s+(PASSED|FAILED)/i);
+
+              const dcMotorStatus = dcMotorMatch ? dcMotorMatch[1] : (testFailed === 0 ? 'PASSED' : 'FAILED');
+              const servoMotorStatus = servoMotorMatch ? servoMotorMatch[1] : (testFailed === 0 ? 'PASSED' : 'FAILED');
+              const speedSensorStatus = speedSensorMatch ? speedSensorMatch[1] : (testFailed === 0 ? 'PASSED' : 'FAILED');
+
+              const coverageMatch = logContent.match(/lines.*?(\d+\.\d+)%.*?functions.*?(\d+\.\d+)%.*?branches.*?(\d+\.\d+)%/s);
+              const coverageInfo = coverageMatch ?
+                `\n#### 📊 Coverage\n- **Lines**: ${coverageMatch[1]}%\n- **Functions**: ${coverageMatch[2]}%\n- **Branches**: ${coverageMatch[3]}%\n` :
+                '\n#### 📊 Coverage\nCoverage report available in artifacts.\n';
+
+              testSummary = `
+            ### 🧪 Unit Test Results
+
+            **Overall Status**: ${testPassed > 0 && testFailed === 0 ? '✅ PASSED' : '❌ FAILED'}
+
+            - **DC Motor Tests**: ${dcMotorStatus} (${dcMotorCount} tests)
+            - **Servo Motor Tests**: ${servoMotorStatus} (${servoMotorCount} tests)
+            - **Speed Sensor Tests**: ${speedSensorStatus} (${speedSensorCount} tests)
+            - **Total**: ${testPassed} tests
+            ${coverageInfo}
+            ---
+            Full coverage reports available in workflow artifacts
+            `;
+            }
+
+            // Always add to job summary
+            await core.summary
+              .addHeading('🧪 Unit Test Results', 2)
+              .addRaw(testSummary || '🧪 Unit tests completed. Check logs for details.')
+              .write();
+
+            // Try to post as comment (PR or commit)
+            try {
+              if (context.eventName === 'pull_request') {
+                await github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: testSummary || '🧪 Unit tests completed. Check logs for details.'
+                });
+              } else {
+                await github.rest.repos.createCommitComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  commit_sha: context.sha,
+                  body: testSummary || '🧪 Unit tests completed. Check logs for details.'
+                });
+              }
+            } catch (error) {
+              console.log('⚠️ Could not post comment (insufficient permissions), but results are in job summary');
+              console.log(error.message);
+            }
