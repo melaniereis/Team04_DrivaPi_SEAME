@@ -297,8 +297,10 @@ generate_coverage_xml() {
         local branch_percent="${BASH_REMATCH[1]}"
         branch_rate=$(awk "BEGIN {printf \"%.4f\", $branch_percent / 100}")
     else
-        # If no branch coverage, use line rate as fallback
-        branch_rate="$line_rate"
+        # If branch coverage wasn't measured/reported, do NOT invent data.
+        # Keep it explicit: 0.0000 and log a warning.
+        branch_rate="0.0000"
+        log_warn "Branch coverage not found in lcov summary; setting branch-rate=0.0000 in Cobertura XML."
     fi
 
         # Create Cobertura XML structure
