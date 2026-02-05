@@ -13,13 +13,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  codeql:
-    name: CodeQL Analysis
+  codeql-analyze:
+    name: CodeQL Analysis (build + analyze)
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install ARM toolchain
         run: |
@@ -34,7 +34,7 @@ jobs:
         run: arm-none-eabi-gcc --version
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: cpp
           queries: security-and-quality
@@ -52,7 +52,7 @@ jobs:
           echo "✅ Build successful"
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
         with:
           category: '/language:cpp'
           output: results
@@ -62,7 +62,6 @@ jobs:
       - name: Filter SARIF results
         uses: advanced-security/filter-sarif@v1
         with:
-          # Generated code intentionally excluded
           patterns: |
             -**/Drivers/**
             -**/Middlewares/**
@@ -73,19 +72,9 @@ jobs:
           input: results/cpp.sarif
           output: results/cpp.sarif
 
-      - name: Upload SARIF to GitHub Security
-        permissions:
-          security-events: write
-        if: >
-          github.event_name == 'push' ||
-          (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: results/cpp.sarif
-
       - name: Upload SARIF artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: codeql-sarif-filtered
           path: results/cpp.sarif
@@ -114,11 +103,6 @@ jobs:
           echo "warnings=$WARNINGS" >> $GITHUB_OUTPUT
           echo "notes=$NOTES" >> $GITHUB_OUTPUT
 
-          echo "📊 CodeQL results"
-          echo "   High/Critical: $ERRORS"
-          echo "   Warnings:      $WARNINGS"
-          echo "   Notes:         $NOTES"
-
           if [ "$ERRORS" -gt 0 ]; then
             echo "status=❌ FAILED" >> $GITHUB_OUTPUT
           else
@@ -136,3 +120,29 @@ jobs:
           fi
 
           echo "✅ No high/critical issues"
+
+  upload-sarif:
+    name: Upload SARIF to GitHub Security
+    needs: codeql-analyze
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+
+    if: >
+      github.event_name == 'push' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
+
+    steps:
+      - name: Download CodeQL SARIF artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: codeql-sarif-filtered
+          path: sarif
+
+      - name: Upload SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: sarif/cpp.sarif
