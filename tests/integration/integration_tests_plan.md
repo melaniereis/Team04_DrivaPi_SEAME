@@ -33,7 +33,7 @@ Verify that all DrivaPi components work together correctly across their interfac
 
 **Evidence**:
 - Runtime logs from [rust/controller/src/main.rs](rust/controller/src/main.rs) showing decoded PS3 input (e.g., `println!("Button test: {:?}", data);`) alongside the CAN payloads sent.
-- Video evidence: [docs/tests/joystick_integration.mp4](docs/tests/joystick_integration.mp4) demonstrating PS3 controller input successfully decoded and processed by the Raspberry Pi.
+- Video evidence: [tests/integration/joystick_integration.mp4](tests/integration/joystick_integration.mp4) demonstrating PS3 controller input successfully decoded and processed by the Raspberry Pi.
 
 ---
 
@@ -111,8 +111,8 @@ Log I2C transaction status (ACK/NACK) from STM32 firmware and parse logs program
 - Failsafe triggers within 100ms of timeout or communication failure
 
 **Evidence**:
-- Test implementation files: [docs/tests/motors-integration/src/](docs/tests/motors-integration/src/) and [docs/tests/motors-integration/inc/](docs/tests/motors-integration/inc/) containing I2C integration test code (`i2c_integration_test.c/h`), PCA9685 driver (`pca9685.c/h`), and test main (`main.c/h`)
-- Video evidence: [docs/tests/motors_integration.mp4](docs/tests/motors_integration.mp4) demonstrating successful I2C communication with motor controllers and proper motor actuation
+- Test implementation files: [tests/integration/motors-integration/src/](tests/integration/motors-integration/src/) and [tests/integration/motors-integration/inc/](tests/integration/motors-integration/inc/) containing I2C integration test code (`i2c_integration_test.c/h`), PCA9685 driver (`pca9685.c/h`), and test main (`main.c/h`)
+- Video evidence: [tests/integration/motors_integration.mp4](tests/integration/motors_integration.mp4) demonstrating successful I2C communication with motor controllers and proper motor actuation
 
 ---
 
@@ -120,44 +120,54 @@ Log I2C transaction status (ACK/NACK) from STM32 firmware and parse logs program
 
 **Objective**: Validate that speed sensor data is correctly read and processed by STM32.
 
-**Test Flow**:
-1. Simulate or generate speed sensor pulses
-2. STM32 reads pulse signals from sensor input pin
-3. STM32 computes speed from pulse frequency
-4. Verify internal speed calculations are correct
-
 **Test Setup**:
-- Simulate sensor pulses using:
-  - Signal generator
-  - Another MCU
-  - GPIO toggling from test firmware
-- Monitor STM32 behavior via UART logging
-- Measure accuracy of speed calculations
+- Connect speed sensor to GPIO pin **PD9** (rising edge interrupt)
+- Monitor UART output for pulse detection messages
+- Count pulses and verify accuracy over time
+
+**Hardware Configuration**:
+- Speed sensor output → PD9 (EXTI9 interrupt, rising edge trigger)
+- UART output for validation (115200 baud)
+- Interrupt increments counter and prints message on each pulse
+
+**Test Cases**:
+1. **Pulse Detection**: Interrupt triggered on each sensor pulse
+2. **Counter Accuracy**: Pulse count incremented correctly
+3. **UART Output**: Message printed for each pulse received
+4. **Zero Input Handling**: System stable with no pulses
+5. **Sustained Operation**: Counter remains stable over extended testing
 
 **Assertions**:
-- ✅ Speed calculation correctness (compare expected vs. calculated)
-- ✅ Pulse counting accuracy across range of frequencies
-- ✅ Zero or invalid pulse input handled gracefully
-- ✅ Speed values remain stable and consistent
+- ✅ Interrupt fires on rising edge of sensor signal
+- ✅ Counter increments correctly for each pulse
+- ✅ UART prints confirmation message per pulse
+- ✅ No data corruption or missed pulses
+- ✅ System remains stable under continuous operation
 
 **Tools**:
-- Function generator or GPIO-based pulse simulation
-- UART logging from STM32 or debugger (SWO/GDB)
-- Oscilloscope (optional, to verify pulse timing)
+- Signal generator or GPIO-based pulse simulation
+- UART terminal monitor (115200 baud, 8N1)
+- Oscilloscope (optional, to verify signal integrity)
 
 **Pass Criteria**:
-- Speed calculation error < 1%
-- Accurate pulse counting at 1 Hz to 100 Hz pulse rates
-- System handles pulse dropout without crashing
-- Calculations remain stable over sustained operation
+- Interrupt correctly triggered on PD9
+- Counter increments match actual pulse count
+- UART output message printed for each pulse
+- No system crashes or hangs
+- Stable operation over sustained pulse input
+
+**Evidence**:
+- Test implementation: [tests/integration/motors-and-speed-sensor-integration/src/stm32u5xx_it.c](tests/integration/motors-and-speed-sensor-integration/src/stm32u5xx_it.c) - `EXTI9_IRQHandler()` with interrupt service routine
+- Main firmware: [tests/integration/speed-sensor-integration/main.c](tests/integration/speed-sensor-integration/main.c) - speed sensor interrupt configuration
+- Video evidence: [tests/integration/speed_sensor_integration.mp4](tests/integration/speed_sensor_integration.mp4) demonstrating successful pulse detection on PD9 with UART output confirming each pulse received
 
 ---
 
 ## Evidence / Proof Artifacts
 
-- Bidirectional CAN: test artifacts from [docs/data-transfer/CAN/bidirectionalCommunication.md](docs/data-transfer/CAN/bidirectionalCommunication.md) and the latency tools in [docs/data-transfer/CAN/latency](docs/data-transfer/CAN/latency) (`can_latency_receive_test.cpp` on Raspberry Pi, `can_latency_send_test.c` on STM32). Logs from these tests demonstrate Raspberry Pi → STM32 command frames and STM32 → Raspberry Pi echoes with correct IDs/payloads and measured RTT.
-- Controller → Raspberry Pi: runtime logs from [rust/controller/src/main.rs](rust/controller/src/main.rs) printing decoded PS3 input (buttons/axes) alongside the CAN payloads sent; these logs correlate controller actions to outbound CAN frames.
-- STM32 reception (optional but recommended): UART/SWO logs from STM32 showing received frames and echo behavior, matching the bidirectional/latency tests.
+- **Bidirectional CAN**: test artifacts from [docs/data-transfer/CAN/bidirectionalCommunication.md](docs/data-transfer/CAN/bidirectionalCommunication.md) and the latency tools in [docs/data-transfer/CAN/latency](docs/data-transfer/CAN/latency) (`can_latency_receive_test.cpp` on Raspberry Pi, `can_latency_send_test.c` on STM32). Logs from these tests demonstrate Raspberry Pi → STM32 command frames and STM32 → Raspberry Pi echoes with correct IDs/payloads and measured RTT.
+- **Controller → Raspberry Pi**: runtime logs from [rust/controller/src/main.rs](rust/controller/src/main.rs) printing decoded PS3 input (buttons/axes) alongside the CAN payloads sent; these logs correlate controller actions to outbound CAN frames.
+- **STM32 reception** (optional but recommended): UART/SWO logs from STM32 showing received frames and echo behavior, matching the bidirectional/latency tests.
 
 ## Test Execution Guidelines
 
