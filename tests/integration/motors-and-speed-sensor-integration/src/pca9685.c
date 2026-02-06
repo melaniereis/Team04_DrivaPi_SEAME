@@ -10,12 +10,12 @@
 #include "pca9685.h"
 
 /**
- *
+ *@brief Write a single byte to a PCA9685 register
  * @param hi2c
  * @param addr7
  * @param reg
  * @param val
- * @return
+ * @return HAL status
  */
 static HAL_StatusTypeDef PCA9685_WriteReg(I2C_HandleTypeDef *hi2c, uint8_t addr7, uint8_t reg, uint8_t val)
 {
@@ -29,12 +29,12 @@ static HAL_StatusTypeDef PCA9685_WriteReg(I2C_HandleTypeDef *hi2c, uint8_t addr7
 }
 
 /**
- *
+ * @brief Read a single byte from a PCA9685 register	
  * @param hi2c
  * @param addr7
  * @param reg
  * @param val
- * @return
+ * @return HAL status
  */
 static HAL_StatusTypeDef PCA9685_ReadReg(I2C_HandleTypeDef *hi2c, uint8_t addr7, uint8_t reg, uint8_t *val)
 {
@@ -49,11 +49,11 @@ static HAL_StatusTypeDef PCA9685_ReadReg(I2C_HandleTypeDef *hi2c, uint8_t addr7,
 }
 
 /**
- *
+ * @brief Initialize the PCA9685 device with basic settings
  * @param hi2c
  * @param addr7
  * @param name
- * @return
+ * @return HAL status
  */
 HAL_StatusTypeDef PCA9685_InitDevice(I2C_HandleTypeDef *hi2c, uint8_t addr7, const char* name)
 {
@@ -116,13 +116,13 @@ HAL_StatusTypeDef PCA9685_InitDevice(I2C_HandleTypeDef *hi2c, uint8_t addr7, con
 }
 
 /**
- *
+ * @brief Set the PWM values for a specific channel on the PCA9685
  * @param hi2c
  * @param addr
  * @param channel
  * @param on
  * @param off
- * @return
+ * @return HAL status
  */
 HAL_StatusTypeDef PCA9685_SetPWM(uint16_t addr, uint8_t channel, uint16_t on, uint16_t off) {
 	uint8_t data[4];

@@ -186,7 +186,7 @@ void Error_Handler(void);
 #define WRLS_WKUP_W_GPIO_Port GPIOF
 
 /* USER CODE BEGIN Private defines */
-
+static volatile uint32_t pulse_count = 0;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
