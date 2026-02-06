@@ -11,9 +11,6 @@
 /* USER CODE END Header */
 
 #include "../Inc/i2c_integration_test.h"
-#include "pca9685.h"
-#include <stdio.h>
-#include <stdarg.h>
 
 static inline uint16_t ClampU16(int32_t computedValue)
 {

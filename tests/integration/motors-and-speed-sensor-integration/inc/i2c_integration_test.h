@@ -13,6 +13,8 @@ extern "C" {
 #endif
 
 #include "pca9685.h"
+#include <stdio.h>
+#include <stdarg.h>
 
 
 /**

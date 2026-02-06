@@ -112,6 +112,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    // FOR I2C TEST UNCOMENT THE FOLOW LINES AND COMMENT THE HAL_Delay(10)
 	  //RunI2CIntegrationTests();
 	  //HAL_Delay(10000);
 

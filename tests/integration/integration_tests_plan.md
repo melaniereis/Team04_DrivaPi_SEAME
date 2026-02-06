@@ -40,7 +40,7 @@ Document the integration tests for DrivaPi system components, defining test obje
 
 **Test Setup**:
 - Use SocketCAN on the Raspberry Pi with the latency test tool `can_latency_receive_test.cpp` (docs/data-transfer/CAN/latency) to send frames and measure echoed responses.
-- Run STM32 firmware `can_latency_send_test.c` (docs/data-transfer/CAN/latency) to receive frames and echo them back for RTT measurement.
+- Run STM32 firmware `can_latency_send_test.c` (docs/data-transfer/CAN/latency) to receive frames and echo them back for round trip measurement.
 - Capture STM32 UART logs that show received frames and echo timing.
 
 **Test Cases**:
@@ -58,14 +58,13 @@ Document the integration tests for DrivaPi system components, defining test obje
 
 ---
 
-### Phase C: STM32 → Motor Controllers (I2C)
+### Phase C: STM32 → Motor Controllers (I2C (Inter-Integrated Circuit))
 
 **Objective**: Verify that STM32 correctly sends I2C commands to motor controller boards and receives proper acknowledgments.
 
 **Test Setup**:
 - Inject commands to STM32
-- Monitor I2C bus traffic to motor controllers (logic analyzer or I2C sniffer)
-- Verify I2C write operations and ACK/NACK responses
+- Verify I2C write operations and ACK (Acknowledge)/NACK (Not Acknowledged) responses
 - Observe physical motor behavior
 
 **Architecture**:
@@ -78,7 +77,6 @@ Document the integration tests for DrivaPi system components, defining test obje
 2. **Steering I2C Communication**: CAN steering command → I2C write to 0x40 → ACK received
 
 **Tools**:
-- Logic analyzer or I2C sniffer (monitor bus traffic, verify addresses and payloads)
 - UART logs from STM32 (show I2C transaction status)
 
 **Assertions**:
@@ -95,10 +93,9 @@ Log I2C transaction status (ACK/NACK) from STM32 firmware and parse logs program
 - 100% correct I2C addressing (0x60 for throttle, 0x40 for steering)
 - All valid commands receive ACK from motor controllers
 - I2C errors handled without system crash
-- Failsafe triggers within 100ms of timeout or communication failure
 
 **Evidence**:
-- Test implementation files: [tests/integration/motors-integration/src/](tests/integration/motors-integration/src/) and [tests/integration/motors-integration/inc/](tests/integration/motors-integration/inc/) containing I2C integration test code (`i2c_integration_test.c/h`), PCA9685 driver (`pca9685.c/h`), and test main (`main.c/h`)
+- Test implementation files: [tests/integration/motors-and-speed-sensor-integration/src/](tests/integration/motors-and-speed-sensor-integration/src/) and [tests/integration/motors-and-speed-sensor-integration/inc/](tests/integration/motors-and-speed-sensor-integration/inc/) containing I2C integration test code (`i2c_integration_test.c/h`), PCA9685 driver (`pca9685.c/h`), and test main (`main.c/h`)
 - Video evidence: [tests/integration/motors_integration.mp4](tests/integration/motors_integration.mp4) demonstrating successful I2C communication with motor controllers and proper motor actuation
 
 ---
@@ -132,9 +129,7 @@ Log I2C transaction status (ACK/NACK) from STM32 firmware and parse logs program
 - ✅ System remains stable under continuous operation
 
 **Tools**:
-- Signal generator or GPIO-based pulse simulation
 - UART terminal monitor (115200 baud, 8N1)
-- Oscilloscope (optional, to verify signal integrity)
 
 **Pass Criteria**:
 - Interrupt correctly triggered on PD9
@@ -145,7 +140,7 @@ Log I2C transaction status (ACK/NACK) from STM32 firmware and parse logs program
 
 **Evidence**:
 - Test implementation: [tests/integration/motors-and-speed-sensor-integration/src/stm32u5xx_it.c](tests/integration/motors-and-speed-sensor-integration/src/stm32u5xx_it.c) - `EXTI9_IRQHandler()` with interrupt service routine
-- Main firmware: [tests/integration/speed-sensor-integration/main.c](tests/integration/speed-sensor-integration/main.c) - speed sensor interrupt configuration
+- Main firmware: [tests/integration/motors-and-speed-sensor-integration/src/main.c](tests/integration/motors-and-speed-sensor-integration/src/main.c) - speed sensor interrupt configuration
 - Video evidence: [tests/integration/speed_sensor_integration.mp4](tests/integration/speed_sensor_integration.mp4) demonstrating successful pulse detection on PD9 with UART output confirming each pulse received
 
 ---
