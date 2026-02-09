@@ -100,7 +100,7 @@ static void Test_DeviceInitialization(void)
 {
     UartPrint("\r\n=== Test 1: Device Initialization ===\r\n");
     
-    HAL_StatusTypeDef status_throttle = PCA9685_InitDevice(&hi2c3, 0x60, "Throttle");
+    HAL_StatusTypeDef status_throttle = PCA9685_InitDevice(&hi2c3, PCA9685_ADDR_MOTOR, "Throttle");
     LogTestResult("Throttle controller (0x60) init", status_throttle, HAL_OK);
     
     HAL_StatusTypeDef status_steering = PCA9685_InitDevice(&hi2c3, 0x40, "Steering");
