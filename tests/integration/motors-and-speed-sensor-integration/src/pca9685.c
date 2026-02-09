@@ -72,7 +72,7 @@ HAL_StatusTypeDef PCA9685_InitDevice(I2C_HandleTypeDef *hi2c, uint8_t addr7, con
 		return ret;
 	}
 
-	if (addr7 == 0x60)
+	if (addr7 == PCA9685_ADDR_MOTOR)
 		ret = PCA9685_WriteReg(hi2c, addr7, PRESCALE, 0x05);
 	else
 		ret = PCA9685_WriteReg(hi2c, addr7, PRESCALE, SERVO_FREQ);
