@@ -58,8 +58,7 @@ static HAL_StatusTypeDef HTS221_ReadCalibration(I2C_HandleTypeDef *hi2c)
     uint16_t addr = HTS221_I2C_ADDRESS << 1;
     
     if (HAL_I2C_Mem_Read(hi2c, addr, 0x30 | 0x80, I2C_MEMADD_SIZE_8BIT, buffer, 16, 100) != HAL_OK)
-        return HAL_ERROR;
-    
+        return HAL_ERROR; 
     calib_data.H0_rh = buffer[0] >> 1;
     calib_data.H1_rh = buffer[1] >> 1;
     calib_data.T0_degC = buffer[2];
@@ -76,20 +75,7 @@ static HAL_StatusTypeDef HTS221_ReadCalibration(I2C_HandleTypeDef *hi2c)
 }
 
 HAL_StatusTypeDef HTS221_Init(I2C_HandleTypeDef *hi2c)
-{
-    uint8_t who_am_i;
-    
-    if (HTS221_ReadReg(hi2c, HTS221_WHO_AM_I, &who_am_i) != HAL_OK)
-    {
-        UartPrint("HTS221: Failed to read WHO_AM_I\r\n");
-        return HAL_ERROR;
-    }
-    if (who_am_i != HTS221_WHO_AM_I_VALUE)
-    {
-        UartPrintf("HTS221: Wrong WHO_AM_I (0x%02X, expected 0x%02X)\r\n", who_am_i, HTS221_WHO_AM_I_VALUE);
-        return HAL_ERROR;
-    }
-    
+{   
     if (HTS221_WriteReg(hi2c, HTS221_CTRL_REG1, 0x85) != HAL_OK)
     {
         UartPrint("HTS221: Failed to write CTRL_REG1\r\n");
@@ -100,7 +86,6 @@ HAL_StatusTypeDef HTS221_Init(I2C_HandleTypeDef *hi2c)
         UartPrint("HTS221: Failed to read calibration\r\n");
         return HAL_ERROR;
     }
-    
     UartPrint("HTS221: Initialized successfully\r\n");
     SoftwareDelay(500);
     return HAL_OK;
@@ -141,8 +126,9 @@ void SensorHTS221Thread(ULONG initial_input)
 {
     float temp, hum;
     HAL_StatusTypeDef status;
-    uint32_t read_count = 0;
-    uint32_t can_send_count = 0;
+    static int16_t last_temp_int = -99;
+    static int16_t last_hum_int = -99;
+    
     (void)initial_input;
     UartPrint("HTS221 Thread: Started\r\n");
     tx_thread_sleep(100);
@@ -160,31 +146,19 @@ void SensorHTS221Thread(ULONG initial_input)
                 g_hts221_data.data_valid = 1;
                 tx_mutex_put(&g_sensorDataMutex);
             }
-            read_count++;
-            can_send_count++;
-
-            /* Send via CAN every 5 readings (5 seconds) to avoid saturation */
-            if (can_send_count >= 5)
+            int16_t temp_int = (int16_t)temp;
+            int16_t hum_int = (int16_t)hum;
+            if (temp_int != last_temp_int || hum_int != last_hum_int)
             {
                 t_can_message msg;
-                
-                msg.id = CAN_ID_HTS221_TEMPERATURE;
-                msg.len = 4;
-                memcpy(msg.data, &temp, 4);
+                memset(&msg, 0, sizeof(msg));
+                msg.id = CAN_ID_HTS221_DATA;
+                msg.len = 8;
+                memcpy(&msg.data[0], &temp, 4);
+                memcpy(&msg.data[4], &hum, 4);
                 CanSend(&msg);
-
-                msg.id = CAN_ID_HTS221_HUMIDITY;
-                msg.len = 4;
-                memcpy(msg.data, &hum, 4);
-                CanSend(&msg);
-                
-                can_send_count = 0;
-            }
-            
-            if (read_count % 10 == 0)
-            {
-                UartPrintf("HTS221: T=%.2f°C, H=%.1f%%, Count=%lu\r\n", 
-                           temp, hum, read_count);
+                last_temp_int = temp_int;
+                last_hum_int = hum_int;
             }
         }
         else
@@ -209,7 +183,6 @@ void SensorsInit(void)
     tx_mutex_create(&g_sensorDataMutex, "Sensor Data Mutex", TX_NO_INHERIT);
     memset(&g_hts221_data, 0, sizeof(HTS221_Data_t));
     memset(&g_battery_data, 0, sizeof(Battery_Data_t));
-    UartPrint("Sensors: Mutex and data structures initialized\r\n");
 }
 
 /* ============================================================================
@@ -227,8 +200,7 @@ HAL_StatusTypeDef Battery_Init(I2C_HandleTypeDef *hi2c)
     uint16_t config_reg;
     HAL_StatusTypeDef status;
     uint16_t dev_addr = BATTERY_I2C_ADDRESS << 1;
-    
-    UartPrint("Battery: Initializing INA219 Power Monitor at 0x41...\r\n");
+
     status = HAL_I2C_Mem_Read(hi2c, dev_addr, INA219_REG_CONFIG, 
                                I2C_MEMADD_SIZE_8BIT, buffer, 2, 100);
     
@@ -237,30 +209,21 @@ HAL_StatusTypeDef Battery_Init(I2C_HandleTypeDef *hi2c)
         UartPrint("Battery: ERROR - Failed to communicate with INA219\r\n");
         return HAL_ERROR;
     }
-    
     config_reg = (buffer[0] << 8) | buffer[1];
-    UartPrintf("Battery: INA219 Config = 0x%04X\r\n", config_reg);
-    
-    /* Read a test voltage to verify it's working */
     status = HAL_I2C_Mem_Read(hi2c, dev_addr, INA219_REG_BUS_V, 
                                I2C_MEMADD_SIZE_8BIT, buffer, 2, 100);
-    
     if (status == HAL_OK)
     {
         uint16_t bus_voltage_raw = (buffer[0] << 8) | buffer[1];
         uint16_t voltage_bits = (bus_voltage_raw >> 3) & 0x1FFF;
         float voltage = voltage_bits * 0.004f;
-        
         UartPrintf("Battery: INA219 initialized successfully! Current voltage: %.3fV\r\n", voltage);
-        
         if (voltage < 9.0f || voltage > 13.0f)
         {
             UartPrintf("Battery: WARNING - Voltage %.3fV outside 3S range (9.0-12.6V)\r\n", voltage);
         }
-        
         return HAL_OK;
     }
-    
     UartPrint("Battery: ERROR - Failed to read voltage from INA219\r\n");
     return HAL_ERROR;
 }
@@ -282,10 +245,8 @@ HAL_StatusTypeDef Battery_Read(I2C_HandleTypeDef *hi2c, float *voltage, uint8_t 
     {
         return HAL_ERROR;
     }
-    
     status = HAL_I2C_Mem_Read(hi2c, dev_addr, INA219_REG_BUS_V, 
                                I2C_MEMADD_SIZE_8BIT, buffer, 2, 100);
-    
     if (status != HAL_OK)
     {
         *voltage = 0.0f;
@@ -300,14 +261,12 @@ HAL_StatusTypeDef Battery_Read(I2C_HandleTypeDef *hi2c, float *voltage, uint8_t 
      * Bit 0: OVF (Math Overflow) - 1 on overflow
      */
     uint16_t bus_voltage_raw = (buffer[0] << 8) | buffer[1];
-    
     if (bus_voltage_raw & INA219_BUS_V_OVF)
     {
         UartPrint("Battery: WARNING - INA219 math overflow detected\r\n");
     }
     uint16_t voltage_bits = (bus_voltage_raw >> 3) & 0x1FFF;
     *voltage = voltage_bits * 0.004f;
-
     if (*voltage >= BATTERY_3S_MAX_V)
     {
         *percentage = 100;
@@ -326,7 +285,6 @@ HAL_StatusTypeDef Battery_Read(I2C_HandleTypeDef *hi2c, float *voltage, uint8_t 
         float pct = ((*voltage - BATTERY_3S_MIN_V) / (BATTERY_3S_NOM_V - BATTERY_3S_MIN_V)) * 50.0f;
         *percentage = (uint8_t)pct;
     }
-    
     return HAL_OK;
 }
 
@@ -341,23 +299,19 @@ HAL_StatusTypeDef Battery_Read(I2C_HandleTypeDef *hi2c, float *voltage, uint8_t 
  */
 void SensorBatteryThread(ULONG initial_input)
 {
-	return ;
     float voltage;
     uint8_t percentage;
     HAL_StatusTypeDef status;
-    uint32_t read_count = 0;
     uint32_t error_count = 0;
-    uint8_t low_battery_warned = 0;
+    static uint8_t last_percentage = 0xFF;
+    static float last_voltage = -1.0f;
     
     (void)initial_input;
-    
     UartPrint("Battery Thread: Started\r\n");
     tx_thread_sleep(100);
-    
     while (1)
     {
         status = Battery_Read(&hi2c3, &voltage, &percentage);
-        
         if (status == HAL_OK)
         {
             error_count = 0;
@@ -367,35 +321,19 @@ void SensorBatteryThread(ULONG initial_input)
                 g_battery_data.percentage = percentage;
                 g_battery_data.timestamp = tx_time_get();
                 g_battery_data.data_valid = 1;
-                
                 tx_mutex_put(&g_sensorDataMutex);
             }
-            read_count++;
-            
-            t_can_message msg;
-            
-
-            msg.id = CAN_ID_BATTERY_VOLTAGE;
-            msg.len = 4;
-            memcpy(msg.data, &voltage, 4);
-            CanSend(&msg);
-            msg.id = CAN_ID_BATTERY_PERCENTAGE;
-            msg.len = 1;
-            msg.data[0] = percentage;
-            CanSend(&msg);
-
-            if (voltage < BATTERY_3S_LOW_V && !low_battery_warned)
+            if (percentage != last_percentage || voltage != last_voltage)
             {
-                UartPrintf("Battery: *** LOW BATTERY WARNING *** V=%.2fV < %.1fV\r\n", 
-                           voltage, BATTERY_3S_LOW_V);
-                low_battery_warned = 1;
+                t_can_message msg;
+                memset(&msg, 0, sizeof(msg));
+                msg.id = CAN_ID_BATTERY_DATA;
+                msg.len = 5;
+                msg.data[0] = percentage;
+                memcpy(&msg.data[1], &voltage, 4);
+                last_percentage = percentage;
+                last_voltage = voltage;
             }
-            else if (voltage >= BATTERY_3S_LOW_V)
-            {
-                low_battery_warned = 0;
-            }
-            UartPrintf("Battery: %.2fV (%d%%) - CAN sent [%lu]\r\n", 
-                       voltage, percentage, read_count);
         }
         else
         {
@@ -410,6 +348,6 @@ void SensorBatteryThread(ULONG initial_input)
                 }
             }
         }
-        tx_thread_sleep(500);
+        tx_thread_sleep(1000);
     }
 }

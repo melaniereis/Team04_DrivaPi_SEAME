@@ -49,10 +49,22 @@ void CraftSpeedMessage(t_can_message *msg, float speed)
 int CanSend(t_can_message* msg)
 {
 	FDCAN_TxHeaderTypeDef tx_header;
+	
+	const uint32_t dlc_map[] = {
+		FDCAN_DLC_BYTES_0,
+		FDCAN_DLC_BYTES_1,
+		FDCAN_DLC_BYTES_2,
+		FDCAN_DLC_BYTES_3,
+		FDCAN_DLC_BYTES_4,
+		FDCAN_DLC_BYTES_5,
+		FDCAN_DLC_BYTES_6,
+		FDCAN_DLC_BYTES_7,
+		FDCAN_DLC_BYTES_8
+	};
 	tx_header.Identifier = msg->id;
 	tx_header.IdType = FDCAN_STANDARD_ID;
 	tx_header.TxFrameType = FDCAN_DATA_FRAME;
-	tx_header.DataLength = FDCAN_DLC_BYTES_4;
+	tx_header.DataLength = (msg->len <= 8) ? dlc_map[msg->len] : FDCAN_DLC_BYTES_8;
 	tx_header.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
 	tx_header.BitRateSwitch = FDCAN_BRS_OFF;
 	tx_header.FDFormat = FDCAN_CLASSIC_CAN;

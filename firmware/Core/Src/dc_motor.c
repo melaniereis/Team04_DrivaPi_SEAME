@@ -8,6 +8,7 @@
   *
 */
 #include "dc_motor.h"
+#include "speed_sensor.h"
 
 /**
 * @brief
@@ -157,6 +158,7 @@ void MotorSetPWM(int32_t left_counts, int32_t right_counts)
 		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_A, 0, max);
 		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_B, 0, 0);
 		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_PWM, 0, pwm);
+		g_current_pwm = (int16_t)pwm;
 	}
 	else if (left_counts < 0)
 	{
@@ -164,12 +166,14 @@ void MotorSetPWM(int32_t left_counts, int32_t right_counts)
 		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_A, 0, 0);
 		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_B, 0, max);
 		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_PWM, 0, pwm);
+		g_current_pwm = -(int16_t)pwm;
 	}
 	else
 	{
-		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_A, 0, 0);
-		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_B, 0, 0);
-		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_PWM, 0, 0);
+		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_A, 0, max);
+		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_B, 0, max);
+		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_PWM, 0, max);
+		g_current_pwm = 0;
 	}
 
 	/* Right motor */
@@ -189,9 +193,9 @@ void MotorSetPWM(int32_t left_counts, int32_t right_counts)
 	}
 	else
 	{
-		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_A, 0, 0);
-		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_B, 0, 0);
-		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_PWM, 0, 0);
+		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_A, 0, max);
+		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_B, 0, max);
+		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_PWM, 0, max);
 	}
 }
 
@@ -220,8 +224,6 @@ VOID DcMotor(ULONG initial_input)
 				int32_t right_count = 0;
 				memcpy(&left_count, msg.data, sizeof(int32_t));
 				memcpy(&right_count, msg.data + sizeof(int32_t), sizeof(int32_t));
-				UartPrintf("left %d\r\n",left_count );
-				UartPrintf("right %d\r\n" ,right_count);
 				MotorSetPWM(left_count, right_count);
 			} 
 			else if (msg.len >= 4)

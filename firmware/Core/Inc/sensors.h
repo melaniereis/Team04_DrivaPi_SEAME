@@ -59,55 +59,46 @@ typedef struct {
 #define HTS221_WHO_AM_I_VALUE  0xBC
 
 /* Battery Monitor - INA219 Power Monitor at 0x41 */
-#define BATTERY_I2C_ADDRESS    0x41     /* INA219 I2C address */
-#define INA219_REG_CONFIG      0x00     /* Configuration Register */
-#define INA219_REG_SHUNT_V     0x01     /* Shunt Voltage Register */
-#define INA219_REG_BUS_V       0x02     /* Bus Voltage Register (battery voltage) */
-#define INA219_REG_POWER       0x03     /* Power Register */
-#define INA219_REG_CURRENT     0x04     /* Current Register */
-#define INA219_REG_CALIBRATION 0x05     /* Calibration Register */
+#define BATTERY_I2C_ADDRESS    0x41
+#define INA219_REG_CONFIG      0x00
+#define INA219_REG_SHUNT_V     0x01
+#define INA219_REG_BUS_V       0x02
+#define INA219_REG_POWER       0x03
+#define INA219_REG_CURRENT     0x04
+#define INA219_REG_CALIBRATION 0x05
 
 /* INA219 Bus Voltage Register bits */
-#define INA219_BUS_V_OVF       (1 << 0) /* Math Overflow Flag */
-#define INA219_BUS_V_CNVR      (1 << 1) /* Conversion Ready Flag */
+#define INA219_BUS_V_OVF       (1 << 0)
+#define INA219_BUS_V_CNVR      (1 << 1)
 
 /* 3S LiPo Battery voltage thresholds */
-#define BATTERY_3S_MAX_V       12.6f    /* 100% charged (4.2V per cell) */
-#define BATTERY_3S_NOM_V       11.1f    /* Nominal voltage (3.7V per cell) */
-#define BATTERY_3S_MIN_V       9.0f     /* 0% - critical low (3.0V per cell) */
-#define BATTERY_3S_LOW_V       10.5f    /* Low battery warning (3.5V per cell) */
+#define BATTERY_3S_MAX_V       12.6f
+#define BATTERY_3S_NOM_V       11.1f
+#define BATTERY_3S_MIN_V       9.0f
+#define BATTERY_3S_LOW_V       10.5f
+
 #define HTS221_H1_T0_OUT_H  0x39
 #define HTS221_T0_OUT_L     0x3C
 #define HTS221_T0_OUT_H     0x3D
 #define HTS221_T1_OUT_L     0x3E
-/* Exported variables --------------------------------------------------------*/
-extern TX_MUTEX g_sensorDataMutex;              /* Mutex for sensor data protection */
-extern HTS221_Data_t g_hts221_data;             /* HTS221 sensor data */
-extern Battery_Data_t g_battery_data;           /* Battery sensor data */
-#define HTS221_WHO_AM_I_VALUE  0xBC
 
-/* Exported variables --------------------------------------------------------*/
-extern TX_MUTEX g_sensorDataMutex;              /* Mutex for sensor data protection */
-extern HTS221_Data_t g_hts221_data;             /* HTS221 sensor data */
-/* Exported function prototypes ----------------------------------------------*/
-/* HTS221 Driver functions */
+extern TX_MUTEX g_sensorDataMutex;
+extern HTS221_Data_t g_hts221_data;
+extern Battery_Data_t g_battery_data;
+
 HAL_StatusTypeDef HTS221_Init(I2C_HandleTypeDef *hi2c);
 HAL_StatusTypeDef HTS221_ReadBoth(I2C_HandleTypeDef *hi2c, float *temperature, float *humidity);
 
-/* Battery Monitor functions */
 HAL_StatusTypeDef Battery_Init(I2C_HandleTypeDef *hi2c);
 HAL_StatusTypeDef Battery_Read(I2C_HandleTypeDef *hi2c, float *voltage, uint8_t *percentage);
 
-/* Sensor thread functions */
 void SensorHTS221Thread(ULONG initial_input);
 void SensorBatteryThread(ULONG initial_input);
-void SensorHTS221Thread(ULONG initial_input);
 
-/* Sensor initialization function */
 void SensorsInit(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __SENSORS_H */
+#endif

@@ -88,9 +88,6 @@ UINT App_ThreadX_Init(VOID *memory_ptr)
 	HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
 	PCA9685_InitAllDevices();
 
-	/* Initialize Battery monitor AFTER PCA9685 */
-	msg = "Initializing Battery monitor...\r\n";
-	HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
 	if (Battery_Init(&hi2c3) == HAL_OK)
 	{
 		msg = "Battery: Initialized successfully\r\n";
@@ -102,21 +99,12 @@ UINT App_ThreadX_Init(VOID *memory_ptr)
 		HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
 	}
 
-	/* Initialize HTS221 temperature sensor */
-	msg = "Initializing HTS221 sensor...\r\n";
-	HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
-	if (HTS221_Init(&hi2c2) == HAL_OK)
-	{
-		msg = "HTS221: Initialized successfully\r\n";
-		HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
-	}
-	else
+	if (HTS221_Init(&hi2c2) != HAL_OK)
 	{
 		msg = "HTS221: Initialization failed!\r\n";
 		HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
 	}
 
-	/* Initialize sensor resources (mutex, data structures) */
 	SensorsInit();
 
 	msg = "Initializing threads...\r\n";

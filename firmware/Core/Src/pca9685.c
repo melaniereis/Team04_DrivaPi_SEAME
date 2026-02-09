@@ -60,60 +60,28 @@ static HAL_StatusTypeDef PCA9685_ReadReg(I2C_HandleTypeDef *hi2c, uint8_t addr7,
 HAL_StatusTypeDef PCA9685_InitDevice(I2C_HandleTypeDef *hi2c, uint8_t addr7, const char* name)
 {
 	HAL_StatusTypeDef ret;
-	char msg[128];
-	snprintf(msg, sizeof(msg), "Init %s PCA9685 at 0x%02X with SWRST\r\n", name, addr7);
-	UartPrint(msg);
-	ret = HAL_OK;
+	(void)name;
+	
 	SoftwareDelay(50);
-
 	ret = PCA9685_WriteReg(hi2c, addr7, MODE1, 0x31);
-	if (ret != HAL_OK) 
-	{ 
-		snprintf(msg, sizeof(msg), "  FAILED MODE1: %d\r\n", ret); 
-		UartPrint(msg);
+	if (ret != HAL_OK)
 		return ret;
-	}
 
 	if (addr7 == 0x60)
 		ret = PCA9685_WriteReg(hi2c, addr7, PRESCALE, 0x05);
 	else
 		ret = PCA9685_WriteReg(hi2c, addr7, PRESCALE, SERVO_FREQ);
-	if (ret != HAL_OK) 
-	{ 
-		snprintf(msg, sizeof(msg), "  FAILED PRESCALE: %d\r\n", ret);
-		UartPrint(msg);
-		return ret;
-	}
 
+	if (ret != HAL_OK)
+		return ret;
 	ret = PCA9685_WriteReg(hi2c, addr7, MODE1, 0x21);
 	if (ret != HAL_OK)
-	{ 
-		snprintf(msg, sizeof(msg), "  FAILED WAKE: %d\r\n", ret); 
-		UartPrint(msg);
-		return ret; 
-	}
+		return ret;
 	SoftwareDelay(50);
-
-	uint8_t mode2_read = 0;
-	ret = PCA9685_ReadReg(hi2c, addr7, MODE2, &mode2_read);
-	if (ret == HAL_OK) 
-	{ 
-		snprintf(msg, sizeof(msg), "  MODE2 current value: 0x%02X\r\n", mode2_read); 
-		UartPrint(msg);
-	}
-	else 
-	{ 
-		snprintf(msg, sizeof(msg), "  MODE2 read FAILED: %d\r\n", ret); 
-		UartPrint(msg);
-	}
-
 	ret = PCA9685_WriteReg(hi2c, addr7, MODE2, 0x04);
 	if (ret != HAL_OK)
-	{
-		snprintf(msg, sizeof(msg), "  MODE2 write FAILED: %d\r\n", ret); UartPrint(msg);
-		UartPrint("  Skipping MODE2 - will attempt PWM write anyway\r\n");
 		return HAL_OK;
-	}
+		
 	return HAL_OK;
 }
 
@@ -135,19 +103,17 @@ HAL_StatusTypeDef PCA9685_SetPWM(uint16_t addr, uint8_t channel, uint16_t on, ui
 	data[1] = (on >> 8) & 0xFF;
 	data[2] = off & 0xFF;
 	data[3] = (off >> 8) & 0xFF;
-
 	HAL_StatusTypeDef status = HAL_I2C_Mem_Write(&hi2c3, dev_addr, reg, I2C_MEMADD_SIZE_8BIT, data, 4, 500);
 	if (status == HAL_OK)
 	{
-//		if (g_i2cDebug)
-//			UartPrintf("PCA9685_SetPWM: wrote PWM to 0x%02X reg=0x%02X\r\n", addr, reg);
+		if (g_i2cDebug)
+			UartPrintf("PCA9685_SetPWM: wrote PWM to 0x%02X reg=0x%02X\r\n", addr, reg);
 		return HAL_OK;
 	}
 
 	uint32_t hal_err_mem = HAL_I2C_GetError(&hi2c3);
 	if (g_i2cDebug)
 		UartPrintf("PCA9685_SetPWM: Mem_Write failed addr=0x%02X HALerr=0x%08lX\r\n", addr, (unsigned long)hal_err_mem);
-
 	uint8_t tx[5];
 	tx[0] = reg;
 	tx[1] = data[0];
@@ -186,7 +152,6 @@ HAL_StatusTypeDef PCA9685_SetFrequency(uint8_t addr7, double freq)
 		UartPrint("PCA9685_SetFrequency: Failed to read MODE1\r\n");
 		return HAL_ERROR;
 	}
-
 	uint8_t sleep_mode = (oldmode & 0x7F) | 0x10;
 	if (PCA9685_WriteReg(&hi2c3, addr7, MODE1, sleep_mode) != HAL_OK)
 	{
@@ -194,26 +159,22 @@ HAL_StatusTypeDef PCA9685_SetFrequency(uint8_t addr7, double freq)
 		return HAL_ERROR;
 	}
 	SoftwareDelay(5);
-
 	if (PCA9685_WriteReg(&hi2c3, addr7, PRESCALE, prescale) != HAL_OK)
 	{
 		UartPrint("PCA9685_SetFrequency: Failed to write PRESCALE\r\n");
 		return HAL_ERROR;
 	}
 	SoftwareDelay(5);
-
 	if (PCA9685_WriteReg(&hi2c3, addr7, MODE1, oldmode) != HAL_OK)
 	{
 		UartPrint("PCA9685_SetFrequency: Failed to restore MODE1\r\n");
 		return HAL_ERROR;
 	}
 	SoftwareDelay(5);
-
 	if (PCA9685_WriteReg(&hi2c3, addr7, MODE1, oldmode | 0xA0 | 0x01) != HAL_OK)
 	{
 		UartPrint("PCA9685_SetFrequency: Warning - failed to set RESTART/AI\r\n");
 	}
-
 	UartPrintf("PCA9685_SetFrequency: freq=%.1f Hz prescale=%d\r\n", freq, prescale);
 	return HAL_OK;
 }
@@ -237,22 +198,18 @@ HAL_StatusTypeDef PCA9685_Sleep(uint16_t addr)
  */
 static HAL_StatusTypeDef I2C_BusRecovery(I2C_HandleTypeDef *hi2c)
 {
-	/* Clear any pending errors */
 	hi2c->ErrorCode = HAL_I2C_ERROR_NONE;
-	
-	/* Check if bus is busy */
 	uint32_t timeout = 10000;
+
 	while ((hi2c->Instance->ISR & I2C_ISR_BUSY) && (--timeout))
 	{
 		SoftwareDelay(1);
 	}
-	
 	if (timeout == 0)
 	{
 		UartPrintf("I2C bus still busy after recovery attempt\r\n");
 		return HAL_BUSY;
 	}
-	
 	return HAL_OK;
 }
 
@@ -265,19 +222,15 @@ static HAL_StatusTypeDef I2C_BusRecovery(I2C_HandleTypeDef *hi2c)
 static HAL_StatusTypeDef I2C_SafeProbe(I2C_HandleTypeDef *hi2c, uint16_t dev_addr)
 {
 	uint8_t dummy;
-	
-	/* Try a read with short timeout */
+
 	HAL_StatusTypeDef status = HAL_I2C_Master_Receive(hi2c, dev_addr, &dummy, 1, 5);
-	
 	if (status != HAL_OK)
 	{
-		/* Try to recover and retry once */
 		if (I2C_BusRecovery(hi2c) == HAL_OK)
 		{
 			status = HAL_I2C_Master_Receive(hi2c, dev_addr, &dummy, 1, 5);
 		}
-	}
-	
+	}	
 	return status;
 }
 
@@ -289,57 +242,34 @@ void PCA9685_InitAllDevices(void)
 	for (size_t b = 0; b < sizeof(buses)/sizeof(buses[0]); ++b) 
 	{
 		I2C_HandleTypeDef* bus = buses[b];
-		
-		/* Verify I2C bus is initialized */
 		if (bus->Instance == NULL)
-		{
-			UartPrintf("Skipping %s (not initialized)\r\n", bus_names[b]);
 			continue;
-		}
-		
-		UartPrintf("Scanning %s for I2C devices...\r\n", bus_names[b]);
-		
-		/* Attempt bus recovery before scan */
+			
 		if (I2C_BusRecovery(bus) != HAL_OK)
 		{
-			UartPrintf("  Warning: %s recovery failed, skipping\r\n", bus_names[b]);
+			UartPrintf("Warning: %s recovery failed\r\n", bus_names[b]);
 			continue;
 		}
 		
-		int device_count = 0;
 		for (uint8_t addr = 1; addr < 128; ++addr) 
 		{
 			uint16_t dev_addr = (uint16_t)(addr << 1);
-			
-			/* Skip HTS221 address (0x5F) - it's not a PCA9685 */
-			if (addr == 0x5F) {
-				UartPrintf("  Skipping 0x%02X (reserved for HTS221)\r\n", addr);
+			if (addr == 0x5F)
 				continue;
-			}
 			
 			if (I2C_SafeProbe(bus, dev_addr) == HAL_OK)
 			{
-				device_count++;
-				UartPrintf("  Device found at 7-bit 0x%02X\r\n", addr);
-				
-				/* Try to identify if it's a PCA9685 */
 				uint8_t v;
 				if (PCA9685_ReadReg(bus, addr, LED0_ON_L, &v) == HAL_OK)
 				{
-					UartPrintf("    PCA9685 detected at 0x%02X\r\n", addr);
 					char name_buffer[32];
 					snprintf(name_buffer, sizeof(name_buffer), "PCA9685@0x%02X", addr);
 					HAL_StatusTypeDef st = PCA9685_InitDevice(bus, addr, name_buffer);
-					if (st == HAL_OK)
-						UartPrintf("      Initialized OK\r\n");
-					else
-						UartPrintf("      Init failed (status %d)\r\n", st);
+					if (st != HAL_OK)
+						UartPrintf("PCA9685 init failed at 0x%02X (status %d)\r\n", addr, st);
 				}
 			}
 		}
-		UartPrintf("  %s scan complete: %d device(s) found\r\n", bus_names[b], device_count);
 	}
-	
-	UartPrintf("I2C device initialization complete\r\n");
 	MotorStop();
 }
