@@ -118,9 +118,9 @@ int main(void)
   uint32_t Trials = 3;
   uint32_t Timeout = 100;
 	if (HAL_I2C_IsDeviceReady(&hi2c2, DevAddress, Trials, Timeout) == HAL_OK)
-		UartPrint("You did it!");
+		UartPrint("Device found!");
 	else
-		UartPrint("Deu merda :(");
+		UartPrint("Device not found!");
   /* USER CODE END 2 */
 
   /* Infinite loop */
