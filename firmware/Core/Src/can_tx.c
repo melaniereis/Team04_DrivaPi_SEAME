@@ -101,6 +101,6 @@ VOID CanTx(ULONG initial_input)
 		CraftSpeedMessage(&msg, speed);
 
 		/* Sleep for 1 second to avoid CAN bus saturation */
-		tx_thread_sleep(100);
+		tx_thread_sleep(10);
 	}
 }
