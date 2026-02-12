@@ -106,8 +106,8 @@ HAL_StatusTypeDef PCA9685_SetPWM(uint16_t addr, uint8_t channel, uint16_t on, ui
 	HAL_StatusTypeDef status = HAL_I2C_Mem_Write(&hi2c3, dev_addr, reg, I2C_MEMADD_SIZE_8BIT, data, 4, 500);
 	if (status == HAL_OK)
 	{
-		if (g_i2cDebug)
-			UartPrintf("PCA9685_SetPWM: wrote PWM to 0x%02X reg=0x%02X\r\n", addr, reg);
+//		if (g_i2cDebug)
+//			UartPrintf("PCA9685_SetPWM: wrote PWM to 0x%02X reg=0x%02X\r\n", addr, reg);
 		return HAL_OK;
 	}
 
@@ -270,6 +270,9 @@ void PCA9685_InitAllDevices(void)
 				}
 			}
 		}
+		UartPrintf("  %s scan complete: %d device(s) found\r\n", bus_names[b], device_count);
 	}
+	
+	UartPrintf("I2C device initialization complete\r\n");
 	MotorStop();
 }

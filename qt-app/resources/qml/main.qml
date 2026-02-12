@@ -129,7 +129,7 @@ Window {
                 Image {
                     width: 75
                     height: 75
-                    source: "qrc:/assets/roadSigns/Zeichen_274-62.svg.png"
+                    source: "qrc:/assets/warning.svg"  // existing bundled asset
                     anchors.left: parent.left
                     anchors.leftMargin: 40
                     anchors.top: parent.top
