@@ -270,9 +270,6 @@ void PCA9685_InitAllDevices(void)
 				}
 			}
 		}
-		UartPrintf("  %s scan complete: %d device(s) found\r\n", bus_names[b], device_count);
 	}
-	
-	UartPrintf("I2C device initialization complete\r\n");
 	MotorStop();
 }
