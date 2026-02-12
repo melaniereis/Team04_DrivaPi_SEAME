@@ -16,10 +16,11 @@ int16_t g_current_pwm = 0;
 RNDGear_t g_current_gear = GEAR_NEUTRAL;
 
 /**
- * @brief Determine RND gear based on speed and PWM
- * @param speed Current speed from encoder (m/s, always positive)
- * @param pwm_value Current PWM value sent to motor (positive=forward, negative=reverse)
- * @return RNDGear_t Current gear state
+ * @brief 
+ * 
+ * @param speed 
+ * @param pwm_value 
+ * @return RNDGear_t 
  */
 RNDGear_t DetermineRNDGear(float speed, int16_t pwm_value)
 {
@@ -76,11 +77,11 @@ float ReadSpeedSensor(void)
 }
 
 /**
-* @brief
-*
-* @param initial_input
-* @return VOID
-*/
+ * @brief 
+ * 
+ * @param initial_input 
+ * @return VOID 
+ */
 VOID SpeedSensor(ULONG initial_input)
 {
 	static RNDGear_t last_gear = GEAR_NEUTRAL;

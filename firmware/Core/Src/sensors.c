@@ -38,12 +38,26 @@ typedef struct {
 
 static HTS221_Calibration_t calib_data;
 
+/**
+ * @brief 
+ * 
+ * @param hi2c 
+ * @param reg 
+ * @param data 
+ * @return HAL_StatusTypeDef 
+ */
 static HAL_StatusTypeDef HTS221_WriteReg(I2C_HandleTypeDef *hi2c, uint8_t reg, uint8_t data)
 {
     uint16_t addr = HTS221_I2C_ADDRESS << 1;
     return HAL_I2C_Mem_Write(hi2c, addr, reg, I2C_MEMADD_SIZE_8BIT, &data, 1, 100);
 }
 
+/**
+ * @brief 
+ * 
+ * @param hi2c 
+ * @return * HAL_StatusTypeDef 
+ */
 static HAL_StatusTypeDef HTS221_ReadCalibration(I2C_HandleTypeDef *hi2c)
 {
     uint8_t t0_msb, t1_msb;
@@ -67,6 +81,12 @@ static HAL_StatusTypeDef HTS221_ReadCalibration(I2C_HandleTypeDef *hi2c)
     return HAL_OK;
 }
 
+/**
+ * @brief 
+ * 
+ * @param hi2c 
+ * @return HAL_StatusTypeDef 
+ */
 HAL_StatusTypeDef HTS221_Init(I2C_HandleTypeDef *hi2c)
 {   
     if (HTS221_WriteReg(hi2c, HTS221_CTRL_REG1, 0x85) != HAL_OK)
@@ -84,6 +104,14 @@ HAL_StatusTypeDef HTS221_Init(I2C_HandleTypeDef *hi2c)
     return HAL_OK;
 }
 
+/**
+ * @brief 
+ * 
+ * @param hi2c 
+ * @param temperature 
+ * @param humidity 
+ * @return HAL_StatusTypeDef 
+ */
 HAL_StatusTypeDef HTS221_ReadBoth(I2C_HandleTypeDef *hi2c, float *temperature, float *humidity)
 {
     uint8_t h_low, t_low, t_high;
@@ -110,10 +138,11 @@ HAL_StatusTypeDef HTS221_ReadBoth(I2C_HandleTypeDef *hi2c, float *temperature, f
     *humidity = h_temp;
     return HAL_OK;
 }
-/* ============================================================================
- * @brief  HTS221 Temperature/Humidity sensor thread
- * @note   Reads temperature and humidity every 10 second
- * @param  initial_input: Thread input parameter (unused)
+
+/**
+ * @brief 
+ * 
+ * @param initial_input 
  */
 void SensorHTS221Thread(ULONG initial_input)
 {
@@ -175,8 +204,8 @@ void SensorHTS221Thread(ULONG initial_input)
 }
 
 /**
- * @brief  Initialize sensor mutex and data structures
- * @note   Call this before ThreadInit() to prepare sensor resources
+ * @brief 
+ * 
  */
 void SensorsInit(void)
 {
@@ -190,9 +219,10 @@ void SensorsInit(void)
  * ============================================================================ */
 
 /**
- * @brief  Initialize Battery Monitor
- * @param  hi2c: I2C handle
- * @retval HAL status
+ * @brief 
+ * 
+ * @param hi2c 
+ * @return HAL_StatusTypeDef 
  */
 HAL_StatusTypeDef Battery_Init(I2C_HandleTypeDef *hi2c)
 {
@@ -227,11 +257,12 @@ HAL_StatusTypeDef Battery_Init(I2C_HandleTypeDef *hi2c)
 }
 
 /**
- * @brief  Read battery voltage and percentage
- * @param  hi2c: I2C handle
- * @param  voltage: Pointer to store voltage value
- * @param  percentage: Pointer to store percentage value
- * @retval HAL status
+ * @brief 
+ * 
+ * @param hi2c 
+ * @param voltage 
+ * @param percentage 
+ * @return HAL_StatusTypeDef 
  */
 HAL_StatusTypeDef Battery_Read(I2C_HandleTypeDef *hi2c, float *voltage, uint8_t *percentage)
 {
@@ -291,9 +322,9 @@ HAL_StatusTypeDef Battery_Read(I2C_HandleTypeDef *hi2c, float *voltage, uint8_t 
  * ============================================================================ */
 
 /**
- * @brief  Battery monitor sensor thread
- * @note   Reads battery status every 5 seconds
- * @param  initial_input: Thread input parameter (unused)
+ * @brief 
+ * 
+ * @param initial_input 
  */
 void SensorBatteryThread(ULONG initial_input)
 {
