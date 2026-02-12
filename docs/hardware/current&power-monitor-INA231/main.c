@@ -616,33 +616,6 @@ void UartPrint(const char* msg)
 	HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
 }
 
-//void read_values()
-//{
-//	int16_t shunt_raw;
-//	HAL_I2C_Mem_Read(&hi2c2, DevAddress, 0x01, I2C_MEMADD_SIZE_8BIT, (uint8_t*)&shunt_raw, 2, HAL_MAX_DELAY);
-//	float shunt_voltage = shunt_raw * 2.5e-6; // LSB = 2.5uV
-//	HAL_Delay(10);
-//
-//	uint16_t bus_raw;
-//	HAL_I2C_Mem_Read(&hi2c2, DevAddress, 0x02, I2C_MEMADD_SIZE_8BIT, (uint8_t*)&bus_raw, 2, HAL_MAX_DELAY);
-//	float bus_voltage = bus_raw * 1.25e-3; // LSB = 1.25mV
-//	HAL_Delay(10);
-//
-//	int16_t current_raw;
-//	HAL_I2C_Mem_Read(&hi2c2, DevAddress, 0x04, I2C_MEMADD_SIZE_8BIT, (uint8_t*)&current_raw, 2, HAL_MAX_DELAY);
-//	float current = current_raw * 0.1f; // depends on your calibration
-//	HAL_Delay(10);
-//
-//	uint16_t power_raw;
-//	HAL_I2C_Mem_Read(&hi2c2, DevAddress, 0x03, I2C_MEMADD_SIZE_8BIT, (uint8_t*)&power_raw, 2, HAL_MAX_DELAY);
-//	float power = power_raw * 2.0f; // depends on calibration
-//	HAL_Delay(10);
-//
-//	UartPrintf("Bus: %.2f V, Shunt: %.3f mV, Current: %.3f A, Power: %.3f W\r\n",
-//	bus_voltage, shunt_voltage*1000, current, power);
-//}
-
-
 void read_values()
 {
     uint8_t buf[2];
@@ -670,6 +643,7 @@ void read_values()
     UartPrintf("Bus: %.2f V, Shunt: %.3f mV, Current: %.3f A, Power: %.3f W\r\n",bus_voltage,
     shunt_voltage * 1000.0f, current, power);
 }
+
 void INA231_WriteRegister(uint8_t reg, uint16_t value)
 {
     uint8_t data[3];
@@ -688,7 +662,6 @@ void INA231_Init(void)
     // --- CALIBRATION REGISTER (0x05) ---
     INA231_WriteRegister(0x05, 168);  // Example value
 }
-
 /* USER CODE END 4 */
 
 /**
