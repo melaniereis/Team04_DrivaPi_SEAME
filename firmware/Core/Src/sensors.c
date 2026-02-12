@@ -20,6 +20,7 @@ TX_MUTEX g_sensorDataMutex;
 HTS221_Data_t g_hts221_data;
 Battery_Data_t g_battery_data;
 
+#define BATTERY_VOLTAGE_EPSILON 0.01f
 /* ============================================================================
  * HTS221 Driver Implementation
  * ============================================================================ */
@@ -352,7 +353,8 @@ void SensorBatteryThread(ULONG initial_input)
                 g_battery_data.data_valid = 1;
                 tx_mutex_put(&g_sensorDataMutex);
             }
-            if (percentage != last_percentage || voltage != last_voltage)
+            if (percentage != last_percentage ||
+                fabsf(voltage - last_voltage) > BATTERY_VOLTAGE_EPSILON)
             {
                 t_can_message msg;
                 memset(&msg, 0, sizeof(msg));
