@@ -38,13 +38,6 @@ typedef struct {
 
 static HTS221_Calibration_t calib_data;
 
-static HAL_StatusTypeDef HTS221_ReadReg(I2C_HandleTypeDef *hi2c, uint8_t reg, uint8_t *data)
-{
-    uint16_t addr = HTS221_I2C_ADDRESS << 1;
-    uint8_t reg_addr = reg | 0x80;
-    return HAL_I2C_Mem_Read(hi2c, addr, reg_addr, I2C_MEMADD_SIZE_8BIT, data, 1, 100);
-}
-
 static HAL_StatusTypeDef HTS221_WriteReg(I2C_HandleTypeDef *hi2c, uint8_t reg, uint8_t data)
 {
     uint16_t addr = HTS221_I2C_ADDRESS << 1;
@@ -128,10 +121,13 @@ void SensorHTS221Thread(ULONG initial_input)
     HAL_StatusTypeDef status;
     static int16_t last_temp_int = -99;
     static int16_t last_hum_int = -99;
+    static ULONG last_send_time = 0;
+    static const ULONG HEARTBEAT_INTERVAL = 3000;
     
     (void)initial_input;
     UartPrint("HTS221 Thread: Started\r\n");
     tx_thread_sleep(100);
+    last_send_time = tx_time_get();
     
     while (1)
     {
@@ -148,7 +144,10 @@ void SensorHTS221Thread(ULONG initial_input)
             }
             int16_t temp_int = (int16_t)temp;
             int16_t hum_int = (int16_t)hum;
-            if (temp_int != last_temp_int || hum_int != last_hum_int)
+            ULONG current_time = tx_time_get();
+
+            if (temp_int != last_temp_int || hum_int != last_hum_int || 
+                (current_time - last_send_time) >= HEARTBEAT_INTERVAL)
             {
                 t_can_message msg;
                 memset(&msg, 0, sizeof(msg));
@@ -159,7 +158,8 @@ void SensorHTS221Thread(ULONG initial_input)
                 CanSend(&msg);
                 last_temp_int = temp_int;
                 last_hum_int = hum_int;
-            }
+                last_send_time = current_time;
+            }  
         }
         else
         {
@@ -197,7 +197,6 @@ void SensorsInit(void)
 HAL_StatusTypeDef Battery_Init(I2C_HandleTypeDef *hi2c)
 {
     uint8_t buffer[2];
-    uint16_t config_reg;
     HAL_StatusTypeDef status;
     uint16_t dev_addr = BATTERY_I2C_ADDRESS << 1;
 
@@ -209,7 +208,6 @@ HAL_StatusTypeDef Battery_Init(I2C_HandleTypeDef *hi2c)
         UartPrint("Battery: ERROR - Failed to communicate with INA219\r\n");
         return HAL_ERROR;
     }
-    config_reg = (buffer[0] << 8) | buffer[1];
     status = HAL_I2C_Mem_Read(hi2c, dev_addr, INA219_REG_BUS_V, 
                                I2C_MEMADD_SIZE_8BIT, buffer, 2, 100);
     if (status == HAL_OK)
@@ -331,6 +329,7 @@ void SensorBatteryThread(ULONG initial_input)
                 msg.len = 5;
                 msg.data[0] = percentage;
                 memcpy(&msg.data[1], &voltage, 4);
+                CanSend(&msg);
                 last_percentage = percentage;
                 last_voltage = voltage;
             }
