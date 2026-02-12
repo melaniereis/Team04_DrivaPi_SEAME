@@ -44,7 +44,7 @@ uint8_t CanReceive(t_can_message *msg)
 void CanRx(ULONG initial_input)
 {
 	t_can_message msg;
-	
+
 	while (1)
 	{
 		if (CanReceive(&msg))
@@ -54,7 +54,6 @@ void CanRx(ULONG initial_input)
 				tx_event_flags_set(&g_eventFlags, FLAG_CAN_SPEED_CMD, TX_OR);
 			}
 			if (msg.id == CMD_STEERING){
-				UartPrintf("ID: %d\r\n", msg.id);
 				tx_queue_send(&g_queueSteerCmd, &msg, TX_NO_WAIT);
 				tx_event_flags_set(&g_eventFlags, FLAG_CAN_STEER_CMD, TX_OR);
 			}
