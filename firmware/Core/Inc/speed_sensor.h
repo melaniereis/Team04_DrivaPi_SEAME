@@ -30,4 +30,7 @@ extern UART_HandleTypeDef huart1;
 #ifdef __cplusplus
 }
 #endif
+
+float ReadSpeedSensor(void);
+VOID SpeedSensor(ULONG initial_input);
 #endif

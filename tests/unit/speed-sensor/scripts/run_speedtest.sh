@@ -1,75 +1,53 @@
 #!/bin/bash
-
-# Stop the script immediately if any command fails (returns non-zero)
 set -e
+set -u
 set -o pipefail
 
-echo "----------------------------------------------------------------"
-echo "🚀 STARTING SPEED SENSOR TEST SUITE"
-echo "----------------------------------------------------------------"
+# --- Paths ---
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+readonly REPO_ROOT="$(cd "${PROJECT_ROOT}/../../.." && pwd)"
 
-# 1. Clean previous builds to ensure no stale coverage data
-echo ""
-echo "🧹 Cleaning up..."
+readonly BUILD_DIR="${PROJECT_ROOT}/build"
+readonly COVERAGE_DIR="${BUILD_DIR}/artifacts/gcov"
+readonly AGGREGATION_DIR="${REPO_ROOT}/tests/unit/build/coverage/speed-sensor"
+
+echo -e "\033[0;36m[INFO]\033[0m 🚀 Starting Speed Sensor Test Suite (White-Box Mode)"
+
+cd "${PROJECT_ROOT}"
+
+# --- Clean & Build ---
 ceedling clobber
+rm -rf "${COVERAGE_DIR}" "${AGGREGATION_DIR}"
+mkdir -p "${COVERAGE_DIR}/html" "${AGGREGATION_DIR}"
 
-# 2. Run the tests with coverage enabled
-# If tests fail, the script stops here due to 'set -e'
-echo ""
-echo "🧪 Running Tests..."
+echo -e "\033[0;36m[INFO]\033[0m Executing tests..."
 ceedling gcov:all
 
-# 3. Capture the raw coverage data
-# We search the entire 'build' folder to find the hidden .gcda files
-echo ""
-echo "📸 Capturing Coverage Data..."
-lcov --capture --directory build --output-file coverage.info --rc lcov_branch_coverage=1 --quiet
+# --- Coverage Capture (The Real Fix) ---
+echo -e "\033[0;36m[INFO]\033[0m Capturing LCOV data..."
+# We point lcov EXACTLY to the 'out' folder where the .gcda files live
+lcov --capture \
+     --directory "${BUILD_DIR}/gcov/out" \
+     --output-file "${COVERAGE_DIR}/coverage.info" \
+     --rc lcov_branch_coverage=1 \
+     --ignore-errors empty,source,gcov --quiet
 
-# 3b. Filter coverage data to include only src/ and remove system/vendor code
-echo "📋 Filtering coverage data (src/ only)..."
-lcov --extract coverage.info '*/src/*' \
-     -o coverage_src_only.info --rc lcov_branch_coverage=1 --quiet || \
-  cp coverage.info coverage_src_only.info
+# --- Coverage Filter ---
+echo -e "\033[0;36m[INFO]\033[0m Filtering coverage data..."
+# Even though the code is included in the test file, GCC tags the coverage
+# with the absolute path of speed_sensor.c. This extracts just the driver data!
+lcov --extract "${COVERAGE_DIR}/coverage.info" \
+     "*/firmware/Core/Src/speed_sensor.c" \
+     --output-file "${COVERAGE_DIR}/coverage_filtered.info" \
+     --rc lcov_branch_coverage=1 \
+     --ignore-errors unused,empty --quiet || cp "${COVERAGE_DIR}/coverage.info" "${COVERAGE_DIR}/coverage_filtered.info"
 
-lcov -r coverage_src_only.info '/usr/*' '*vendor*' '*cmock*' '*unity*' '*c_exception*' \
-     '*build/test/*' '*test/runners*' '*test/mocks*' '/var/lib/gems/*' '*test/*' \
-     --ignore-errors unused \
-     -o coverage_filtered.info --rc lcov_branch_coverage=1 --quiet || \
-  cp coverage_src_only.info coverage_filtered.info
+# --- Export & Report ---
+cp "${COVERAGE_DIR}/coverage_filtered.info" "${AGGREGATION_DIR}/coverage_filtered.info"
 
-# 4. Generate the HTML Report (with error tolerance)
-echo ""
-echo "📊 Generating HTML Report with Branch Coverage..."
-if ! genhtml coverage_filtered.info --output-directory coverage_report \
-     --branch-coverage --function-coverage \
-     --rc genhtml_branch_coverage=1 --quiet 2>/dev/null; then
-  # If genhtml fails (e.g., in headless CI), try without quiet or just warn
-  mkdir -p coverage_report
-  echo "⚠️ genhtml had issues, but coverage files are saved"
-fi
+genhtml "${COVERAGE_DIR}/coverage_filtered.info" \
+        --output-directory "${COVERAGE_DIR}/html" \
+        --branch-coverage --quiet --rc genhtml_branch_coverage=1
 
-echo ""
-echo "----------------------------------------------------------------"
-echo "✅ SUCCESS! Report available at: $PWD/coverage_report/index.html"
-echo "----------------------------------------------------------------"
-echo ""
-
-# Note: Not opening browser automatically (headless CI environment)
-
-
-# 6. Cleanup
-if [[ "${CI:-false}" == "true" || "${CALLED_FROM_MASTER:-0}" == "1" ]]; then
-    echo ""
-    echo "ℹ️ Skipping cleanup (CI/Master mode) to preserve artifacts for aggregation"
-else
-  echo ""
-  echo "🧹 Cleaning up..."
-  echo "Removing coverage files..."
-  rm -f coverage.info coverage_src_only.info || true
-  echo "Running clobber.."
-  ceedling clobber || true
-  echo ""
-  echo "✓ Cleanup done!"
-fi
-echo ""
-echo "✓ Speed Sensor tests PASSED"
+echo -e "\033[1;32m✓ Tests passed and coverage saved for aggregation!\033[0m"

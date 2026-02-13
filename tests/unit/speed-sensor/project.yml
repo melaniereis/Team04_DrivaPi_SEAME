@@ -43,17 +43,32 @@
   :test:
     - +:test/**
     - -:test/support
-  :source:
-    - src/**
+  :source: []
   :include:
-    - src/**
+    - test/support
+    - ../../../firmware/Core/Inc/**
   :support:
     - test/support
   :libraries: []
 
+:flags:
+  :test:
+    :compile:
+      :*:
+        - --coverage
+    :link:
+      :*:
+        - --coverage
+  :gcov:
+    :compile:
+      - --coverage
+    :link:
+      - --coverage
+
 :files:
   :test: []
-  :source: []
+  :source:
+    - ../../../firmware/Core/Src/speed_sensor.c
 
 :defines:
   :test:
@@ -89,6 +104,8 @@
     uint32: UINT32
     int8: INT8
     bool: UINT8
+    TIM_HandleTypeDef: UINT32
+    UART_HandleTypeDef: UINT32
   :memcmp_if_unknown: true
   :when_ptr: :compare_data
   :weak: ''
