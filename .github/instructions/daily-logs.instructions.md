@@ -9,8 +9,8 @@ When asked to create or update daily logs:
 
 5. **Date Detection & Assignment**:
    - The team uses a **6-week rotating schedule** where Afonso covers for one person each week
-   - **Week 1 Start Date**: February 24, 2026 (Monday)
-   - Determine current week: `((weeks_since_feb_24_2026) % 6) + 1`
+   - **Week 1 Start Date**: February 23, 2026 (Monday)
+   - Determine current week: `((weeks_since_feb_23_2026) % 6) + 1`
    - **Rotation Schedule**:
      - **Week 1**: Mon-Gaspar, Tue-Hugo, Wed-Melanie, Thu-Bernardo, Fri-Miguel (**Afonso off**)
      - **Week 2**: Mon-**Afonso**, Tue-Hugo, Wed-Melanie, Thu-Bernardo, Fri-Miguel (Gaspar off)
