@@ -1,31 +1,16 @@
-#include <string.h>
-#include <setjmp.h>
-#include "unity.h"
-
-/* --- 1. MOCK HEADERS --- */
+#include "main.h"
 #include "mock_stm32u5xx_hal.h"
 #include "mock_tx_api.h"
 
-/* --- 2. SUPPORT HEADERS --- */
-#include "main.h"
-
-/* --- 3. CLOCK MACRO FIX --- */
-/* The firmware calls this macro. We define it as nothing to satisfy the compiler. */
-#ifndef __HAL_RCC_TIM1_CLK_ENABLE
-#define __HAL_RCC_TIM1_CLK_ENABLE() (void)0
-#endif
-
-/* --- 4. GLOBAL VARIABLES --- */
-/* We define these here so the driver (and the test) can use them. */
+/* --- GLOBAL VARIABLES --- */
 TX_MUTEX g_speedDataMutex;
 TX_EVENT_FLAGS_GROUP g_eventFlags;
 TX_QUEUE g_queueSpeedCmd;
 TX_QUEUE g_queueSteerCmd;
 
-/* FIX: Use CamelCase to match the firmware exactly */
 float g_vehicleSpeed = 0.0f;
 
-/* --- 5. FAKE HARDWARE --- */
+/* --- FAKE HARDWARE --- */
 TIM_HandleTypeDef htim1;
 UART_HandleTypeDef huart1;
 TIM_TypeDef fake_tim1_registers;

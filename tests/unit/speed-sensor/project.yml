@@ -42,13 +42,12 @@
 :paths:
   :test:
     - +:test/**
-    - -:test/support
   :source: []
   :include:
-    - test/support
+    - ../common/support
     - ../../../firmware/Core/Inc/**
   :support:
-    - test/support
+    - ../common/support
   :libraries: []
 
 :flags:
