@@ -114,8 +114,8 @@ Use GitHub CLI (`gh`) to create the PR:
 gh pr create \
   --title "Your PR Title" \
   --body "$(cat pr_body.txt)" \
-  --assignee @username \
-  --reviewer @reviewer1,@reviewer2 \
+  --assignee username \
+  --reviewer reviewer1,reviewer2 \
   --base main
 ```
 
