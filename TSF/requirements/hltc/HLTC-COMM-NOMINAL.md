@@ -25,7 +25,9 @@ references:
     path: "docs/data-transfer/CAN/latency/can_latency_send_test.c"
     note: "Phase B — STM32 echoes frames back for bidirectional validation."
 
-score: 1.0
+score:
+  MelanieReis: 0.6
+#Because Phase B proves bidirectional comms + payload structure, but not packet-loss computation at 10Hz.
 
 active: true
 derived: false

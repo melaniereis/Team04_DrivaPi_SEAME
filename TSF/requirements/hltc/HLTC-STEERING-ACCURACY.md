@@ -26,7 +26,9 @@ references:
     path: "tests/integration/joystick_integration.mp4"
     note: "Phase A — evidence video/log capture of decoded inputs."
 
-score: 1.0
+score:
+  MelanieReis: 0.2
+#Because we only have Phase A (command decoding) evidence, not physical angle measurement.
 
 active: true
 derived: false

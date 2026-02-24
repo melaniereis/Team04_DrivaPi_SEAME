@@ -37,7 +37,9 @@ references:
     path: "tests/integration/motors_integration.mp4"
     note: "Phase C — evidence video of proportional speed + direction behavior."
 
-score: 1.0
+score:
+  MelanieReis: 0.7
+#Because Phase A + Phase C + motor video is strong end-to-end qualitative evidence, but we still lack a tachometer/encoder metric artifact for “proportional”..
 
 active: true
 derived: false

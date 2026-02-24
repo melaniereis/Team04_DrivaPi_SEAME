@@ -28,7 +28,9 @@ references:
     path: "tests/integration/speed_sensor_integration.mp4"
     note: "Phase D — evidence video showing correct speed reporting under wheel spin."
 
-score: 1.0
+score:
+  MelanieReis: 0.4
+#Because Phase D proves interrupt/pulse handling chain, but not ground-truth accuracy.
 
 active: true
 derived: false
