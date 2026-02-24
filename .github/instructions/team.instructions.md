@@ -4,11 +4,7 @@
 
 - **Afonso** (@AfonsoMota-132)
   - Role: Qt Development
-  - Daily log day: Rotates weekly (covers for person who is off)
-
-- **Bernardo** (@berestv)
-  - Role: Hardware Integration & Testing
-  - Daily log day: Thursday (off Week 5)
+  - Daily log day: Rotates weekly (covers for person who is off, off Week 1)
 
 - **Gaspar** (@Zahhask45)
   - Role: OS & Development Environment
@@ -21,6 +17,10 @@
 - **Melanie** (@melaniereis)
   - Role: GUI & Team Coordination
   - Daily log day: Wednesday (off Week 4)
+
+- **Bernardo** (@berestv)
+  - Role: Hardware Integration & Testing
+  - Daily log day: Thursday (off Week 5)
 
 - **Miguel** (@Biltes)
   - Role: GitHub Project & Agile/Scrum
@@ -42,6 +42,6 @@ The team follows a 6-week rotating schedule where Afonso covers for one person e
 **Cycle repeats after Week 6.**
 
 ### Determining Current Week
-- **Week 1 Start Date**: February 24, 2026 (Monday)
+- **Week 1 Start Date**: February 23, 2026 (Monday)
 - Calculate weeks since start date to determine current week in cycle
-- Formula: `((weeks_since_feb_24_2026) % 6) + 1`
+- Formula: `((weeks_since_feb_23_2026) % 6) + 1`
