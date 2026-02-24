@@ -12,7 +12,21 @@ parents:
 reviewers:
   - name: "Melanie Reis"
     email: "melanie.reis@seame.pt"
-reviewed: ''
+reviewed: '2026-02-24 - Approved by Melanie Reis <melanie.reis@seame.pt>'
+
+references:
+  # Phase A — PS3 controller input decoding on RPi (upstream command source)
+  - type: "file"
+    path: "tests/integration/integration_tests_plan.md"
+    note: "Phase A — PS3 Controller → Raspberry Pi input receive/decode/validate."
+  - type: "file"
+    path: "rust/controller/src/main.rs"
+    note: "Phase A — controller decoding implementation."
+  - type: "file"
+    path: "tests/integration/joystick_integration.mp4"
+    note: "Phase A — evidence video/log capture of decoded inputs."
+
+score: 1.0
 
 active: true
 derived: false
