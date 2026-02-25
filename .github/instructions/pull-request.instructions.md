@@ -10,6 +10,7 @@ When asked to create a pull request:
 ## 2. Identify Requesting User
 - Get the GitHub username of the requester from context
 - Map to team member:
+  - `AfonsoMota-132` → Afonso (Qt Development)
   - `berestv` → Bernardo (Hardware Integration & Testing)
   - `Zahhask45` → Gaspar (OS & Development Environment)
   - `hugofslopes` → Hugo (Hardware & Fabrication)
@@ -30,6 +31,7 @@ When asked to create a pull request:
   2. **User specifies 1 reviewer**: Use that reviewer + 1 random team member (excluding requester)
   3. **User specifies 0 reviewers**: Select 2 random team members (excluding requester)
 - Team members pool (excluding requester):
+  - `@AfonsoMota-132` (Afonso)
   - `@berestv` (Bernardo)
   - `@Zahhask45` (Gaspar)
   - `@hugofslopes` (Hugo)
@@ -38,12 +40,15 @@ When asked to create a pull request:
 
 ### Daily Log PRs (Special Case)
 - **Requires 1 reviewer only**
-- **Reviewer is the next person in the daily log rotation**:
-  - Monday log (Gaspar) → Reviewer: Hugo (`@hugofslopes`)
-  - Tuesday log (Hugo) → Reviewer: Melanie (`@melaniereis`)
-  - Wednesday log (Melanie) → Reviewer: Bernardo (`@berestv`)
-  - Thursday log (Bernardo) → Reviewer: Miguel (`@Biltes`)
-  - Friday log (Miguel) → Reviewer: Gaspar (`@Zahhask45`)
+- **Reviewer is the next person in the daily log rotation** (next weekday, accounting for rotation):
+  - Check current week rotation to determine who is on duty
+  - Week 1: Mon-Gaspar, Tue-Hugo, Wed-Melanie, Thu-Bernardo, Fri-Miguel (Afonso off)
+  - Week 2: Mon-Afonso, Tue-Hugo, Wed-Melanie, Thu-Bernardo, Fri-Miguel (Gaspar off)
+  - Week 3: Mon-Gaspar, Tue-Afonso, Wed-Melanie, Thu-Bernardo, Fri-Miguel (Hugo off)
+  - Week 4: Mon-Gaspar, Tue-Hugo, Wed-Afonso, Thu-Bernardo, Fri-Miguel (Melanie off)
+  - Week 5: Mon-Gaspar, Tue-Hugo, Wed-Melanie, Thu-Afonso, Fri-Miguel (Bernardo off)
+  - Week 6: Mon-Gaspar, Tue-Hugo, Wed-Melanie, Thu-Bernardo, Fri-Afonso (Miguel off)
+  - Reviewer is whoever is assigned to the next weekday in that week's rotation
 - Detect daily log PR by:
   - Branch name contains `daily` or `standup`
   - Changes only in `docs/standups/` directory
@@ -109,8 +114,8 @@ Use GitHub CLI (`gh`) to create the PR:
 gh pr create \
   --title "Your PR Title" \
   --body "$(cat pr_body.txt)" \
-  --assignee @username \
-  --reviewer @reviewer1,@reviewer2 \
+  --assignee username \
+  --reviewer reviewer1,reviewer2 \
   --base main
 ```
 
