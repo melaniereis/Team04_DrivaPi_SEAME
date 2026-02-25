@@ -5,17 +5,16 @@
 
 ## Header / Metadata
 - **Date:** [YYYY-MM-DD]
-- **Time Started:** [HH:MM UTC]
+- **Time Started:** [HH:MM]
 - **Tester Name:** [Full Name]
-- **Test Phase:** B
-- **Test Cycle:** [Sprint X, Iteration Y]
-- **Template Version:** 1.0
+- **Test Phase:** C
+- **Test Cycle:** [Sprint X]
 
 ---
 
 ## Test Information
-- **Phase Name:** CAN Bidirectional Communication & Latency Validation
-- **Test Objective:** Validate CAN communication between Raspberry Pi and STM32, measure round-trip latency, verify message IDs, and confirm payload integrity
+- **Phase Name:** CAN Bidirectional Communicatio
+- **Test Objective:** Validate CAN communication between Raspberry Pi and STM32 using the measure round-trip latency code
 - **Related Requirements:**
   - Integration Test Plan - Phase B
   - `/docs/tests/integration-test-plan.md`
@@ -26,9 +25,9 @@
 ## Environment Setup
 
 ### Hardware Required
-- [ ] Raspberry Pi 4B with CAN controller
-- [ ] STM32U585 microcontroller (on vehicle)
-- [ ] CAN transceiver on both boards
+- [ ] Raspberry Pi 5 with CAN controller/transceiver hat
+- [ ] STM32U585 microcontroller
+- [ ] CAN transceiver on stm32 board
 - [ ] CAN termination resistors (120Ω) at both ends
 - [ ] Logic analyzer or oscilloscope (for signal capture)
 - [ ] USB cables for power and logging
@@ -36,14 +35,11 @@
 ### Software Required
 - [ ] CAN driver configured on Raspberry Pi (version: __________)
 - [ ] STM32 firmware loaded (version: __________)
-- [ ] CANallyzer or equivalent monitoring tool
-- [ ] CAN diagnostic tool (candump, cansend, etc.)
-- [ ] Latency measurement tool
-- [ ] Python CAN library (if applicable)
+- [ ] Raspberry Pi c++ code 
 
 ### Configuration Settings
-- **CAN Bus:** [CAN0, CAN1]
-- **Baud Rate:** [500kbps, 1Mbps]
+- **CAN Bus:** [CAN1]
+- **Baud Rate:** [1Mbps]
 - **Py Rx ID (STM32 → Rpi):** [0x_______]
 - **Tx ID (Rpi → STM32):** [0x_______]
 - **Latency Sampling Rate:** [Hz]

@@ -5,17 +5,16 @@
 
 ## Header / Metadata
 - **Date:** [YYYY-MM-DD]
-- **Time Started:** [HH:MM UTC]
+- **Time Started:** [HH:MM]
 - **Tester Name:** [Full Name]
 - **Test Phase:** C
-- **Test Cycle:** [Sprint X, Iteration Y]
-- **Template Version:** 1.0
+- **Test Cycle:** [Sprint X]
 
 ---
 
 ## Test Information
 - **Phase Name:** I2C Motor Controller Communication & Addressing Verification
-- **Test Objective:** Validate I2C commands sent from STM32 to motor controllers, verify correct addressing (0x60/0x40), and confirm ACK responses from motor controllers
+- **Test Objective:** Validate I2C commands sent from STM32 to the PiRacer expansion board's motor controllers via I2C interface, verify correct addressing (0x60/0x40), and confirm ACK responses
 - **Related Requirements:**
   - Integration Test Plan - Phase C
   - `/docs/tests/integration-test-plan.md`
@@ -27,22 +26,20 @@
 
 ### Hardware Required
 - [ ] STM32U585 microcontroller with I2C interface
-- [ ] Motor controller #1 (Address: 0x60)
-- [ ] Motor controller #2 (Address: 0x40)
-- [ ] Logic analyzer (8+ channels: SDA, SCL, GPIO for sync)
-- [ ] Pull-up resistors for SDA/SCL (typical 4.7kΩ to 10kΩ)
-- [ ] USB cables for STM32 and logic analyzer
-
+- [ ] PiRacer expansion board (single board with integrated dual motor controllers and I2C interface)
+  - Motor Controller #1 (Address: 0x60)
+  - Motor Controller #2 (Address: 0x40)
+- [ ] USB cables for STM32
+- [ ] Power cable for expansion board
 ### Software Required
 - [ ] STM32 firmware with I2C driver (version: __________)
 - [ ] Motor controller firmware (version: __________)
-- [ ] Logic analyzer software (version: __________)
-- [ ] I2C protocol decoding tool
 - [ ] Data capture and analysis tool
 
 ### Configuration Settings
 - **I2C Bus:** [I2C3]
-- **Clock Speed:** [180]
+- **Clock Speed:** [180] kHz
+- **Expansion Board:** PiRacer Kit
 - **Motor Controller 1 Address:** 0x60
 - **Motor Controller 2 Address:** 0x40
 - **Expected Pull-up Resistance:** _______ kΩ
@@ -50,7 +47,6 @@
 
 ### Prerequisites Checklist
 - [ ] Connection diagram verified and matched
-- [ ] Pull-up resistors installed and measured
 - [ ] STM32 I2C peripheral configured
 - [ ] Motor controllers powered and responsive
 - [ ] Logic analyzer connected to SDA, SCL, (and optional GPIO)

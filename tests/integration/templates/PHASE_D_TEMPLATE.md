@@ -5,11 +5,10 @@
 
 ## Header / Metadata
 - **Date:** [YYYY-MM-DD]
-- **Time Started:** [HH:MM UTC]
+- **Time Started:** [HH:MM]
 - **Tester Name:** [Full Name]
-- **Test Phase:** D
-- **Test Cycle:** [Sprint X, Iteration Y]
-- **Template Version:** 1.0
+- **Test Phase:** C
+- **Test Cycle:** [Sprint X]
 
 ---
 

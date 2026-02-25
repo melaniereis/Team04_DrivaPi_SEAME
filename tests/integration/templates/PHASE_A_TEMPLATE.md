@@ -5,17 +5,16 @@
 
 ## Header / Metadata
 - **Date:** [YYYY-MM-DD]
-- **Time Started:** [HH:MM UTC]
+- **Time Started:** [HH:MM]
 - **Tester Name:** [Full Name]
-- **Test Phase:** A
-- **Test Cycle:** [Sprint X, Iteration Y]
-- **Template Version:** 1.0
+- **Test Phase:** C
+- **Test Cycle:** [Sprint X]
 
 ---
 
 ## Test Information
 - **Phase Name:** PS3 Controller Input Validation & Command Decoding
-- **Test Objective:** Validate PS3 controller input is correctly decoded and CAN payload is generated with correct DBC mapping
+- **Test Objective:** Validate PS3 controller input is correctly decoded
 - **Related Requirements:** 
   - Integration Test Plan - Phase A
   - `/docs/tests/integration-test-plan.md`
@@ -27,42 +26,29 @@
 
 ### Hardware Required
 - [ ] PS3 Controller (fully charged)
-- [ ] Raspberry Pi 4B connected to network
-- [ ] USB cable for PS3 controller connection
-- [ ] Network connectivity (SSH or direct connection)
-- [ ] Monitoring station for CAN traffic capture
+- [ ] Raspberry Pi 5
+- [ ] USB dongle for PS3 controller connection
+- [ ] Network connectivity (SSH or direct connection)S
 
 ### Software Required
-- [ ] Controller application (version: __________)
-- [ ] CANallyzer or equivalent CAN bus monitoring tool
+- [ ] Controller application
 - [ ] SSH client (if testing remotely)
-- [ ] Logging enabled in controller app
 
 ### Configuration Settings
 - **Controller App Port:** __________ 
-- **CAN Bus:** [CAN0/CAN1]
-- **Baud Rate:** [1Mbps]
-- **DBC File:** [Filename]
-- **Log Level:** DEBUG
 
 ### Prerequisites Checklist
 - [ ] PS3 controller paired with Raspberry Pi
-- [ ] Network connectivity verified
-- [ ] CAN bus monitoring tool connected and running
 - [ ] Controller application installed and ready
-- [ ] Log directory exists and is writable
-- [ ] Previous test logs backed up
 
 ---
 
 ## Pre-Test Checklist
 - [ ] PS3 controller fully charged (>80%)
 - [ ] Raspberry Pi powered on and responsive
-- [ ] CAN monitoring tool running and capturing
 - [ ] Controller application deployed and ready to start
 - [ ] Test environment isolated from other network traffic
 - [ ] SSH connection tested (if remote)
-- [ ] Logging directory verified as empty
 
 ---
 
@@ -70,7 +56,7 @@
 
 ### Step 1: Start Controller Application
 **Procedure:**
-1. Connect to Raspberry Pi via SSH
+1. Connect to Raspberry Pi directly or via SSH
 2. Navigate to controller application directory
 3. Start the controller application with debug logging enabled
 4. Wait for initialization complete message (typically 2-3 seconds)
@@ -79,7 +65,6 @@
 ```
 Controller Application Started
 Listening for PS3 controller input on [port]
-CAN interface initialized
 Ready for input
 ```
 
@@ -94,7 +79,7 @@ Ready for input
 
 ### Step 2: Connect PS3 Controller
 **Procedure:**
-1. Hold PS button on PS3 controller for 3-5 seconds
+1. Press start button on PS3 controller
 2. Observe connection confirmation on Raspberry Pi
 3. Verify controller connection status in application logs
 
