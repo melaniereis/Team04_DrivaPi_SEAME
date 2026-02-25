@@ -30,8 +30,10 @@ void UltrasonicEntry(ULONG initial_input)
 		Soft_I2C_Start();
 		if (Soft_I2C_WriteByte(SRF08_ADDR) == 1)
 		{
-			Soft_I2C_WriteByte(0x02); Soft_I2C_Stop();
-			Soft_I2C_Start(); Soft_I2C_WriteByte(SRF08_ADDR|1);
+			Soft_I2C_WriteByte(0x02);
+			Soft_I2C_Stop();
+			Soft_I2C_Start();
+			Soft_I2C_WriteByte(SRF08_ADDR|1);
 			verify_range = Soft_I2C_ReadByte(0);
 		}
 		Soft_I2C_Stop();
@@ -50,6 +52,8 @@ void UltrasonicEntry(ULONG initial_input)
 	int16_t dist_old = 0;
 	float velocity_cm_s = 0;
 	float ttc_ms = 9999;
+	float current_speed = 0;
+	bool range_active = false;
 
 	while(1)
 	{
@@ -61,7 +65,9 @@ void UltrasonicEntry(ULONG initial_input)
 			tx_thread_sleep(1);
 			continue;
 		}
-		Soft_I2C_WriteByte(CMD_REG); Soft_I2C_WriteByte(CMD_CENTIMETERS); Soft_I2C_Stop();
+		Soft_I2C_WriteByte(CMD_REG);
+		Soft_I2C_WriteByte(CMD_CENTIMETERS);
+		Soft_I2C_Stop();
 
 		// 2. WAIT
 		tx_thread_sleep(6);
@@ -73,7 +79,8 @@ void UltrasonicEntry(ULONG initial_input)
 			Soft_I2C_Stop();
 			continue;
 		}
-		Soft_I2C_WriteByte(RANGE_REG); Soft_I2C_Stop();
+		Soft_I2C_WriteByte(RANGE_REG);
+		Soft_I2C_Stop();
 
 		Soft_I2C_Start();
 		Soft_I2C_WriteByte(SRF08_ADDR | 1);
@@ -82,6 +89,15 @@ void UltrasonicEntry(ULONG initial_input)
 		Soft_I2C_Stop();
 
 		range_cm = (high_byte << 8) | low_byte;
+
+		// Get current speed locally so we don't need to use the mutex every time we try to access it
+		tx_mutex_get(&g_speedDataMutex, TX_WAIT_FOREVER);
+		current_speed = g_vehicleSpeed;
+		tx_mutex_put(&g_speedDataMutex);
+		if (range_cm <= BRAKE_THRESHOLD_CM)
+			range_active = true;
+		else
+			range_active = false;
 
 		// 4. PHYSICS & SAFETY
 		if (range_cm > 0 && range_cm < 80)
@@ -104,34 +120,50 @@ void UltrasonicEntry(ULONG initial_input)
 			snprintf(msg, sizeof(msg), "D:%d cm | TTC:%.0f ms\r\n", range_cm, ttc_ms);
 			HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), 10);
 
-			// --- THE KILL SWITCH (Direct Action) ---
-			if (ttc_ms < TTC_THRESHOLD_MS || range_cm < BRAKE_THRESHOLD_CM)
+			if (!range_active && (ttc_ms < TTC_THRESHOLD_MS || range_cm < BRAKE_THRESHOLD_CM))
 			{
 				tx_mutex_get(&g_emergencyMutex, TX_WAIT_FOREVER);
 				g_emergencyBrake = true;
 				tx_mutex_put(&g_emergencyMutex);
 				HAL_UART_Transmit(&huart1, (uint8_t*)"!!! KILLING MOTORS !!!\r\n", 24, 100);
 
-				if (ttc_ms < TTC_THRESHOLD_MS)
+				if (ttc_ms < TTC_THRESHOLD_MS && ttc_ms >= 200)
 					MotorSetPWM(0, 0);
-
-
-				if (range_cm > BRAKE_THRESHOLD_CM)
+				else if (ttc_ms < 200 && range_cm > BRAKE_THRESHOLD_CM && current_speed >= 0.2)
+				{
+					for (int i = 1; i <= (50 * current_speed); i++)
+					{
+						if (i % 2 == 0)
+						{
+							MotorSetPWM(-4096, -4096);
+							HAL_UART_Transmit(&huart1, (uint8_t*)"!!!ABS!!!\r\n", 24, 100);
+						}
+						else if (i % 5 == 0)
+						{
+							MotorSetPWM(0, 0);
+						}
+					}
+					MotorSetPWM(0, 0);
+				}
+				else if (range_cm < BRAKE_THRESHOLD_CM)
 				{
 					MotorSetPWM(0, 0);
-					tx_thread_sleep(10);
+					range_active = true;
 				}
+
 
 				// D. Final Stop
 				//MotorStop();
 
-				tx_thread_sleep(15);
+				//tx_thread_sleep(15);
 			}
-			else
+			else if (ttc_ms > TTC_THRESHOLD_MS && range_cm > BRAKE_THRESHOLD_CM)
 			{
 				tx_mutex_get(&g_emergencyMutex, TX_WAIT_FOREVER);
 				g_emergencyBrake = false;
 				tx_mutex_put(&g_emergencyMutex);
+				range_active = false;
+				HAL_UART_Transmit(&huart1, (uint8_t*)"brake free\r\n", 24, 100);
 			}
 			dist_old = range_cm;
 		}

@@ -93,6 +93,7 @@ VOID DcMotor(ULONG initial_input)
 			if(g_emergencyBrake && left_count > 0 )
 			{
 				tx_mutex_put(&g_emergencyMutex);
+				tx_thread_sleep(5);
 				continue ;
 			}
 			else

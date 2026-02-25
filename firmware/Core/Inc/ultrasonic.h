@@ -17,9 +17,9 @@
 #define CMD_CENTIMETERS     0x51
 
 // Safety Thresholds
-#define BRAKE_THRESHOLD_CM  15   // Hard Stop
-#define TTC_THRESHOLD_MS    200 // Predictive Stop
-#define DT_SECONDS          0.06f
+#define BRAKE_THRESHOLD_CM  17   // Hard Stop
+#define TTC_THRESHOLD_MS    450 // Predictive Stop
+#define DT_SECONDS          0.057f
 
 
 #endif /* INC_ULTRASONIC_H_ */
