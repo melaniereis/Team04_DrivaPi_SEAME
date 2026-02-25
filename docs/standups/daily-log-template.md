@@ -2,7 +2,7 @@
 
 **Date:** [Weekday, Month DD, YYYY]
 
-**Team:** Bernardo, Gaspar, Hugo, Melanie, Miguel
+**Team:** Bernardo, Gaspar, Hugo, Melanie, Miguel, Afonso
 
 ---
 
@@ -31,6 +31,10 @@
 - 🔄 [In progress]
 
 ### Miguel - GitHub Project & Agile/Scrum
+- ✅ [Done]
+- 🔄 [In progress]
+
+### Afonso - GitHub Project & Agile/Scrum
 - ✅ [Done]
 - 🔄 [In progress]
 
