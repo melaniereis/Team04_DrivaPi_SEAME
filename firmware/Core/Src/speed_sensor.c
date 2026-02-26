@@ -26,7 +26,7 @@ RNDGear_t DetermineRNDGear(float speed, int16_t pwm_value)
 {
 	if (speed > RND_DEADZONE_POSITIVE)
 	{
-		if (pwm_value < 0)
+		if (pwm_value > 0)
 		{
 			return GEAR_DRIVE;
 		}
