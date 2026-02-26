@@ -1,7 +1,0 @@
-../Core/Src/pca9685.c:22:26:PCA9685_WriteReg	40	static
-../Core/Src/pca9685.c:41:26:PCA9685_ReadReg	48	static
-../Core/Src/pca9685.c:60:19:PCA9685_InitDevice	168	static
-../Core/Src/pca9685.c:126:19:PCA9685_SetPWM	72	static
-../Core/Src/pca9685.c:171:19:PCA9685_SetFrequency	48	static
-../Core/Src/pca9685.c:222:19:PCA9685_Sleep	32	static
-../Core/Src/pca9685.c:230:6:PCA9685_InitAllDevices	72	static

@@ -1,8 +1,0 @@
-../Core/Src/dc_motor.c:16:6:MotorStop	16	static
-../Core/Src/dc_motor.c:32:6:MotorForward	32	static
-../Core/Src/dc_motor.c:51:6:MotorBackward	32	static
-../Core/Src/dc_motor.c:70:6:MotorLeft	32	static
-../Core/Src/dc_motor.c:89:6:MotorRight	32	static
-../Core/Src/dc_motor.c:108:6:SetMotor	48	static
-../Core/Src/dc_motor.c:149:6:MotorSetPWM	40	static
-../Core/Src/dc_motor.c:204:6:DcMotor	56	static
