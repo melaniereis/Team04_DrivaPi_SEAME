@@ -33,7 +33,7 @@
 
 ### Software Required
 - [ ] CAN driver configured on Raspberry Pi
-- [ ] STM32 firmware loaded with CAN interrupt echo functionality
+- [ ] STM32 firmware loaded with CAN interrupt functionality
 - [ ] Raspberry Pi C++ bidirectional communication test code compiled and ready 
 
 ### Configuration Settings
@@ -287,21 +287,15 @@ Majority of iterations complete successfully
   - Location: _______________
   - Samples: 1000
   - Format: Plain text
-  
-- [ ] CAN trace (if captured): `[filename]`
-  - Location: _______________
-  - Duration: _______ sec
-  - Message count: _______
 
 ### Screenshots
 - [ ] Test execution terminal output: `[filename]`
 
-### Logs
-- [ ] Raspberry Pi CAN log: `[filename]`
+### Video Record
+- [ ] Test execution video: `[filename]`
+  - Duration: _______ seconds
   - Location: _______________
-- [ ] STM32 debug log: `[filename]`
-  - Location: _______________
-
+  - Notes: _______________
 ---
 
 ## Notes / Observations
@@ -340,7 +334,6 @@ Majority of iterations complete successfully
 ### Archive Reference
 **Location in Repository:** `/tests/integration/executions/phase_b/`
 **Committed:** [ ] Yes [ ] No
-**Commit Hash:** _______________
 
 ---
 
