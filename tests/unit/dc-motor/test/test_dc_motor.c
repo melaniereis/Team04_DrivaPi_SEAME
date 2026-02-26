@@ -19,7 +19,6 @@ TX_QUEUE g_queueSpeedCmd;
 TX_QUEUE g_queueSteerCmd;
 int16_t g_current_pwm;
 
-/* --- FAKE HARDWARE --- */
 I2C_HandleTypeDef hi2c3;
 UART_HandleTypeDef huart1;
 
@@ -54,11 +53,7 @@ void test_MotorSetPWM_ShouldSetBothMotors(void)
     PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_R_A, 0, 0, HAL_OK);
     PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_R_B, 0, max, HAL_OK);
     PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_R_PWM, 0, right_pwm, HAL_OK);
-    
-    // Act
     MotorSetPWM(left_counts, right_counts);
-    
-    // Assert
 }
 
 void test_MotorSetPWM_WithNegativeCounts(void)
@@ -67,8 +62,8 @@ void test_MotorSetPWM_WithNegativeCounts(void)
     int32_t left_counts = -2048;
     int32_t right_counts = -2048;
     const uint16_t max = 4095;
-    uint16_t left_pwm = ClampU16(-left_counts);   // 2048
-    uint16_t right_pwm = ClampU16(-right_counts); // 2048
+    uint16_t left_pwm = ClampU16(-left_counts);
+    uint16_t right_pwm = ClampU16(-right_counts);
     
     // Left motor backward: A=0, B=max
     PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_L_A, 0, 0, HAL_OK);
@@ -79,11 +74,8 @@ void test_MotorSetPWM_WithNegativeCounts(void)
     PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_R_A, 0, max, HAL_OK);
     PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_R_B, 0, 0, HAL_OK);
     PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_R_PWM, 0, right_pwm, HAL_OK);
-    
-    // Act
+
     MotorSetPWM(left_counts, right_counts);
-    
-    // Assert
 }
 
 void test_MotorSetPWM_WithMixedDirections(void)
@@ -92,8 +84,8 @@ void test_MotorSetPWM_WithMixedDirections(void)
     int32_t left_counts = 3000;
     int32_t right_counts = -3000;
     const uint16_t max = 4095;
-    uint16_t left_pwm = ClampU16(left_counts);      // 3000
-    uint16_t right_pwm = ClampU16(-right_counts);   // 3000
+    uint16_t left_pwm = ClampU16(left_counts);
+    uint16_t right_pwm = ClampU16(-right_counts);
     
     // Left motor forward: A=max, B=0
     PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_L_A, 0, max, HAL_OK);
@@ -104,11 +96,7 @@ void test_MotorSetPWM_WithMixedDirections(void)
     PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_R_A, 0, max, HAL_OK);
     PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_R_B, 0, 0, HAL_OK);
     PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_R_PWM, 0, right_pwm, HAL_OK);
-    
-    // Act
     MotorSetPWM(left_counts, right_counts);
-    
-    // Assert
 }
 
 void test_MotorSetPWM_WithClampingPositive(void)
@@ -117,8 +105,8 @@ void test_MotorSetPWM_WithClampingPositive(void)
     int32_t left_counts = 5000;
     int32_t right_counts = 10000;
     const uint16_t max = 4095;
-    uint16_t left_pwm = ClampU16(left_counts);    // 4095 (clamped)
-    uint16_t right_pwm = ClampU16(right_counts);  // 4095 (clamped)
+    uint16_t left_pwm = ClampU16(left_counts);
+    uint16_t right_pwm = ClampU16(right_counts);
     
     // Left motor forward at clamped max
     PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_L_A, 0, max, HAL_OK);
@@ -129,11 +117,7 @@ void test_MotorSetPWM_WithClampingPositive(void)
     PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_R_A, 0, 0, HAL_OK);
     PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_R_B, 0, max, HAL_OK);
     PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_R_PWM, 0, right_pwm, HAL_OK);
-    
-    // Act
     MotorSetPWM(left_counts, right_counts);
-    
-    // Assert
 }
 
 void test_MotorSetPWM_WithClampingNegative(void)
@@ -142,8 +126,8 @@ void test_MotorSetPWM_WithClampingNegative(void)
     int32_t left_counts = -5000;
     int32_t right_counts = -10000;
     const uint16_t max = 4095;
-    uint16_t left_pwm = ClampU16(-left_counts);    // 4095 (clamped from 5000)
-    uint16_t right_pwm = ClampU16(-right_counts);  // 4095 (clamped from 10000)
+    uint16_t left_pwm = ClampU16(-left_counts);
+    uint16_t right_pwm = ClampU16(-right_counts);
     
     // Left motor backward at clamped max
     PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_L_A, 0, 0, HAL_OK);
@@ -154,15 +138,10 @@ void test_MotorSetPWM_WithClampingNegative(void)
     PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_R_A, 0, max, HAL_OK);
     PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_R_B, 0, 0, HAL_OK);
     PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_R_PWM, 0, right_pwm, HAL_OK);
-    
-    // Act
     MotorSetPWM(left_counts, right_counts);
-    
-    // Assert
 }
 void test_MotorSetPWM_WithZeroCounts(void)
 {
-    // Arrange - zero counts apply active braking to keep vehicle stopped
     int32_t left_counts = 0;
     int32_t right_counts = 0;
     const uint16_t max = 4095;
@@ -176,11 +155,7 @@ void test_MotorSetPWM_WithZeroCounts(void)
     PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_R_A, 0, max, HAL_OK);
     PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_R_B, 0, max, HAL_OK);
     PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_R_PWM, 0, max, HAL_OK);
-    
-    // Act
     MotorSetPWM(left_counts, right_counts);
-    
-    // Assert
 }
 
 void test_MotorSetPWM_WithMaxCounts(void)
@@ -201,11 +176,7 @@ void test_MotorSetPWM_WithMaxCounts(void)
     PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_R_A, 0, 0, HAL_OK);
     PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_R_B, 0, max, HAL_OK);
     PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_R_PWM, 0, right_pwm, HAL_OK);
-    
-    // Act
     MotorSetPWM(left_counts, right_counts);
-    
-    // Assert
 }
 
 static jmp_buf s_dcMotorLoopExit;

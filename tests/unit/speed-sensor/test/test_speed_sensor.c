@@ -15,10 +15,10 @@ TIM_HandleTypeDef htim1;
 UART_HandleTypeDef huart1;
 TIM_TypeDef fake_tim1_registers;
 
-/* --- 6. INCLUDE SOURCE FILE DIRECTLY --- */
+/* --- INCLUDE SOURCE FILE DIRECTLY --- */
 #include "../../../firmware/Core/Src/speed_sensor.c"
 
-/* --- 7. TEST INFRASTRUCTURE --- */
+/* --- TEST INFRASTRUCTURE --- */
 static jmp_buf test_break_jump;
 static int s_canSendCallCount;
 static t_can_message s_lastCanSendMessage;

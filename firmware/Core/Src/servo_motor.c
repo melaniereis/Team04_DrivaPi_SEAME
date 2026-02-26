@@ -32,7 +32,6 @@ int SetServoAngle(uint8_t channel, uint16_t angle_deg)
 	{
 		return 1;
 	}
-
 	return 0;
 }
 
