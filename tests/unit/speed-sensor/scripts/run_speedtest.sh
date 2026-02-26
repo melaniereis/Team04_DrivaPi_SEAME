@@ -33,10 +33,7 @@ main() {
 
   generate_lcov_coverage "${BUILD_DIR}" "${COVERAGE_DIR}"
 
-  cp -f "${COVERAGE_DIR}/coverage_filtered.info" "${PROJECT_ROOT}/coverage_filtered.info"
-  cp -f "${COVERAGE_DIR}/coverage.xml"          "${PROJECT_ROOT}/speed-sensor.xml"
-
-  ABS_ROOT="$(cd "${PROJECT_ROOT}/../.." && pwd)"
+  ABS_ROOT="$(cd "${PROJECT_ROOT}/../../.." && pwd)"
   PERSIST_DIR="${ABS_ROOT}/build/coverage/speed-sensor"
   mkdir -p "${PERSIST_DIR}"
   cp -f "${COVERAGE_DIR}/coverage_filtered.info" "${PERSIST_DIR}/coverage_filtered.info"

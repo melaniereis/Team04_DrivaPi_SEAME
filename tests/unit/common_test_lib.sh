@@ -171,7 +171,7 @@ generate_lcov_coverage() {
         lcov --capture \
             --directory "$build_dir" \
             --output-file "$coverage_dir/coverage.info" \
-            --rc branch_coverage=1 \
+            --rc lcov_branch_coverage=1 \
             --ignore-errors source,gcov 2>&1 | grep -v "WARNING" || true
 
     # Filter
@@ -179,7 +179,7 @@ generate_lcov_coverage() {
             '/usr/*' '*/test/*' '*/mock_*' '*/unity/*' '*/cmock/*' '*vendor*' \
             '*c_exception*' '*build/test/*' '*test/runners*' '*test/mocks*' '/var/lib/gems/*' '*/common/*' \
             --output-file "$coverage_dir/coverage_filtered.info" \
-            --rc branch_coverage=1 \
+            --rc lcov_branch_coverage=1 \
             --ignore-errors unused >/dev/null 2>&1 || true
 
     # Generate HTML
@@ -231,14 +231,14 @@ aggregate_coverage() {
 
         lcov "${lcov_args[@]}" \
             -o "$output_dir/coverage_combined.info" \
-            --rc branch_coverage=1 || return 1
+            --rc lcov_branch_coverage=1 || return 1
 
     # Filter
         lcov -r "$output_dir/coverage_combined.info" \
             '/usr/*' '*vendor*' '*cmock*' '*unity*' '*c_exception*' \
             '*build/test/*' '*test/runners*' '*test/mocks*' '/var/lib/gems/*' '*/common/*' \
             -o "$output_dir/coverage_filtered.info" \
-            --rc branch_coverage=1 \
+            --rc lcov_branch_coverage=1 \
             --ignore-errors unused >/dev/null 2>&1 || true
 
     # Generate HTML
@@ -256,7 +256,7 @@ aggregate_coverage() {
 
     echo ""
     log_info "Coverage Summary:"
-    lcov --summary "$output_dir/coverage_filtered.info" --rc branch_coverage=1 || true
+    lcov --summary "$output_dir/coverage_filtered.info" --rc lcov_branch_coverage=1 || true
 }
 
 # ============================================================================
@@ -280,7 +280,7 @@ generate_coverage_xml() {
     local branch_rate=0.0
 
     # Get coverage metrics using lcov with branch coverage enabled
-    local lcov_output=$(lcov --summary "$coverage_info" --rc branch_coverage=1 2>/dev/null || true)
+    local lcov_output=$(lcov --summary "$coverage_info" --rc lcov_branch_coverage=1 2>/dev/null || true)
 
     # Extract line coverage percentage (e.g., "lines.......: 100.0% (210 of 210 lines)")
     if [[ $lcov_output =~ lines[^:]*:[[:space:]]*([0-9.]+)% ]]; then

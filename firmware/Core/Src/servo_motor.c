@@ -28,8 +28,12 @@ int SetServoAngle(uint8_t channel, uint16_t angle_deg)
 
 	uint16_t range = SERVO_MAX_PULSE - SERVO_MIN_PULSE;
 	uint16_t pulse = SERVO_MIN_PULSE + (range * angle_deg) / 180u;
-	PCA9685_SetPWM(PCA9685_ADDR_SERVO, channel, 0, pulse);
-	return 1;
+	if (PCA9685_SetPWM(PCA9685_ADDR_SERVO, channel, 0, pulse) == HAL_OK)
+	{
+		return 1;
+	}
+
+	return 0;
 }
 
 

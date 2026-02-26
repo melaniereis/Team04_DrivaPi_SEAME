@@ -17,6 +17,7 @@ TX_MUTEX g_speedDataMutex;
 TX_EVENT_FLAGS_GROUP g_eventFlags;
 TX_QUEUE g_queueSpeedCmd;
 TX_QUEUE g_queueSteerCmd;
+int16_t g_current_pwm;
 
 /* --- FAKE HARDWARE --- */
 I2C_HandleTypeDef hi2c3;
@@ -161,19 +162,20 @@ void test_MotorSetPWM_WithClampingNegative(void)
 }
 void test_MotorSetPWM_WithZeroCounts(void)
 {
-    // Arrange - zero counts stop both motors (all channels to 0)
+    // Arrange - zero counts apply active braking to keep vehicle stopped
     int32_t left_counts = 0;
     int32_t right_counts = 0;
+    const uint16_t max = 4095;
     
-    // Left motor stops (all 0)
-    PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_L_A, 0, 0, HAL_OK);
-    PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_L_B, 0, 0, HAL_OK);
-    PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_L_PWM, 0, 0, HAL_OK);
+    // Left motor active brake (all max)
+    PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_L_A, 0, max, HAL_OK);
+    PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_L_B, 0, max, HAL_OK);
+    PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_L_PWM, 0, max, HAL_OK);
     
-    // Right motor stops (all 0)
-    PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_R_A, 0, 0, HAL_OK);
-    PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_R_B, 0, 0, HAL_OK);
-    PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_R_PWM, 0, 0, HAL_OK);
+    // Right motor active brake (all max)
+    PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_R_A, 0, max, HAL_OK);
+    PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_R_B, 0, max, HAL_OK);
+    PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_MOTOR, MOTOR_R_PWM, 0, max, HAL_OK);
     
     // Act
     MotorSetPWM(left_counts, right_counts);

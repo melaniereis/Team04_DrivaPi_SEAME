@@ -20,10 +20,22 @@ TIM_TypeDef fake_tim1_registers;
 
 /* --- 7. TEST INFRASTRUCTURE --- */
 static jmp_buf test_break_jump;
+static int s_canSendCallCount;
+static t_can_message s_lastCanSendMessage;
 
 /* Stub for Error_Handler */
 void Error_Handler(void) {
     // No-op for tests
+}
+
+int CanSend(t_can_message* msg)
+{
+    s_canSendCallCount++;
+    if (msg != NULL)
+    {
+        memcpy(&s_lastCanSendMessage, msg, sizeof(t_can_message));
+    }
+    return 0;
 }
 
 // --------------------------------------------------------
@@ -43,6 +55,8 @@ void setUp(void)
     // Note: Since 'ReadSpeedSensor' has statics, unit testing it repeatedly
     // requires either resetting the system or adding a 'reset_sensor()' helper function
     // to your source code. For these tests, we assume a fresh start or we manage logic carefully.
+    s_canSendCallCount = 0;
+    memset(&s_lastCanSendMessage, 0, sizeof(s_lastCanSendMessage));
 }
 
 /**
@@ -58,6 +72,22 @@ UINT Stub_BreakLoop_OnSecondCall(TX_EVENT_FLAGS_GROUP *group_ptr, ULONG flags_to
     }
 
     // Otherwise (Index 0), just pretend we set the flags successfully
+    return TX_SUCCESS;
+}
+
+UINT Stub_BreakLoop_OnSecondCallAndMoveCounter(TX_EVENT_FLAGS_GROUP *group_ptr, ULONG flags_to_set, UINT set_option, int cmock_num_calls)
+{
+    (void)group_ptr;
+    (void)flags_to_set;
+    (void)set_option;
+
+    if (cmock_num_calls == 0)
+    {
+        fake_tim1_registers.CNT = 1030;
+        return TX_SUCCESS;
+    }
+
+    longjmp(test_break_jump, 1);
     return TX_SUCCESS;
 }
 
@@ -355,6 +385,24 @@ void test_Speed_Protection_Against_Tiny_TimeDelta(void)
     TEST_ASSERT_EQUAL_FLOAT(0.0f, speed);
 }
 
+void test_DetermineRNDGear_ShouldReturnDrive_WhenSpeedAboveDeadzoneAndPositivePwm(void)
+{
+    RNDGear_t gear = DetermineRNDGear(1.0f, 100);
+    TEST_ASSERT_EQUAL_INT(GEAR_DRIVE, gear);
+}
+
+void test_DetermineRNDGear_ShouldReturnReverse_WhenSpeedAboveDeadzoneAndNegativePwm(void)
+{
+    RNDGear_t gear = DetermineRNDGear(1.0f, -100);
+    TEST_ASSERT_EQUAL_INT(GEAR_REVERSE, gear);
+}
+
+void test_DetermineRNDGear_ShouldReturnNeutral_WhenSpeedAboveDeadzoneAndZeroPwm(void)
+{
+    RNDGear_t gear = DetermineRNDGear(1.0f, 0);
+    TEST_ASSERT_EQUAL_INT(GEAR_NEUTRAL, gear);
+}
+
 /**
  * Test: Speed Sensor Thread Entry
  * Context:
@@ -397,5 +445,37 @@ void test_SpeedSensor_Thread_Should_LoopTwice(void)
         SpeedSensor(0);
         TEST_FAIL_MESSAGE("Loop did not break!");
     }
+}
+
+void test_SpeedSensor_ShouldSendCanGearMessage_WhenGearChanges(void)
+{
+    fake_tim1_registers.CNT = 1000;
+    g_current_pwm = 500;
+
+    HAL_TIM_Base_Stop_ExpectAndReturn(&htim1, HAL_OK);
+    HAL_TIM_Base_Start_ExpectAndReturn(&htim1, HAL_OK);
+
+    tx_thread_sleep_ExpectAndReturn(100, TX_SUCCESS);
+    tx_time_get_ExpectAndReturn(1000);
+    tx_mutex_get_ExpectAndReturn(&g_speedDataMutex, TX_WAIT_FOREVER, TX_SUCCESS);
+    tx_mutex_put_ExpectAndReturn(&g_speedDataMutex, TX_SUCCESS);
+
+    tx_thread_sleep_ExpectAndReturn(100, TX_SUCCESS);
+    tx_time_get_ExpectAndReturn(2000);
+    tx_mutex_get_ExpectAndReturn(&g_speedDataMutex, TX_WAIT_FOREVER, TX_SUCCESS);
+    tx_mutex_put_ExpectAndReturn(&g_speedDataMutex, TX_SUCCESS);
+
+    tx_event_flags_set_Stub(Stub_BreakLoop_OnSecondCallAndMoveCounter);
+
+    if (setjmp(test_break_jump) == 0)
+    {
+        SpeedSensor(0);
+        TEST_FAIL_MESSAGE("Loop did not break!");
+    }
+
+    TEST_ASSERT_EQUAL_INT(1, s_canSendCallCount);
+    TEST_ASSERT_EQUAL_UINT32(CAN_ID_RND_GEAR, s_lastCanSendMessage.id);
+    TEST_ASSERT_EQUAL_UINT8(1, s_lastCanSendMessage.len);
+    TEST_ASSERT_EQUAL_UINT8((uint8_t)GEAR_DRIVE, s_lastCanSendMessage.data[0]);
 }
 
