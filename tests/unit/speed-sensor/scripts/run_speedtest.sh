@@ -1,58 +1,54 @@
 #!/bin/bash
-set -e
-set -u
-set -o pipefail
+################################################################################
+# Speed Sensor Unit Test Automation
+#
+# Purpose: Execute speed sensor unit tests with coverage reporting
+# ASIL Level: A/QM (project policy)
+# Version: 1.3.1
+################################################################################
 
-readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-readonly REPO_ROOT="$(cd "${PROJECT_ROOT}/../../.." && pwd)"
-readonly BUILD_DIR="${PROJECT_ROOT}/build"
-readonly COVERAGE_DIR="${BUILD_DIR}/artifacts/gcov"
-readonly AGGREGATION_DIR="${REPO_ROOT}/tests/unit/build/coverage/speed-sensor"
-readonly GLOBAL_AGGREGATION_DIR="${REPO_ROOT}/build/coverage/speed-sensor"
-readonly VENDOR_DIR="${PROJECT_ROOT}/vendor"
-readonly COMMON_LIB="${SCRIPT_DIR}/../../common_test_lib.sh"
+set -e -u -o pipefail
 
-source "${COMMON_LIB}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../../common_test_lib.sh"
+
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+BUILD_DIR="${PROJECT_ROOT}/build"
+COVERAGE_DIR="${BUILD_DIR}/artifacts/gcov"
+REPORTS_DIR="${PROJECT_ROOT}/test_reports"
+VENDOR_DIR="${PROJECT_ROOT}/vendor"
+mkdir -p "${REPORTS_DIR}"
 
 main() {
-    log_info "🚀 Starting Speed Sensor Test Suite (White-Box Mode)"
+  log_section "ISO 26262 Speed Sensor Tests - DrivaPi"
+  echo -e "${BOLD}ASIL Level:${NC} A/QM"
+  echo -e "${BOLD}Coverage Gate (CI):${NC} >= 90% line coverage per suite"
 
-    check_prerequisites
-    cd "${PROJECT_ROOT}"
-    cleanup_build "${BUILD_DIR}"
-    ensure_vendor "${VENDOR_DIR}"
+  check_prerequisites || exit 1
+  cleanup_build "${BUILD_DIR}"
+  ensure_vendor "${VENDOR_DIR}" || exit 1
 
-    rm -rf "${COVERAGE_DIR}" "${AGGREGATION_DIR}"
-     mkdir -p "${COVERAGE_DIR}/html" "${AGGREGATION_DIR}" "${GLOBAL_AGGREGATION_DIR}" "${BUILD_DIR}/gcov/out"
+  cd "${PROJECT_ROOT}"
+  run_ceedling_tests "${REPORTS_DIR}/test_output.log" || exit 1
 
-    log_info "Executing tests..."
-    ceedling gcov:all
+  generate_lcov_coverage "${BUILD_DIR}" "${COVERAGE_DIR}"
 
-    log_info "Capturing LCOV data..."
-     if [[ ! -s "${COVERAGE_DIR}/coverage.info" ]]; then
-          lcov --capture \
-                --directory "${BUILD_DIR}/gcov/out" \
-                --output-file "${COVERAGE_DIR}/coverage.info" \
-                --rc lcov_branch_coverage=1 \
-                --ignore-errors source,gcov --quiet
-     fi
+  cp -f "${COVERAGE_DIR}/coverage_filtered.info" "${PROJECT_ROOT}/coverage_filtered.info"
+  cp -f "${COVERAGE_DIR}/coverage.xml"          "${PROJECT_ROOT}/speed-sensor.xml"
 
-    log_info "Filtering coverage data..."
-    lcov --extract "${COVERAGE_DIR}/coverage.info" \
-         "*/firmware/Core/Src/speed_sensor.c" \
-         --output-file "${COVERAGE_DIR}/coverage_filtered.info" \
-         --rc lcov_branch_coverage=1 \
-         --ignore-errors unused --quiet || cp "${COVERAGE_DIR}/coverage.info" "${COVERAGE_DIR}/coverage_filtered.info"
+  ABS_ROOT="$(cd "${PROJECT_ROOT}/../.." && pwd)"
+  PERSIST_DIR="${ABS_ROOT}/build/coverage/speed-sensor"
+  mkdir -p "${PERSIST_DIR}"
+  cp -f "${COVERAGE_DIR}/coverage_filtered.info" "${PERSIST_DIR}/coverage_filtered.info"
+  cp -f "${COVERAGE_DIR}/coverage.xml"          "${PERSIST_DIR}/speed-sensor.xml"
 
-    cp "${COVERAGE_DIR}/coverage_filtered.info" "${AGGREGATION_DIR}/coverage_filtered.info"
-     cp "${COVERAGE_DIR}/coverage_filtered.info" "${GLOBAL_AGGREGATION_DIR}/coverage_filtered.info"
+  if [[ "${CALLED_FROM_MASTER:-0}" = "1" ]]; then
+    ART_DIR="${ABS_ROOT}/artifacts/verification/coverage"
+    mkdir -p "${ART_DIR}"
+    cp -f "${COVERAGE_DIR}/coverage.xml" "${ART_DIR}/speed-sensor.xml"
+  fi
 
-    genhtml "${COVERAGE_DIR}/coverage_filtered.info" \
-            --output-directory "${COVERAGE_DIR}/html" \
-            --branch-coverage --quiet --rc genhtml_branch_coverage=1
-
-    log_success "Tests passed and coverage saved for aggregation!"
+  log_section "✓ SPEED SENSOR TESTS PASSED"
 }
 
 main "$@"

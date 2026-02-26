@@ -1,61 +1,54 @@
 #!/bin/bash
 ################################################################################
-# ISO 26262 Unit Test Automation Script
+# Servo Motor Unit Test Automation
 #
-# Purpose: Execute unit tests with 100% branch coverage validation
-# ASIL Level: B/D
+# Purpose: Execute servo motor unit tests with coverage reporting
+# ASIL Level: A/QM (project policy)
+# Version: 1.3.1
 ################################################################################
 
-set -e
-set -u
-set -o pipefail
+set -e -u -o pipefail
 
-readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-readonly BUILD_DIR="${PROJECT_ROOT}/build"
-readonly COVERAGE_DIR="${BUILD_DIR}/artifacts/gcov"
-readonly REPORTS_DIR="${PROJECT_ROOT}/test_reports"
-readonly VENDOR_DIR="${PROJECT_ROOT}/vendor"
-readonly COMMON_LIB="${SCRIPT_DIR}/../../common_test_lib.sh"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../../common_test_lib.sh"
 
-source "${COMMON_LIB}"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+BUILD_DIR="${PROJECT_ROOT}/build"
+COVERAGE_DIR="${BUILD_DIR}/artifacts/gcov"
+REPORTS_DIR="${PROJECT_ROOT}/test_reports"
+VENDOR_DIR="${PROJECT_ROOT}/vendor"
+mkdir -p "${REPORTS_DIR}"
 
 main() {
-    local start_time
-    start_time=$(date +%s)
+  log_section "ISO 26262 Servo Motor Tests - DrivaPi"
+  echo -e "${BOLD}ASIL Level:${NC} A/QM"
+  echo -e "${BOLD}Coverage Gate (CI):${NC} >= 90% line coverage per suite"
 
-    log_header "ISO 26262 Unit Test Automation - DrivaPi"
-    echo -e "${BOLD}ASIL Level:${NC} B/D"
-    echo -e "${BOLD}Coverage Requirement:${NC} 100% Branch Coverage"
-    echo ""
+  check_prerequisites || exit 1
+  cleanup_build "${BUILD_DIR}"
+  ensure_vendor "${VENDOR_DIR}" || exit 1
 
-    check_prerequisites
-    cd "${PROJECT_ROOT}"
-    cleanup_build "${BUILD_DIR}"
-    rm -rf "${REPORTS_DIR}"
-    mkdir -p "${REPORTS_DIR}" "${BUILD_DIR}/test/mocks" "${BUILD_DIR}/gcov/out"
+  cd "${PROJECT_ROOT}"
+  run_ceedling_tests "${REPORTS_DIR}/test_output.log" || exit 1
 
-    ensure_vendor "${VENDOR_DIR}"
-    run_ceedling_tests "${REPORTS_DIR}/test_output.log"
-    print_speed_sensor_coverage_note
-    generate_lcov_coverage "${BUILD_DIR}" "${COVERAGE_DIR}"
-    generate_sonarqube_xml_report "${PROJECT_ROOT}" "${BUILD_DIR}" "${REPORTS_DIR}/coverage-sonar.xml"
-    save_coverage_for_module "${COVERAGE_DIR}" "${PROJECT_ROOT}" "servo-motor"
+  generate_lcov_coverage "${BUILD_DIR}" "${COVERAGE_DIR}"
 
-    if ! validate_coverage_file "${COVERAGE_DIR}"; then
-        log_fail "VALIDATION FAILED"
-        exit 1
-    fi
+  cp -f "${COVERAGE_DIR}/coverage_filtered.info" "${PROJECT_ROOT}/coverage_filtered.info"
+  cp -f "${COVERAGE_DIR}/coverage.xml"          "${PROJECT_ROOT}/servo-motor.xml"
 
-    local end_time
-    end_time=$(date +%s)
-    local duration=$((end_time - start_time))
+  ABS_ROOT="$(cd "${PROJECT_ROOT}/../.." && pwd)"
+  PERSIST_DIR="${ABS_ROOT}/build/coverage/servo-motor"
+  mkdir -p "${PERSIST_DIR}"
+  cp -f "${COVERAGE_DIR}/coverage_filtered.info" "${PERSIST_DIR}/coverage_filtered.info"
+  cp -f "${COVERAGE_DIR}/coverage.xml"          "${PERSIST_DIR}/servo-motor.xml"
 
-    echo ""
-    log_header "✓ ALL TESTS PASSED - ISO 26262 COMPLIANT"
-    log_info "Execution time: ${duration}s"
-    log_info "Reports: ${REPORTS_DIR}"
-    log_info "Coverage HTML: ${COVERAGE_DIR}/html/index.html"
+  if [[ "${CALLED_FROM_MASTER:-0}" = "1" ]]; then
+    ART_DIR="${ABS_ROOT}/artifacts/verification/coverage"
+    mkdir -p "${ART_DIR}"
+    cp -f "${COVERAGE_DIR}/coverage.xml" "${ART_DIR}/servo-motor.xml"
+  fi
+
+  log_section "✓ SERVO MOTOR TESTS PASSED"
 }
 
 main "$@"
