@@ -84,9 +84,6 @@ failedSuites=0
 [[ "$servoMotorStatus" == "FAILED" ]] && failedSuites=$((failedSuites + 1))
 [[ "$speedSensorStatus" == "FAILED" ]] && failedSuites=$((failedSuites + 1))
 
-totalSuites=3
-passedSuites=$((totalSuites - failedSuites))
-
 dcMotorFailedCount=$(echo "$log_content" | awk -F':' '/:FAIL:/ && $1 ~ /test_dc_motor\.c$/ {print $3}' | sed '/^$/d' | sort -u | wc -l | tr -d ' ')
 servoMotorFailedCount=$(echo "$log_content" | awk -F':' '/:FAIL:/ && $1 ~ /test_servo_motor\.c$/ {print $3}' | sed '/^$/d' | sort -u | wc -l | tr -d ' ')
 speedSensorFailedCount=$(echo "$log_content" | awk -F':' '/:FAIL:/ && $1 ~ /test_speed_sensor\.c$/ {print $3}' | sed '/^$/d' | sort -u | wc -l | tr -d ' ')
@@ -95,23 +92,17 @@ dcMotorFailedCount=${dcMotorFailedCount:-0}
 servoMotorFailedCount=${servoMotorFailedCount:-0}
 speedSensorFailedCount=${speedSensorFailedCount:-0}
 
-if [[ "$dcMotorStatus" == "FAILED" ]]; then
-  dcMotorDisplayCount="${dcMotorFailedCount}/${dcMotorCount}"
-else
-  dcMotorDisplayCount="${dcMotorCount}/${dcMotorCount}"
-fi
+dcMotorPassedCount=$((dcMotorCount - dcMotorFailedCount))
+servoMotorPassedCount=$((servoMotorCount - servoMotorFailedCount))
+speedSensorPassedCount=$((speedSensorCount - speedSensorFailedCount))
 
-if [[ "$servoMotorStatus" == "FAILED" ]]; then
-  servoMotorDisplayCount="${servoMotorFailedCount}/${servoMotorCount}"
-else
-  servoMotorDisplayCount="${servoMotorCount}/${servoMotorCount}"
-fi
+[[ $dcMotorPassedCount -lt 0 ]] && dcMotorPassedCount=0
+[[ $servoMotorPassedCount -lt 0 ]] && servoMotorPassedCount=0
+[[ $speedSensorPassedCount -lt 0 ]] && speedSensorPassedCount=0
 
-if [[ "$speedSensorStatus" == "FAILED" ]]; then
-  speedSensorDisplayCount="${speedSensorFailedCount}/${speedSensorCount}"
-else
-  speedSensorDisplayCount="${speedSensorCount}/${speedSensorCount}"
-fi
+dcMotorDisplayCount="${dcMotorPassedCount}/${dcMotorCount}"
+servoMotorDisplayCount="${servoMotorPassedCount}/${servoMotorCount}"
+speedSensorDisplayCount="${speedSensorPassedCount}/${speedSensorCount}"
 
 coverageMatch=$(echo "$log_content" | grep -Poz 'lines.*?(\d+\.\d+)%.*?functions.*?(\d+\.\d+)%.*?branches.*?(\d+\.\d+)%' | head -n1)
 if [[ -n "$coverageMatch" ]]; then
@@ -153,14 +144,14 @@ EOF
 fi
 
 if [[ "$overallFromSummary" == "PASSED" ]]; then
-  overallStatus="✅ PASSED (${failedSuites} failed suites, ${passedSuites} passed suites, ${testPassed} total tests)"
+  overallStatus="✅ PASSED"
 elif [[ "$overallFromSummary" == "FAILED" ]]; then
-  overallStatus="❌ FAILED (${failedSuites} failed suites, ${passedSuites} passed suites, ${testPassed} total tests)"
+  overallStatus="❌ FAILED"
 else
   if [[ $testPassed -gt 0 && $testFailed -eq 0 ]]; then
-    overallStatus="✅ PASSED (${failedSuites} failed suites, ${passedSuites} passed suites, ${testPassed} total tests)"
+    overallStatus="✅ PASSED"
   else
-    overallStatus="❌ FAILED (${failedSuites} failed suites, ${passedSuites} passed suites, ${testPassed} total tests)"
+    overallStatus="❌ FAILED"
   fi
 fi
 
