@@ -44,14 +44,38 @@ if [[ -n "$coverageMatch" ]]; then
   lines=$(echo "$coverageMatch" | grep -oP 'lines.*?\K(\d+\.\d+)(?=%)')
   functions=$(echo "$coverageMatch" | grep -oP 'functions.*?\K(\d+\.\d+)(?=%)')
   branches=$(echo "$coverageMatch" | grep -oP 'branches.*?\K(\d+\.\d+)(?=%)')
-  coverageInfo="\n#### 📊 Coverage\n- **Lines**: $lines%\n- **Functions**: $functions%\n- **Branches**: $branches%\n"
+  coverageInfo=$(cat <<EOF
+#### 📊 Coverage
+- **Lines**: $lines%
+- **Functions**: $functions%
+- **Branches**: $branches%
+EOF
+)
 else
-  coverageInfo='\n#### 📊 Coverage\nCoverage report available in artifacts.\n'
+  coverageInfo=$(cat <<'EOF'
+#### 📊 Coverage
+Coverage report available in artifacts.
+EOF
+)
 fi
 
 lltcSummary=""
 if [[ -f "$LLTC_SUMMARY_FILE" ]]; then
-  lltcSummary="\n#### 🔍 Coverage Change Validation\n$(cat "$LLTC_SUMMARY_FILE")\n"
+  lltcItems=""
+  while IFS= read -r line; do
+    [[ -z "$line" ]] && continue
+    if [[ "$line" =~ ^-\  ]]; then
+      lltcItems+="${line}"$'\n'
+    else
+      lltcItems+="- ${line}"$'\n'
+    fi
+  done < "$LLTC_SUMMARY_FILE"
+
+  lltcSummary=$(cat <<EOF
+#### 🔍 Coverage Change Validation
+$lltcItems
+EOF
+)
 fi
 
 overallStatus="$( [[ $testPassed -gt 0 && $testFailed -eq 0 ]] && echo '✅ PASSED' || echo '❌ FAILED' )"
@@ -65,7 +89,9 @@ cat <<EOF
 - **Servo Motor Tests**: $servoMotorStatus ($servoMotorCount tests)
 - **Speed Sensor Tests**: $speedSensorStatus ($speedSensorCount tests)
 - **Total**: $testPassed tests
+
 $coverageInfo
+
 $lltcSummary
 ---
 Full coverage reports available in workflow artifacts
