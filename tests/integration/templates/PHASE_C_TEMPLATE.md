@@ -13,8 +13,8 @@
 ---
 
 ## Test Information
-- **Phase Name:** I2C Motor Controller Communication & Addressing Verification
-- **Test Objective:** Validate I2C commands sent from STM32 to the PiRacer expansion board's motor controllers via I2C interface, verify correct addressing (0x60/0x40), and confirm ACK responses
+- **Phase Name:** I2C Motor Controller Basic Integration
+- **Test Objective:** Validate basic I2C communication with the PCA9685 motor controllers (0x60 and 0x40) using the on-device test suite and confirm ACK results in UART logs
 - **Related Requirements:**
   - Integration Test Plan - Phase C
   - `/docs/tests/integration-test-plan.md`
@@ -43,7 +43,7 @@
 - **SDA/SCL Voltage:** [3.3V]
 
 ### Prerequisites Checklist
-- [ ] Connection diagram verified and matched
+- [ ] Connection diagram verified and matches
 - [ ] STM32 I2C peripheral configured
 - [ ] All devices on same I2C bus
 - [ ] No address conflicts between devices
@@ -55,6 +55,7 @@
 - [ ] SDA/SCL not shorted or stuck
 - [ ] STM32 powered and firmware loaded
 - [ ] Motor controllers powered
+- [ ] UART connected for logs
 - [ ] Test environment stable and isolated
 
 ---
@@ -65,7 +66,7 @@
 **Procedure:**
 1. Measure voltage on SDA and SCL lines
 2. Verify lines are pulled HIGH at rest
-4. Check for stuck-low or stuck-high conditions
+3. Check for stuck-low or stuck-high conditions
 
 **Expected Output:**
 ```
@@ -84,279 +85,46 @@ No stuck conditions detected
 
 ---
 
-### Step 2: Verify Motor Controller Addressing (0x60, 0x40)
+### Step 2: Run Phase C I2C Integration Test Suite
 **Procedure:**
-1. Ensure both motor controllers are connected and powered
-2. Configure STM32 to scan I2C bus
-3. Execute I2C bus scan: address range 0x00-0x7F
-4. Verify motor controllers at 0x60 and 0x40 respond with ACK
-5. Log address verification
+1. Build and flash the integration test firmware
+2. Ensure `RunI2CIntegrationTests()` is enabled in `main.c`
+3. Open a UART terminal at 115200 baud
+4. Observe UART logs and record results
 
-**Expected Output:**
+**Expected UART Output (summary):**
 ```
-I2C Bus Scan Results:
-  0x60 - Motor Controller 1: PRESENT (ACK)
-  0x40 - Motor Controller 2: PRESENT (ACK)
-Scan complete
+Phase C: STM32 → Motor Controllers (I2C)
+Integration Test Suite
+=== Test 1: Device Initialization ===
+PASS: Throttle controller (0x60) init
+PASS: Steering controller (0x40) init
+=== Test 2: Throttle I2C Write + ACK ===
+PASS: Motor control - 0% (stop)
+PASS: Motor control - 25% left turn
+PASS: Motor control - 50% left turn
+PASS: Motor control - 50% right turn
+PASS: Motor control - back to stop
+=== Test 3: Steering I2C Write + ACK ===
+PASS: Steering 0x40 - center position
+PASS: Steering 0x40 - left turn
+PASS: Steering 0x40 - right turn
+PASS: Steering 0x40 - back to center
+Test Summary
+Total Tests: __
+Passed: __
+Failed: __
 ```
 
 **Actual Output:**
 ```
-[Record scan results here]
-```
-
-**Devices Found:**
-- Address 0x60: [ ] PRESENT [ ] NOT FOUND - Status: _______
-- Address 0x40: [ ] PRESENT [ ] NOT FOUND - Status: _______
-- Other addresses: _______
-
-**Status:** [ ] PASS [ ] FAIL
-
-**Notes/Issues:** [If any]
-
----
-
-### Step 3: Single Write Transaction to Motor Controller 1 (0x60)
-**Procedure:**
-1. Prepare I2C write command to 0x60
-2. Write control byte: 0x01 (example: enable motor)
-3. Capture I2C transaction with logic analyzer
-4. Verify ACK bit received from motor controller
-
-**Logic Analyzer Capture - Expected Sequence:**
-```
-START condition
-Address: 0x60 (write)
-ACK received
-Data byte: 0x01
-ACK received
-STOP condition
-```
-
-**Actual Sequence:**
-```
-[Record actual I2C transaction capture here]
-```
-
-**Transaction Details:**
-- START condition: [ ] Detected [ ] Not detected
-- Address byte: 0x_______
-- Address ACK: [ ] Received [ ] Not received
-- Data byte transmitted: 0x_______
-- Data ACK: [ ] Received [ ] Not received
-- STOP condition: [ ] Detected [ ] Not detected
-
-**Timing Measurements:**
-- Clock frequency detected: _______ kHz
-- Setup time: _______ ns
-- Hold time: _______ ns
-- Rise time: _______ µs
-
-**Status:** [ ] PASS [ ] FAIL
-
-**Notes/Issues:** [If any]
-
----
-
-### Step 4: Single Write Transaction to Motor Controller 2 (0x40)
-**Procedure:**
-1. Prepare I2C write command to 0x40
-2. Write control byte: 0x02 (example: set direction)
-3. Capture I2C transaction with logic analyzer
-4. Verify ACK bit received from motor controller
-
-**Logic Analyzer Capture - Expected Sequence:**
-```
-START condition
-Address: 0x40 (write)
-ACK received
-Data byte: 0x02
-ACK received
-STOP condition
-```
-
-**Actual Sequence:**
-```
-[Record actual I2C transaction capture here]
-```
-
-**Transaction Details:**
-- START condition: [ ] Detected [ ] Not detected
-- Address byte: 0x_______
-- Address ACK: [ ] Received [ ] Not received
-- Data byte transmitted: 0x_______
-- Data ACK: [ ] Received [ ] Not received
-- STOP condition: [ ] Detected [ ] Not detected
-
-**Status:** [ ] PASS [ ] FAIL
-
-**Notes/Issues:** [If any]
-
----
-
-### Step 5: Read Transaction from Motor Controller 1 (0x60)
-**Procedure:**
-1. Prepare I2C read command from 0x60
-2. Request status byte (usually register 0x00)
-3. Capture I2C transaction with logic analyzer
-4. Verify motor controller transmits data and STM32 sends ACK
-
-**Logic Analyzer Capture - Expected Sequence:**
-```
-START condition
-Address: 0x60 (read)
-ACK received from motor controller
-Data byte: 0x## (status)
-NACK sent by STM32
-STOP condition
-```
-
-**Actual Sequence:**
-```
-[Record actual I2C transaction capture here]
-```
-
-**Transaction Details:**
-- START condition: [ ] Detected [ ] Not detected
-- Address byte: 0x_______
-- Address ACK: [ ] Received from controller [ ] Not received
-- Data byte received: 0x_______
-- STM32 response: [ ] ACK [ ] NACK
-- STOP condition: [ ] Detected [ ] Not detected
-
-**Status:** [ ] PASS [ ] FAIL
-
-**Notes/Issues:** [If any]
-
----
-
-### Step 6: Multi-Byte Write Transaction (Motor Controller Sequence)
-**Procedure:**
-1. Send multi-byte write sequence to 0x60
-2. Example: Write PWM value as 2 bytes (0x12 0x34)
-3. Capture all I2C frames
-4. Verify each byte generates ACK
-
-**Expected Sequence (3-byte write):**
-```
-START
-Address: 0x60 (write) - ACK
-Data byte 1: 0x12 - ACK
-Data byte 2: 0x34 - ACK
-STOP
-```
-
-**Actual Sequence:**
-```
-[Record actual transaction here]
-```
-
-**Multi-Byte Details:**
-| Byte # | Value | ACK Received | Status |
-|--------|-------|-------------|--------|
-| Address | 0x60 | [ ] Yes [ ] No | PASS/FAIL |
-| 1 | 0x__ | [ ] Yes [ ] No | PASS/FAIL |
-| 2 | 0x__ | [ ] Yes [ ] No | PASS/FAIL |
-| 3 | 0x__ | [ ] Yes [ ] No | PASS/FAIL |
-
-**Status:** [ ] PASS [ ] FAIL
-
-**Notes/Issues:** [If any]
-
----
-
-### Step 7: Simultaneous Access - Address Verification
-**Procedure:**
-1. Send commands to both controllers rapidly
-2. Verify no address collisions
-3. Confirm both 0x60 and 0x40 receive their respective data
-4. Verify arbitration handling (if occurring)
-
-**Test Sequence:**
-```
-Command 1: Write to 0x60 (e.g., speed control)
-Command 2: Write to 0x40 (e.g., steering control)
-Command 3: Read from 0x60
-Command 4: Read from 0x40
+[Record UART output here]
 ```
 
 **Results:**
-
-| Command | Dest Address | Data | ACK Status | Status |
-|---------|-------------|------|-----------|--------|
-| 1 | 0x60 | ___ | [ ] ACK [ ] NACK | PASS/FAIL |
-| 2 | 0x40 | ___ | [ ] ACK [ ] NACK | PASS/FAIL |
-| 3 | 0x60 | ___ | [ ] ACK [ ] NACK | PASS/FAIL |
-| 4 | 0x40 | ___ | [ ] ACK [ ] NACK | PASS/FAIL |
-
-**Status:** [ ] PASS [ ] FAIL
-
-**Notes/Issues:** [If any]
-
----
-
-### Step 8: ACK/NACK Protocol Verification
-**Procedure:**
-1. Send write command to valid address (0x60): expect ACK
-2. Send write command to invalid address (0x61): expect NACK
-3. Verify STM32 handles NACK correctly
-4. Verify no repeated START or retry by default
-
-**ACK/NACK Test Results:**
-
-| Test | Address | Expected | Actual | Status |
-|------|---------|----------|--------|--------|
-| Valid address write | 0x60 | ACK | [ ] ACK [ ] NACK | PASS/FAIL |
-| Invalid address write | 0x61 | NACK | [ ] ACK [ ] NACK | PASS/FAIL |
-| Valid address read | 0x60 | ACK | [ ] ACK [ ] NACK | PASS/FAIL |
-| Invalid address read | 0x7F | NACK | [ ] ACK [ ] NACK | PASS/FAIL |
-
-**STM32 Error Handling:**
-- NACK detected? [ ] Yes [ ] No
-- Error flag set? [ ] Yes [ ] No
-- Timeout triggered? [ ] Yes [ ] No
-
-**Status:** [ ] PASS [ ] FAIL
-
-**Notes/Issues:** [If any]
-
----
-
-### Step 9: High-Frequency Transaction Stress Test
-**Procedure:**
-1. Send I2C transactions at high frequency (100+ Hz)
-2. Alternate between 0x60 and 0x40
-3. Vary transaction size (1-byte to 8-byte)
-4. Monitor for errors, timeouts, or data corruption
-5. Capture for 30 seconds minimum
-
-**Test Configuration:**
-- Transaction rate: _______ Hz
-- Total transactions: _______
-- Test duration: _______ sec
-
-**Expected Result:**
-```
-All transactions completed successfully
-No timeouts or errors detected
-ACK rate: 100%
-Data integrity: 100%
-```
-
-**Actual Result:**
-```
-[Record measurements here]
-```
-
-**Stress Test Results:**
-
-| Metric | Value | Threshold | Status |
-|--------|-------|-----------|--------|
-| Successful transactions | ___ | 100% | PASS/FAIL |
-| Failed transactions | ___ | 0 | PASS/FAIL |
-| Timeouts | ___ | 0 | PASS/FAIL |
-| Data errors | ___ | 0 | PASS/FAIL |
-| ACK rate | ___% | 100% | PASS/FAIL |
+- Test 1 (Device Initialization): [ ] PASS [ ] FAIL
+- Test 2 (Throttle Write + ACK): [ ] PASS [ ] FAIL
+- Test 3 (Steering Write + ACK): [ ] PASS [ ] FAIL
 
 **Status:** [ ] PASS [ ] FAIL
 
@@ -372,24 +140,18 @@ Data integrity: 100%
 - [ ] **CONDITIONAL PASS** - Minor issues requiring documentation
 
 ### Pass/Fail Criteria Met
-- [ ] Motor controller 1 (0x60) detected and responding with ACK
-- [ ] Motor controller 2 (0x40) detected and responding with ACK
-- [ ] Write transactions to both controllers successful (100% ACK)
-- [ ] Read transactions from both controllers successful
-- [ ] Multi-byte transactions handled correctly
-- [ ] ACK/NACK protocol working as expected
-- [ ] No address collisions during simultaneous access
-- [ ] High-frequency stress test passed (100% success, 0% errors)
+- [ ] Motor controller 1 (0x60) initialized successfully
+- [ ] Motor controller 2 (0x40) initialized successfully
+- [ ] Throttle write commands returned ACK (HAL_OK)
+- [ ] Steering write commands returned ACK (HAL_OK)
 
 ### Key Measurements Summary
 | Metric | Value | Threshold | Status |
 |--------|-------|-----------|--------|
-| Controller 0x60 Detection | [Found/Not Found] | Found | PASS/FAIL |
-| Controller 0x40 Detection | [Found/Not Found] | Found | PASS/FAIL |
-| ACK Rate | ___% | 100% | PASS/FAIL |
-| NACK Errors | ___ | 0 | PASS/FAIL |
-| Addressing Errors | ___ | 0 | PASS/FAIL |
-| Transaction Success Rate | ___% | 100% | PASS/FAIL |
+| Controller 0x60 Init | PASS/FAIL | PASS | PASS/FAIL |
+| Controller 0x40 Init | PASS/FAIL | PASS | PASS/FAIL |
+| Throttle Writes | PASS/FAIL | PASS | PASS/FAIL |
+| Steering Writes | PASS/FAIL | PASS | PASS/FAIL |
 
 ### Issues Encountered
 - [ ] No issues
@@ -410,49 +172,15 @@ Data integrity: 100%
 - Average transaction duration: _______ ms
 - Minimum transaction time: _______ ms
 - Maximum transaction time: _______ ms
-- Bus errors during stress test: _______
 
 ---
 
 ## Evidence Artifacts
 
-### Logic Analyzer Captures
-- [ ] I2C transaction capture (0x60 writes): `[filename]`
-  - Duration: _______ sec
-  - Transactions captured: _______
-  - Location: _______________
-  
-- [ ] I2C transaction capture (0x40 writes): `[filename]`
-  - Duration: _______ sec
-  - Transactions captured: _______
-  - Location: _______________
-
-- [ ] Read transactions capture: `[filename]`
-  - Duration: _______ sec
-  - Location: _______________
-
-### Decoded Traces
-- [ ] I2C protocol decode file: `[filename]`
-  - Format: [CSV, JSON, Saleae format, other]
-  - Transactions decoded: _______
-  - Location: _______________
-
-### Analysis Files
-- [ ] Address verification report: `[filename]`
-  - Location: _______________
-  
-- [ ] ACK/NACK analysis: `[filename]`
-  - Location: _______________
-
-### Screenshots
-- [ ] Logic analyzer waveform (0x60 write): `[filename]`
-- [ ] Logic analyzer waveform (0x40 write): `[filename]`
-- [ ] Bus scan result: `[screenshot]`
-
 ### Logs
-- [ ] STM32 I2C log: `[filename]`
+- [ ] UART console log: `[filename]`
   - Location: _______________
-- [ ] Motor controller response log: `[filename]`
+- [ ] STM32 I2C log (optional): `[filename]`
   - Location: _______________
 
 ---
@@ -496,7 +224,6 @@ Data integrity: 100%
 ### Archive Reference
 **Location in Repository:** `/tests/integration/executions/phase_c/`
 **Committed:** [ ] Yes [ ] No
-**Commit Hash:** _______________
 
 ---
 
