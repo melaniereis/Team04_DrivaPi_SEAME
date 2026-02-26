@@ -7,7 +7,7 @@
 - **Date:** [YYYY-MM-DD]
 - **Time Started:** [HH:MM]
 - **Tester Name:** [Full Name]
-- **Test Phase:** C
+- **Test Phase:** A
 - **Test Cycle:** [Sprint X]
 
 ---
@@ -25,17 +25,17 @@
 ## Environment Setup
 
 ### Hardware Required
-- [ ] PS3 Controller (fully charged)
+- [ ] PS3 Controller
 - [ ] Raspberry Pi 5
 - [ ] USB dongle for PS3 controller connection
-- [ ] Network connectivity (SSH or direct connection)S
+- [ ] Network connectivity (if testing remotely)
 
 ### Software Required
 - [ ] Controller application
 - [ ] SSH client (if testing remotely)
 
 ### Configuration Settings
-- **Controller App Port:** __________ 
+- **Controller Port:** __________ 
 
 ### Prerequisites Checklist
 - [ ] PS3 controller paired with Raspberry Pi
@@ -47,8 +47,8 @@
 - [ ] PS3 controller fully charged (>80%)
 - [ ] Raspberry Pi powered on and responsive
 - [ ] Controller application deployed and ready to start
-- [ ] Test environment isolated from other network traffic
-- [ ] SSH connection tested (if remote)
+- [ ] Test environment isolated from other network traffic and interfering processes
+- [ ] SSH connection tested (if testing remotely)
 
 ---
 
@@ -86,8 +86,6 @@ Ready for input
 **Expected Output:**
 ```
 PS3 Controller Connected
-Controller ID: [Device ID]
-Battery Level: [%]
 ```
 
 **Actual Output:**
@@ -103,29 +101,18 @@ Battery Level: [%]
 **Procedure:**
 1. Move left analog stick to full left position
 2. Record decoded value in application
-3. Verify CAN payload generated with correct values
-4. Repeat for: right, up, down, diagonals
+3. Repeat for: right, up, down, diagonals
 
 **Expected Output:**
 - Left stick: X=0x00, Y=0x80
 - Each direction shows correct analog value decoding
-- CAN messages generated for each movement
 
 **Actual Output:**
 ```
 [Record actual output here]
 ```
 
-**CAN Messages Captured:**
-```
-[List CAN message IDs and payloads]
-```
-
 **Notes/Issues:** [If any]
-
-**Measurements:**
-- Response Time (button press → CAN message): _______ ms
-- Number of CAN messages generated: _______
 
 ---
 
@@ -149,91 +136,36 @@ Battery Level: [%]
 | R1 | ___ | ___ | ___ | PASS/FAIL |
 | R2 | ___ | ___ | ___ | PASS/FAIL |
 
-**Measurements:**
-- Max button to CAN encoding latency: _______ ms
-- Decoding accuracy: _______ %
-
 ---
 
-### Step 5: Test D-Pad Input
-**Procedure:**
-1. Press each D-Pad direction: Up, Down, Left, Right
-2. Record decoded direction in application logs
-3. Verify CAN payload generated
-4. Test diagonal presses (Up+Left, Up+Right, Down+Left, Down+Right)
-
-**D-Pad Test Results:**
-
-| Direction | Decoded Value | CAN ID | CAN Payload | Status |
-|-----------|---------------|--------|-------------|--------|
-| Up | ___ | ___ | ___ | PASS/FAIL |
-| Down | ___ | ___ | ___ | PASS/FAIL |
-| Left | ___ | ___ | ___ | PASS/FAIL |
-| Right | ___ | ___ | ___ | PASS/FAIL |
-| Diagonals | ___ | ___ | ___ | PASS/FAIL |
-
-**Notes/Issues:** [If any]
-
----
-
-### Step 6: Verify DBC Mapping Accuracy
-**Procedure:**
-1. Enable DBC translation in CAN monitoring tool
-2. Verify all CAN messages match DBC file definitions
-3. Check that signal names are correctly mapped
-4. Validate payload byte ordering (big-endian/little-endian)
-
-**DBC Verification Results:**
-
-| Signal Name | Expected DBC | Actual | Match | Status |
-|-------------|-------------|--------|-------|--------|
-| Input_Button | [DBC def] | [Actual] | YES/NO | PASS/FAIL |
-| Analog_Left | [DBC def] | [Actual] | YES/NO | PASS/FAIL |
-| Analog_Right | [DBC def] | [Actual] | YES/NO | PASS/FAIL |
-| [Other signals] | [DBC def] | [Actual] | YES/NO | PASS/FAIL |
-
----
-
-### Step 7: Stress Test - Rapid Input
+### Step 5: Stress Test - Rapid Input
 **Procedure:**
 1. Perform rapid button presses (10 presses/second for 10 seconds)
 2. Monitor for dropped inputs or errors
-3. Check for message loss or corruption in CAN logging
 4. Verify no buffer overflow or crash occurs
 
 **Expected Output:**
 - All inputs captured without loss
-- No errors reported in controller logs
-- CAN message count matches input count
 
 **Actual Output:**
 ```
 [Record measurements here]
 ```
 
-**Measurements:**
-- Total inputs sent: _______
-- Total CAN messages generated: _______
-- Missed inputs: _______
-- Error count: _______
-
 **Notes/Issues:** [If any]
 
 ---
 
-### Step 8: Stop Test & Verify Clean Shutdown
+### Step 6: Stop Test & Verify Clean Shutdown
 **Procedure:**
 1. Disconnect PS3 controller
 2. Stop controller application gracefully
-3. Verify no errors in shutdown logs
-4. Save all logs to evidence directory
 
 **Expected Output:**
 ```
 PS3 Controller Disconnected
 Controller Application Shutting Down
 All resources released
-Save complete
 ```
 
 **Actual Output:**
@@ -256,18 +188,8 @@ Save complete
 - [ ] 100% command decoding accuracy achieved
 - [ ] All button inputs correctly decoded
 - [ ] All analog values correctly mapped
-- [ ] Correct DBC message IDs and payloads generated
 - [ ] No message loss during stress test
 - [ ] Application started and stopped cleanly
-
-### Key Measurements Summary
-| Metric | Value | Threshold | Status |
-|--------|-------|-----------|--------|
-| Decoding Accuracy | ___% | 100% | PASS/FAIL |
-| Button Response Latency | ___ ms | < 50 ms | PASS/FAIL |
-| Analog Latency | ___ ms | < 50 ms | PASS/FAIL |
-| Message Loss Count | ___ | 0 | PASS/FAIL |
-| Stress Test Inputs Captured | ___% | 100% | PASS/FAIL |
 
 ### Issues Encountered
 - [ ] No issues
@@ -283,13 +205,6 @@ Save complete
 - Workaround: [If applicable]
 - Follow-up Required: [Yes/No]
 
-### Performance Metrics Summary
-- Average button decode latency: _______ ms
-- Average analog decode latency: _______ ms
-- CAN message generation rate: _______ msg/sec
-- Peak CPU usage during test: _______ %
-- Peak memory usage during test: _______ MB
-
 ---
 
 ## Evidence Artifacts
@@ -302,18 +217,6 @@ Save complete
 - [ ] System log: `[filename]`
   - Location: _______________
   - Size: _______ KB
-
-### Data Captures
-- [ ] CAN bus trace file: `[filename]`
-  - Format: [.csv, .dbc, .log, other]
-  - Duration: _______ seconds
-  - Message count: _______
-  - Location: _______________
-
-### Screenshots
-- [ ] Controller app interface: `[filename]`
-- [ ] CAN analyzer tool: `[filename]`
-- [ ] Error messages (if any): `[filename]`
 
 ### Video Record
 - [ ] Test execution video: `[filename]`
@@ -344,11 +247,6 @@ Save complete
 - [ ] Action 1: [Description] - Owner: _______ - Due: _______
 - [ ] Action 2: [Description] - Owner: _______ - Due: _______
 
-### Environment Notes
-- Network conditions: _______________________
-- Background processes: _______________________
-- Any interference or disruptions: _______________________
-
 ---
 
 ## Sign-Off
@@ -367,8 +265,7 @@ Save complete
 ### Archive Reference
 **Location in Repository:** `/tests/integration/executions/phase_a/`
 **Committed:** [ ] Yes [ ] No
-**Commit Hash:** _______________
 
 ---
 
-**Template Version:** 1.0 | **Last Updated:** 2026-02-23 | **Created by:** Team04_DrivaPi Integration Test Team
+**Template Version:** 1.0 | **Last Updated:** 2026-02-23 | **Created by:** Team04_DrivaPi
