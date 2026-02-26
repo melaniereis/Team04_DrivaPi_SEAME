@@ -99,13 +99,23 @@ PS3 Controller Connected
 
 ### Step 3: Test Analog Stick Input
 **Procedure:**
-1. Move left analog stick to full left position
-2. Record decoded value in application
-3. Repeat for: right, up, down, diagonals
+1. **Left Analog Stick:**
+   - Move left analog stick to full left position
+   - Record decoded value in application
+   - Repeat for: right, up, down and center
+2. **Right Analog Stick:**
+   - Move right analog stick to full left position
+   - Record decoded value in application
+   - Repeat for: right, up, down and center
 
 **Expected Output:**
-- Left stick: X=0x00, Y=0x80
-- Each direction shows correct analog value decoding
+- Left stick center: Y= 0
+- Left stick full up: Y=4096
+- Left stick full down: Y=-4096
+- Right stick center: X=90
+- Right stick full left: X=0
+- Right stick full right: X=180
+- Each direction shows correct analog value decoding for both sticks
 
 **Actual Output:**
 ```
@@ -142,7 +152,7 @@ PS3 Controller Connected
 **Procedure:**
 1. Perform rapid button presses (10 presses/second for 10 seconds)
 2. Monitor for dropped inputs or errors
-4. Verify no buffer overflow or crash occurs
+3. Verify no buffer overflow or crash occurs
 
 **Expected Output:**
 - All inputs captured without loss
