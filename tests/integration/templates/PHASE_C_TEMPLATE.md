@@ -32,9 +32,7 @@
 - [ ] USB cables for STM32
 - [ ] Power cable for expansion board
 ### Software Required
-- [ ] STM32 firmware with I2C driver (version: __________)
-- [ ] Motor controller firmware (version: __________)
-- [ ] Data capture and analysis tool
+- [ ] STM32 firmware with I2C driver
 
 ### Configuration Settings
 - **I2C Bus:** [I2C3]
@@ -42,28 +40,21 @@
 - **Expansion Board:** PiRacer Kit
 - **Motor Controller 1 Address:** 0x60
 - **Motor Controller 2 Address:** 0x40
-- **Expected Pull-up Resistance:** _______ kΩ
-- **SDA/SCL Voltage:** [3.3V, 5V]
+- **SDA/SCL Voltage:** [3.3V]
 
 ### Prerequisites Checklist
 - [ ] Connection diagram verified and matched
 - [ ] STM32 I2C peripheral configured
-- [ ] Motor controllers powered and responsive
-- [ ] Logic analyzer connected to SDA, SCL, (and optional GPIO)
 - [ ] All devices on same I2C bus
 - [ ] No address conflicts between devices
-- [ ] Previous test data archived
 
 ---
 
 ## Pre-Test Checklist
-- [ ] I2C bus voltage: _______ V (expected 3.3V or 5V)
-- [ ] Pull-up resistance: _______ kΩ (expected 4.7-10kΩ)
+- [ ] I2C bus voltage: _______ V (expected 3.3V)
 - [ ] SDA/SCL not shorted or stuck
-- [ ] Logic analyzer connected and powered
-- [ ] Logic analyzer software running and configured
 - [ ] STM32 powered and firmware loaded
-- [ ] Motor controllers powered (if separate power supply)
+- [ ] Motor controllers powered
 - [ ] Test environment stable and isolated
 
 ---
@@ -74,28 +65,18 @@
 **Procedure:**
 1. Measure voltage on SDA and SCL lines
 2. Verify lines are pulled HIGH at rest
-3. Measure pull-up resistance
 4. Check for stuck-low or stuck-high conditions
 
 **Expected Output:**
 ```
-SDA voltage at rest: 3.3V (or 5V)
-SCL voltage at rest: 3.3V (or 5V)
-Pull-up resistance: 4.7-10kΩ
+SDA voltage at rest: 3.3V
+SCL voltage at rest: 3.3V
 No stuck conditions detected
-```
-
-**Actual Output:**
-```
-[Record measurements here]
 ```
 
 **Measurements:**
 - SDA idle voltage: _______ V
 - SCL idle voltage: _______ V
-- Pull-up resistance (SDA): _______ kΩ
-- Pull-up resistance (SCL): _______ kΩ
-- Bus floating? [ ] Yes [ ] No
 
 **Status:** [ ] PASS [ ] FAIL
 
@@ -103,18 +84,19 @@ No stuck conditions detected
 
 ---
 
-### Step 2: Verify Motor Controller 1 Addressing (0x60)
+### Step 2: Verify Motor Controller Addressing (0x60, 0x40)
 **Procedure:**
-1. Configure STM32 to scan I2C bus
-2. Execute I2C bus scan: address range 0x00-0x7F
-3. Verify motor controller at 0x60 responds with ACK
-4. Log address verification
+1. Ensure both motor controllers are connected and powered
+2. Configure STM32 to scan I2C bus
+3. Execute I2C bus scan: address range 0x00-0x7F
+4. Verify motor controllers at 0x60 and 0x40 respond with ACK
+5. Log address verification
 
 **Expected Output:**
 ```
 I2C Bus Scan Results:
   0x60 - Motor Controller 1: PRESENT (ACK)
-  0x40 - (Not present yet)
+  0x40 - Motor Controller 2: PRESENT (ACK)
 Scan complete
 ```
 
@@ -134,37 +116,7 @@ Scan complete
 
 ---
 
-### Step 3: Verify Motor Controller 2 Addressing (0x40)
-**Procedure:**
-1. Connect motor controller 2 if not already connected
-2. Execute I2C bus scan again
-3. Verify motor controller at 0x40 responds with ACK
-4. Verify 0x60 is still present
-
-**Expected Output:**
-```
-I2C Bus Scan Results:
-  0x60 - Motor Controller 1: PRESENT (ACK)
-  0x40 - Motor Controller 2: PRESENT (ACK)
-Scan complete
-```
-
-**Actual Output:**
-```
-[Record scan results here]
-```
-
-**Devices Found:**
-- Address 0x60: [ ] PRESENT [ ] NOT FOUND - Status: _______
-- Address 0x40: [ ] PRESENT [ ] NOT FOUND - Status: _______
-
-**Status:** [ ] PASS [ ] FAIL
-
-**Notes/Issues:** [If any]
-
----
-
-### Step 4: Single Write Transaction to Motor Controller 1 (0x60)
+### Step 3: Single Write Transaction to Motor Controller 1 (0x60)
 **Procedure:**
 1. Prepare I2C write command to 0x60
 2. Write control byte: 0x01 (example: enable motor)
@@ -206,7 +158,7 @@ STOP condition
 
 ---
 
-### Step 5: Single Write Transaction to Motor Controller 2 (0x40)
+### Step 4: Single Write Transaction to Motor Controller 2 (0x40)
 **Procedure:**
 1. Prepare I2C write command to 0x40
 2. Write control byte: 0x02 (example: set direction)
@@ -242,7 +194,7 @@ STOP condition
 
 ---
 
-### Step 6: Read Transaction from Motor Controller 1 (0x60)
+### Step 5: Read Transaction from Motor Controller 1 (0x60)
 **Procedure:**
 1. Prepare I2C read command from 0x60
 2. Request status byte (usually register 0x00)
@@ -278,7 +230,7 @@ STOP condition
 
 ---
 
-### Step 7: Multi-Byte Write Transaction (Motor Controller Sequence)
+### Step 6: Multi-Byte Write Transaction (Motor Controller Sequence)
 **Procedure:**
 1. Send multi-byte write sequence to 0x60
 2. Example: Write PWM value as 2 bytes (0x12 0x34)
@@ -313,7 +265,7 @@ STOP
 
 ---
 
-### Step 8: Simultaneous Access - Address Verification
+### Step 7: Simultaneous Access - Address Verification
 **Procedure:**
 1. Send commands to both controllers rapidly
 2. Verify no address collisions
@@ -343,7 +295,7 @@ Command 4: Read from 0x40
 
 ---
 
-### Step 9: ACK/NACK Protocol Verification
+### Step 8: ACK/NACK Protocol Verification
 **Procedure:**
 1. Send write command to valid address (0x60): expect ACK
 2. Send write command to invalid address (0x61): expect NACK
@@ -370,7 +322,7 @@ Command 4: Read from 0x40
 
 ---
 
-### Step 10: High-Frequency Transaction Stress Test
+### Step 9: High-Frequency Transaction Stress Test
 **Procedure:**
 1. Send I2C transactions at high frequency (100+ Hz)
 2. Alternate between 0x60 and 0x40
