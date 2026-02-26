@@ -64,13 +64,17 @@ void ServoMotor(ULONG initial_input)
 
 	while (1)
 	{
-		tx_event_flags_get(&g_eventFlags, FLAG_CAN_STEER_CMD, TX_OR_CLEAR, &actual_flags, TX_NO_WAIT);
+		tx_event_flags_get(&g_eventFlags, FLAG_CAN_STEER_CMD, TX_OR_CLEAR, &actual_flags, TX_WAIT_FOREVER);
+		
 		while (tx_queue_receive(&g_queueSteerCmd, &msg, TX_NO_WAIT) == TX_SUCCESS)
 		{
+			tx_mutex_get(&g_servoMutex, TX_WAIT_FOREVER);
+
 			float angle_f = *((float *)msg.data);
 			uint16_t angle = (uint16_t)angle_f;
 			SetServoAngle(SERVO_CH, angle);
+
+			tx_mutex_put(&g_servoMutex);
 		}
-		tx_thread_sleep(10);
 	}
 }

@@ -127,6 +127,8 @@ void UltrasonicEntry(ULONG initial_input)
 				tx_mutex_put(&g_emergencyMutex);
 				HAL_UART_Transmit(&huart1, (uint8_t*)"!!! KILLING MOTORS !!!\r\n", 24, 100);
 
+				tx_mutex_get(&g_motorMutex, TX_WAIT_FOREVER);
+
 				if (ttc_ms < TTC_THRESHOLD_MS && ttc_ms >= 200)
 					MotorSetPWM(0, 0);
 				else if (ttc_ms < 200 && range_cm > BRAKE_THRESHOLD_CM && current_speed >= 0.2)
@@ -151,6 +153,7 @@ void UltrasonicEntry(ULONG initial_input)
 					range_active = true;
 				}
 
+				tx_mutex_put(&g_motorMutex);
 
 				// D. Final Stop
 				//MotorStop();

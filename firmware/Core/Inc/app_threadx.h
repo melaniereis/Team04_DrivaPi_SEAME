@@ -149,6 +149,9 @@ extern TX_QUEUE             g_queueSteerCmd;
 extern TX_EVENT_FLAGS_GROUP	g_eventFlags;
 extern TX_MUTEX             g_speedDataMutex;
 extern TX_MUTEX             g_emergencyMutex;
+extern TX_MUTEX             g_canMutex;
+extern TX_MUTEX             g_motorMutex;
+extern TX_MUTEX             g_servoMutex;
 extern float				g_vehicleSpeed;
 /* USER CODE END 1 */
 

@@ -50,6 +50,9 @@ TX_QUEUE                g_queueSteerCmd;
 TX_EVENT_FLAGS_GROUP    g_eventFlags;
 TX_MUTEX                g_speedDataMutex;
 TX_MUTEX                g_emergencyMutex;
+TX_MUTEX                g_canMutex;
+TX_MUTEX                g_motorMutex;
+TX_MUTEX                g_servoMutex;
 float                   g_vehicleSpeed;
 /* USER CODE END PV */
 
@@ -85,6 +88,12 @@ UINT App_ThreadX_Init(VOID *memory_ptr)
 	memory_ptr += QUEUE_SIZE * sizeof(t_can_message);
 
 	tx_event_flags_create(&g_eventFlags, "System Events");
+
+	tx_mutex_create(&g_speedDataMutex, "Speed Data Mutex", TX_NO_INHERIT);
+	tx_mutex_create(&g_emergencyMutex, "Emergency Mutex", TX_NO_INHERIT);
+	tx_mutex_create(&g_canMutex, "CAN Mutex", TX_NO_INHERIT);
+	tx_mutex_create(&g_motorMutex, "Motor Mutex", TX_NO_INHERIT);
+	tx_mutex_create(&g_servoMutex, "Servo Mutex", TX_NO_INHERIT);
 
 	InitAllDevices();
 

@@ -95,7 +95,9 @@ VOID CanTx(ULONG initial_input)
 		float speed = g_vehicleSpeed;
 		tx_mutex_put(&g_speedDataMutex);
 
+		tx_mutex_get(&g_canMutex, TX_WAIT_FOREVER);
 		CraftSpeedMessage(&msg, speed);
+		tx_mutex_put(&g_canMutex);
 
 		tx_thread_sleep(20);
 	}
