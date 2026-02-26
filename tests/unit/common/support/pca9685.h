@@ -6,7 +6,6 @@
 #ifndef __PCA9685_H
 #define __PCA9685_H
 
-#include <stdint.h>
 #include "stm32u5xx_hal.h"
 
 /* Constants */

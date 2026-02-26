@@ -252,3 +252,91 @@ void test_SetServoAngle_ShouldUseCorrectChannel15(void)
     // Assert
     TEST_ASSERT_EQUAL_INT(1, result);
 }
+
+static jmp_buf s_servoMotorLoopExit;
+static t_can_message s_servoMotorQueuedMessage;
+
+static UINT ServoTxEventFlagsGetCallback(TX_EVENT_FLAGS_GROUP *group_ptr,
+                                         ULONG requested_flags,
+                                         UINT get_option,
+                                         ULONG *actual_flags,
+                                         ULONG wait_option,
+                                         int cmock_num_calls)
+{
+    (void)group_ptr;
+    (void)get_option;
+    (void)wait_option;
+    (void)cmock_num_calls;
+    if (actual_flags != NULL) {
+        *actual_flags = requested_flags;
+    }
+    return TX_SUCCESS;
+}
+
+static UINT ServoTxQueueReceiveOnceCallback(TX_QUEUE *queue_ptr,
+                                            void *destination_ptr,
+                                            ULONG wait_option,
+                                            int cmock_num_calls)
+{
+    (void)queue_ptr;
+    (void)wait_option;
+
+    if (cmock_num_calls == 0) {
+        memcpy(destination_ptr, &s_servoMotorQueuedMessage, sizeof(t_can_message));
+        return TX_SUCCESS;
+    }
+
+    return 1u;
+}
+
+static UINT ServoTxQueueReceiveEmptyCallback(TX_QUEUE *queue_ptr,
+                                             void *destination_ptr,
+                                             ULONG wait_option,
+                                             int cmock_num_calls)
+{
+    (void)queue_ptr;
+    (void)destination_ptr;
+    (void)wait_option;
+    (void)cmock_num_calls;
+    return 1u;
+}
+
+static UINT ServoTxThreadSleepBreakCallback(ULONG timer_ticks, int cmock_num_calls)
+{
+    (void)timer_ticks;
+    (void)cmock_num_calls;
+    longjmp(s_servoMotorLoopExit, 1);
+    return TX_SUCCESS;
+}
+
+void test_ServoMotor_ShouldProcessQueueMessageAndSetServoAngle(void)
+{
+    float angle_f = 45.7f;
+    uint16_t angle = (uint16_t)angle_f;
+    uint16_t expected_pulse = SERVO_MIN_PULSE + ((SERVO_MAX_PULSE - SERVO_MIN_PULSE) * angle) / 180u;
+
+    memset(&s_servoMotorQueuedMessage, 0, sizeof(s_servoMotorQueuedMessage));
+    s_servoMotorQueuedMessage.len = 8;
+    memcpy(s_servoMotorQueuedMessage.data, &angle_f, sizeof(float));
+
+    tx_event_flags_get_StubWithCallback(ServoTxEventFlagsGetCallback);
+    tx_queue_receive_StubWithCallback(ServoTxQueueReceiveOnceCallback);
+    tx_thread_sleep_StubWithCallback(ServoTxThreadSleepBreakCallback);
+
+    PCA9685_SetPWM_ExpectAndReturn(PCA9685_ADDR_SERVO, SERVO_CH, 0, expected_pulse, HAL_OK);
+
+    if (setjmp(s_servoMotorLoopExit) == 0) {
+        ServoMotor(0);
+    }
+}
+
+void test_ServoMotor_ShouldSleepWhenQueueIsEmpty(void)
+{
+    tx_event_flags_get_StubWithCallback(ServoTxEventFlagsGetCallback);
+    tx_queue_receive_StubWithCallback(ServoTxQueueReceiveEmptyCallback);
+    tx_thread_sleep_StubWithCallback(ServoTxThreadSleepBreakCallback);
+
+    if (setjmp(s_servoMotorLoopExit) == 0) {
+        ServoMotor(0);
+    }
+}

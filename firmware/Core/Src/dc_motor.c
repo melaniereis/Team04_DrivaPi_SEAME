@@ -10,148 +10,18 @@
 #include "dc_motor.h"
 
 /**
-* @brief
-*
-*/
-void MotorStop(void)
-{
-	PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_A, 0, 0);
-	PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_B, 0, 0);
-	PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_PWM, 0, 0);
+ * @brief 
+ * 
+ * @param left_counts 
+ * @param right_counts 
+ */
 
-	PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_A, 0, 0);
-	PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_B, 0, 0);
-	PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_PWM, 0, 0);
-}
-
-/**
-* @brief
-*
-* @param speed
-*/
-void MotorForward(double speed)
-{
-	uint16_t max = 4095;
-	uint16_t pwm_value = (uint16_t)(speed * max);
-
-	PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_A, 0, max);
-	PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_B, 0, 0);
-	PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_PWM, 0, pwm_value);
-
-	PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_A, 0, 0);
-	PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_B, 0, max);
-	PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_PWM, 0, pwm_value);
-}
-
-/**
-* @brief
-*
-* @param speed
-*/
-void MotorBackward(double speed)
-{
-	uint16_t max = 4095;
-	uint16_t pwm_val = (uint16_t)(speed * max);
-
-	PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_A, 0, 0);
-	PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_B, 0, max);
-	PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_PWM, 0, pwm_val);
-
-	PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_A, 0, max);
-	PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_B, 0, 0);
-	PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_PWM, 0, pwm_val);
-}
-
-/**
-* @brief
-*
-* @param speed
-*/
-void MotorLeft(double speed)
-{
-	const uint16_t max = (uint16_t)(PCA9685_COUNTS - 1u);
-	uint16_t pwm_val = ClampU16((int32_t)(speed * (double)max + 0.5));
-
-	PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_A, 0, max);
-	PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_B, 0, 0);
-	PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_PWM, 0, pwm_val);
-
-	PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_A, 0, 0);
-	PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_B, 0, max);
-	PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_PWM, 0, pwm_val);
-}
-
-/**
-* @brief
-*
-* @param speed
-*/
-void MotorRight(double speed)
-{
-	const uint16_t max = (uint16_t)(PCA9685_COUNTS - 1u);
-	uint16_t pwm_val = ClampU16((int32_t)(speed * (double)max + 0.5));
-
-	PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_A, 0, 0);
-	PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_B, 0, max);
-	PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_PWM, 0, pwm_val);
-
-	PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_A, 0, max);
-	PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_B, 0, 0);
-	PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_PWM, 0, pwm_val);
-}
-
-/**
-* @brief
-*
-* @param value
-*/
-void SetMotor(double value)
-{
-	const uint16_t max = (uint16_t)(PCA9685_COUNTS - 1u);
-	uint16_t pwm_val = ClampU16((int32_t)(fabs(value) * (double)max + 0.5));
-
-	if (fabs(value) < 1e-6)
-	{
-		MotorStop();
-		return;
-	}
-
-	if (value > 0.0)
-	{
-		// Forward
-		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_A, 0, max);
-		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_B, 0, 0);
-		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_PWM, 0, pwm_val);
-
-		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_A, 0, 0);
-		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_B, 0, max);
-		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_PWM, 0, pwm_val);
-	}
-	else 
-	{
-		// Backward
-		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_A, 0, 0);
-		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_B, 0, max);
-		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_PWM, 0, pwm_val);
-
-		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_A, 0, max);
-		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_B, 0, 0);
-		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_PWM, 0, pwm_val);
-	}
-}
-
-/**
-* @brief
-*
-* @param left_counts
-* @param right_counts
-*/
 void MotorSetPWM(int32_t left_counts, int32_t right_counts)
 {
 	const uint16_t max = (uint16_t)(PCA9685_COUNTS - 1u);
 
 	/* Left motor */
-	if (left_counts > 0)
+	if (left_counts < 0)
 	{
 		uint16_t pwm = ClampU16(left_counts);
 		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_A, 0, max);

@@ -1,40 +1,12 @@
 ---
 :project:
-  :use_mocks: TRUE
+  :use_exceptions: FALSE
   :use_test_preprocessor: :none
-  :use_deep_preprocessor: :none
-  :use_backtrace: :simple
-  :use_decorators: :auto
+  :use_auxiliary_dependencies: TRUE
   :build_root: build
   :test_file_prefix: test_
   :default_tasks:
     - test:all
-  :test_threads: 8
-  :compile_threads: 8
-  :release_build: FALSE
-
-:mixins:
-  :enabled: []
-  :load_paths: []
-
-:test_build:
-  :use_assembly: FALSE
-
-:release_build:
-  :output: MyApp.out
-  :use_assembly: FALSE
-  :artifacts: []
-
-:plugins:
-  :load_paths: []
-  :enabled:
-    - gcov
-    - module_generator
-    - report_tests_log_factory
-
-:report_tests_log_factory:
-  :reports:
-    - junit
 
 :extension:
   :executable: .out
@@ -51,29 +23,33 @@
   :libraries: []
 
 :flags:
-  :test:
-    :compile:
-      :*:
-        - --coverage
-    :link:
-      :*:
-        - --coverage
   :gcov:
     :compile:
       - --coverage
     :link:
       - --coverage
 
-:files:
-  :test: []
-  :source:
-    - ../../../firmware/Core/Src/servo_motor.c
-
 :defines:
+  :common: &common_defines
+    - UNIT_TEST_BUILD
+    - TARGET_INDEPENDENT
   :test:
+    - *common_defines
     - TEST
-  :release: []
-  :use_test_definition: FALSE
+    - UNITY_INCLUDE_DOUBLE
+    - UNITY_DOUBLE_PRECISION=1e-12
+  :test_preprocess:
+    - *common_defines
+    - TEST
+  :gcov:
+    - *common_defines
+    - GCOV_BUILD
+
+:unity:
+  :vendor_path: vendor
+
+:cexception:
+  :vendor_path: vendor
 
 :cmock:
   :plugins:
@@ -99,6 +75,16 @@
   :callback_include_count: true
   :callback_after_arg_check: false
   :exclude_setjmp_h: false
+
+:plugins:
+  :enabled:
+    - gcov
+    - module_generator
+    - report_tests_log_factory
+
+:report_tests_log_factory:
+  :reports:
+    - junit
 
 :gcov:
   :summaries: TRUE

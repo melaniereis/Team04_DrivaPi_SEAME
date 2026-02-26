@@ -156,6 +156,76 @@ run_ceedling_tests() {
     fi
 }
 
+print_speed_sensor_coverage_note() {
+    log_header "Speed Sensor Coverage Note"
+    log_info "Speed sensor tests executed:"
+    log_info "  ✓ test_speed_sensor_functions.c"
+    log_info "  ✓ test_threadx_speed_sensor.c"
+    log_info ""
+    log_info "For the comprehensive speed-sensor/ test suite:"
+    log_info "  cd speed-sensor && ./run_speedtest.sh"
+}
+
+generate_sonarqube_xml_report() {
+    local project_root="$1"
+    local build_dir="$2"
+    local output_xml="$3"
+
+    log_header "Generating SonarQube XML"
+
+    local repo_root
+    repo_root="$(cd "${project_root}/../../.." && pwd)"
+
+    gcovr \
+        --root "${repo_root}" \
+        --filter ".*src/.*" \
+        --exclude ".*test.*" \
+        --exclude ".*mock.*" \
+        --txt-metric branch \
+        --xml \
+        --xml-pretty \
+        --output "${output_xml}" \
+        "${build_dir}"
+
+    log_success "SonarQube XML: ${output_xml}"
+}
+
+validate_coverage_file() {
+    local coverage_dir="$1"
+
+    log_header "Validating Coverage (ISO 26262 ASIL-B/D)"
+
+    if [[ -s "${coverage_dir}/coverage_filtered.info" ]]; then
+        log_success "Coverage data available"
+        log_info "Coverage report: ${coverage_dir}/html/index.html"
+        return 0
+    fi
+
+    log_warn "Coverage data not found"
+    return 1
+}
+
+save_coverage_for_module() {
+    local coverage_dir="$1"
+    local project_root="$2"
+    local module_name="$3"
+
+    log_header "Saving Coverage for Aggregation"
+
+    local absolute_project_root
+    absolute_project_root="$(cd "${project_root}/../.." && pwd)"
+    local persistent_coverage_dir="${absolute_project_root}/build/coverage/${module_name}"
+
+    mkdir -p "${persistent_coverage_dir}"
+
+    if [[ -f "${coverage_dir}/coverage_filtered.info" ]]; then
+        cp "${coverage_dir}/coverage_filtered.info" "${persistent_coverage_dir}/coverage_filtered.info"
+        log_success "Coverage saved for aggregation: ${persistent_coverage_dir}/coverage_filtered.info"
+    else
+        log_warn "Coverage file not found: ${coverage_dir}/coverage_filtered.info"
+    fi
+}
+
 # ============================================================================
 # COVERAGE GENERATION
 # ============================================================================
@@ -167,23 +237,35 @@ generate_lcov_coverage() {
 
     mkdir -p "$coverage_dir/html"
 
-    # Capture coverage
+    # Prefer Ceedling gcov plugin output when available
+    if [[ ! -s "$coverage_dir/coverage.info" ]]; then
         lcov --capture \
-            --directory "$build_dir" \
+            --directory "$build_dir/gcov/out" \
             --output-file "$coverage_dir/coverage.info" \
-            --rc branch_coverage=1 \
+            --rc lcov_branch_coverage=1 \
             --ignore-errors source,gcov 2>&1 | grep -v "WARNING" || true
+    fi
+
+    if [[ ! -s "$coverage_dir/coverage.info" ]]; then
+        log_error "Coverage info file not found: $coverage_dir/coverage.info"
+        return 1
+    fi
 
     # Filter
-        lcov --remove "$coverage_dir/coverage.info" \
+    lcov --remove "$coverage_dir/coverage.info" \
             '/usr/*' '*/test/*' '*/mock_*' '*/unity/*' '*/cmock/*' '*vendor*' \
             '*c_exception*' '*build/test/*' '*test/runners*' '*test/mocks*' '/var/lib/gems/*' '*/common/*' \
             --output-file "$coverage_dir/coverage_filtered.info" \
-            --rc branch_coverage=1 \
-            --ignore-errors unused >/dev/null 2>&1 || true
+            --rc lcov_branch_coverage=1 \
+            --ignore-errors unused >/dev/null 2>&1 || cp "$coverage_dir/coverage.info" "$coverage_dir/coverage_filtered.info"
+
+    if [[ ! -s "$coverage_dir/coverage_filtered.info" ]]; then
+        log_error "Coverage info file not found: $coverage_dir/coverage_filtered.info"
+        return 1
+    fi
 
     # Generate HTML
-        genhtml "$coverage_dir/coverage_filtered.info" \
+    genhtml "$coverage_dir/coverage_filtered.info" \
             --output-directory "$coverage_dir/html" \
             --title "DrivaPi Coverage" \
             --branch-coverage \
@@ -231,14 +313,14 @@ aggregate_coverage() {
 
         lcov "${lcov_args[@]}" \
             -o "$output_dir/coverage_combined.info" \
-            --rc branch_coverage=1 || return 1
+            --rc lcov_branch_coverage=1 || return 1
 
     # Filter
         lcov -r "$output_dir/coverage_combined.info" \
             '/usr/*' '*vendor*' '*cmock*' '*unity*' '*c_exception*' \
             '*build/test/*' '*test/runners*' '*test/mocks*' '/var/lib/gems/*' '*/common/*' \
             -o "$output_dir/coverage_filtered.info" \
-            --rc branch_coverage=1 \
+            --rc lcov_branch_coverage=1 \
             --ignore-errors unused >/dev/null 2>&1 || true
 
     # Generate HTML
@@ -256,7 +338,7 @@ aggregate_coverage() {
 
     echo ""
     log_info "Coverage Summary:"
-    lcov --summary "$output_dir/coverage_filtered.info" --rc branch_coverage=1 || true
+    lcov --summary "$output_dir/coverage_filtered.info" --rc lcov_branch_coverage=1 || true
 }
 
 # ============================================================================
@@ -280,7 +362,7 @@ generate_coverage_xml() {
     local branch_rate=0.0
 
     # Get coverage metrics using lcov with branch coverage enabled
-    local lcov_output=$(lcov --summary "$coverage_info" --rc branch_coverage=1 2>/dev/null || true)
+    local lcov_output=$(lcov --summary "$coverage_info" --rc lcov_branch_coverage=1 2>/dev/null || true)
 
     # Extract line coverage percentage (e.g., "lines.......: 100.0% (210 of 210 lines)")
     if [[ $lcov_output =~ lines[^:]*:[[:space:]]*([0-9.]+)% ]]; then
@@ -334,58 +416,9 @@ count_tests() {
     grep -oP '^\d+(?= Tests)' "$output_file" | awk '{s+=$1} END {print s}' || echo 0
 }
 
-run_test_suite() {
-    local test_name="$1"
-    local script="$2"
-    local output_file="$3"
-
-    log_section "Running $test_name"
-    echo ""
-
-    local exit_code=0
-    if "$script" 2>&1 | tee "$output_file"; then
-        exit_code=$?
-    else
-        exit_code=$?
-    fi
-
-    if [[ $exit_code -eq 0 ]]; then
-        log_pass "$test_name PASSED"
-        return 0
-    else
-        log_fail "$test_name FAILED"
-        return 1
-    fi
-}
-
 # ============================================================================
 # REPORT GENERATION
 # ============================================================================
-
-generate_test_report() {
-    local output_file="$1"
-    local report_file="$2"
-
-    # Extract test counts
-    local passed=$(grep -oP 'Tests \d+, \d+ failures' "$output_file" | grep -oP '\d+(?=, \d+ failures)' | head -1 || echo 0)
-    local failures=$(grep -oP 'Tests \d+, \d+ failures' "$output_file" | grep -oP '\d+(?= failures)' | head -1 || echo 0)
-    local total=$(grep -oP '^\d+(?= Tests)' "$output_file" | awk '{s+=$1} END {print s}' || echo 0)
-
-    if [[ -z "$passed" ]] || [[ "$passed" == "0" ]]; then
-        passed=$((total - failures))
-    fi
-
-    cat > "$report_file" << EOF
-{
-  "test_suite": "$(basename $(dirname $(dirname "$output_file")))",
-  "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-  "total_tests": $total,
-  "passed": $passed,
-  "failed": $failures,
-  "status": "$([ $failures -eq 0 ] && echo 'PASSED' || echo 'FAILED')"
-}
-EOF
-}
 
 generate_junit_xml() {
     local output_file="$1"

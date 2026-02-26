@@ -6,14 +6,12 @@ extern "C" {
 #endif
 
 #include "tx_api.h"
-#include <stdint.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <math.h>
 #include "stm32u5xx_hal.h"
 
-/* CAN message structure (will be overridden by firmware if included) */
 #ifndef can_message_s
 typedef struct can_message_s {
     uint32_t id;	
