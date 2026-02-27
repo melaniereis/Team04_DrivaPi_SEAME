@@ -14,7 +14,8 @@ sudo apt-get install -y \
     wget \
     python3 \
     python3-venv \
-    python3-pip
+    python3-pip \
+    libvulkan1 vulkan-utils
 ```
 
 ### Step 2 — Download CARLA
@@ -23,9 +24,9 @@ Go to the [CARLA GitHub Releases page](https://github.com/carla-simulator/carla/
 
 ```bash
 # Replace 0.9.16 with the version you want
-wget https://tiny.carla.org/carla-0-9-16-linux
+wget https://carla-releases.b-cdn.net/Linux/CARLA_0.9.16.tar.gz
 mkdir -p ~/CARLA
-tar -xzf carla-0-9-16-linux -C ~/CARLA
+tar -xzf CARLA_0.9.16.tar.gz -C ~/CARLA
 cd ~/CARLA
 ```
 
@@ -140,12 +141,6 @@ sudo reboot
 The simulator takes time to fully load. Add a delay in your script or increase the client timeout:
 ```python
 client.set_timeout(30.0)
-```
-
-**Vulkan errors on startup**
-Install the Vulkan ICD loader:
-```bash
-sudo apt-get install libvulkan1 vulkan-utils
 ```
 
 ---
