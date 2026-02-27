@@ -315,7 +315,6 @@ Pulse detected! Total count: N
 ### Archive Reference
 **Location in Repository:** `/tests/integration/executions/phase_d/`
 **Committed:** [ ] Yes [ ] No
-**Commit Hash:** _______________
 
 ---
 

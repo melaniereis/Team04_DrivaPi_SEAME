@@ -15,7 +15,7 @@
 ## Test Information
 - **Phase Name:** CAN Bidirectional Communication
 - **Test Objective:** Verify bidirectional CAN communication between Raspberry Pi and STM32
-- **Related Requirements:
+- **Related Requirements:**
   - Integration Test Plan - Phase B
   - `/docs/tests/integration-test-plan.md`
   - CAN communication specification

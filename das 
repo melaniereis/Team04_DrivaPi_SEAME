@@ -1,0 +1,46 @@
+[33mcf69f85[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdocs/476-test-execution-templates-for-integration-test-phases[m[33m, [m[1;31morigin/docs/476-test-execution-templates-for-integration-test-phases[m[33m)[m HEAD@{0}: pull (finish): returning to refs/heads/docs/476-test-execution-templates-for-integration-test-phases
+[33mcf69f85[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdocs/476-test-execution-templates-for-integration-test-phases[m[33m, [m[1;31morigin/docs/476-test-execution-templates-for-integration-test-phases[m[33m)[m HEAD@{1}: pull (pick): Update 24 daily log
+[33mf12a012[m HEAD@{2}: pull (pick): docs: update 2026-02-24 daily log with Melanie's contributions
+[33m4cfffa6[m HEAD@{3}: pull (pick): docs: add daily log for February 24, 2026 (Day 82)
+[33m91869fb[m HEAD@{4}: pull (pick): Fix: Fixed errors on the files
+[33m31fb96d[m HEAD@{5}: pull (pick): Chore: Updated daily-log-template.md
+[33mca41163[m HEAD@{6}: pull (pick): docs: Add daily log for 2026-02-23
+[33m81a693e[m HEAD@{7}: pull (pick): Update team.instructions.md
+[33m07f641e[m HEAD@{8}: pull (pick): Update week start date and calculation method
+[33md3ae413[m HEAD@{9}: pull (pick): Fix formatting of pull request command in instructions
+[33md145b45[m HEAD@{10}: pull (pick): chore: Added the new team member to the AI instructions
+[33med13408[m HEAD@{11}: pull (pick): Update navigation links for standup document
+[33m75dc289[m HEAD@{12}: pull (pick): docs: update trustable repository URL in TSF validation workflow
+[33m379fe1e[m HEAD@{13}: pull (pick): docs: fix date - 2026-02-13 was Friday, not Thursday
+[33mc33c23a[m HEAD@{14}: pull (pick): docs: add daily log for 2026-02-13 (Day 80)
+[33m7215875[m HEAD@{15}: pull (pick): docs: Add daily log for 2026-02-12
+[33m8c9786a[m HEAD@{16}: pull (pick): Added multiple logos and guidelines
+[33me455289[m HEAD@{17}: pull (start): checkout e455289c6255576af5692057e6ab3ade694c4b5a
+[33mab2bfc2[m HEAD@{18}: pull origin master (finish): returning to refs/heads/docs/476-test-execution-templates-for-integration-test-phases
+[33mab2bfc2[m HEAD@{19}: pull origin master (pick): update phase D implementation test tempalte
+[33ma354209[m HEAD@{20}: pull origin master (pick): Finish fase C template
+[33m1300226[m HEAD@{21}: pull origin master (pick): Update phase C tempalte
+[33m0fe0dbe[m HEAD@{22}: pull origin master (pick): Finish phase B template
+[33mec2157c[m HEAD@{23}: pull origin master (pick): Improve interation test phase B
+[33m377f5d6[m HEAD@{24}: pull origin master (pick): finish integration phase A template
+[33m8f0175d[m HEAD@{25}: pull origin master (pick): improve integration phase A
+[33m0a91879[m HEAD@{26}: pull origin master (pick): update integration tests template
+[33m86ea358[m HEAD@{27}: pull origin master (pick): create integration tests templates
+[33m100cd29[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/docs/494-integrate-and-configure-meta-hailo-layer[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{28}: pull origin master (start): checkout 100cd298586d1e6dff7c713c5834d967a5e739c2
+[33me455289[m HEAD@{29}: commit: update phase D implementation test tempalte
+[33mb27478b[m HEAD@{30}: commit: Finish fase C template
+[33m3dfec47[m HEAD@{31}: commit: Update phase C tempalte
+[33m8be2141[m HEAD@{32}: commit: Finish phase B template
+[33m9545820[m HEAD@{33}: commit: Improve interation test phase B
+[33ma19903f[m HEAD@{34}: commit: finish integration phase A template
+[33mbd19d0c[m HEAD@{35}: commit: improve integration phase A
+[33m1b44a92[m HEAD@{36}: checkout: moving from docs/490-daily-24-02-2026 to docs/476-test-execution-templates-for-integration-test-phases
+[33m8314249[m[33m ([m[1;31morigin/docs/490-daily-24-02-2026[m[33m, [m[1;32mdocs/490-daily-24-02-2026[m[33m)[m HEAD@{37}: commit: Update 24 daily log
+[33mc7a8eec[m HEAD@{38}: commit: docs: update 2026-02-24 daily log with Melanie's contributions
+[33md2d545b[m HEAD@{39}: commit: docs: add daily log for February 24, 2026 (Day 82)
+[33mad62920[m HEAD@{40}: pull origin master: Fast-forward
+[33m9b9ed3a[m[33m ([m[1;32mmaster[m[33m)[m HEAD@{41}: checkout: moving from docs/476-test-execution-templates-for-integration-test-phases to docs/490-daily-24-02-2026
+[33m1b44a92[m HEAD@{42}: commit: update integration tests template
+[33mfe3955d[m HEAD@{43}: commit: create integration tests templates
+[33m1bcbbd4[m HEAD@{44}: checkout: moving from master to docs/476-test-execution-templates-for-integration-test-phases
+[33m9b9ed3a[m[33m ([m[1;32mmaster[m[33m)[m HEAD@{45}: clone: from github.com:SEAME-pt/Team04_DrivaPi.git
