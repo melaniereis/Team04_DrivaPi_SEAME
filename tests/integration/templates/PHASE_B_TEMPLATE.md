@@ -39,7 +39,6 @@
 ### Configuration Settings
 - **CAN Bus:** [CAN1]
 - **Baud Rate:** [1Mbps]
-- **Test Duration:** [seconds]
 
 ### Prerequisites Checklist
 - [ ] CAN transceiver powered and operational
@@ -326,7 +325,7 @@ Majority of iterations complete successfully
 ### Review & Approval
 - **Tested By:** [Tester Name] - Signature/Date: _______________
 - **Reviewed By:** [Reviewer Name] - Signature/Date: _______________
-- **Approved By:** [Team Lead Name] - Signature/Date: _______________
+- **Approved By:** [Reviewer Name] - Signature/Date: _______________
 
 ### Date Approved
 **Date:** [YYYY-MM-DD]
