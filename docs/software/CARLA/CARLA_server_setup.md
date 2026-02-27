@@ -13,6 +13,7 @@ sudo apt-get update
 sudo apt-get install -y \
     wget \
     python3 \
+    python3-venv \
     python3-pip
 ```
 
