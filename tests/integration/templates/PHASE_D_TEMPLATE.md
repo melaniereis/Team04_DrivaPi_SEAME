@@ -37,9 +37,9 @@
 - [ ] UART terminal (115200 baud)
 
 ### Configuration Settings
-- **Sensor Type:** [Hall effect, Proximity, other]
+- **Sensor Type:** LM393 (Dual Differential Comparator)
 - **Input Pin:** SPEED_SENSOR_Pin (EXTI9)
-- **Interrupt Type:** External interrupt (rising/falling edge)
+- **Interrupt Type:** External interrupt (rising edge)
 - **UART Baud Rate:** 115200
 
 ### Prerequisites Checklist
@@ -52,7 +52,7 @@
 ---
 
 ## Pre-Test Checklist
-- [ ] Sensor power voltage: _______ V (expected: _______ V)
+- [ ] Sensor power voltage: _______ V (expected: 5V)
 - [ ] Signal output line not shorted
 - [ ] STM32 powered and firmware loaded
 - [ ] UART connected and terminal open at 115200 baud
@@ -231,14 +231,6 @@ Pulse detected! Total count: N
 - [ ] Continuous pulse detection working without missed pulses
 - [ ] No interrupt handling errors observed
 
-### Key Measurements Summary
-| Metric | Value | Threshold | Status |
-|--------|-------|-----------|--------|
-| Single Pulse Detection | PASS/FAIL | PASS | PASS/FAIL |
-| Multiple Pulse Accuracy | ___% | 100% | PASS/FAIL |
-| Continuous Detection | Working/Not Working | Working | PASS/FAIL |
-| UART Messages | Yes/No | Yes | PASS/FAIL |
-
 ### Issues Encountered
 - [ ] No issues
 - [ ] Issues found (describe below):
@@ -259,13 +251,18 @@ Pulse detected! Total count: N
 - Total pulses detected: _______
 - Pulse detection accuracy: _______ %
 - Missed pulses: _______
-- UART response time: _______ ms
 
 ---
 
 ## Evidence Artifacts
 
-### Logs
+### Video Record
+- [ ] Test execution video: `[filename]`
+  - Duration: _______ seconds
+  - Location: _______________
+  - Notes: _______________
+
+### Logs (Optional)
 - [ ] UART console log: `[filename]`
   - Location: _______________
   - Pulse messages captured: _______
@@ -307,7 +304,7 @@ Pulse detected! Total count: N
 ### Review & Approval
 - **Tested By:** [Tester Name] - Signature/Date: _______________
 - **Reviewed By:** [Reviewer Name] - Signature/Date: _______________
-- **Approved By:** [Team Lead Name] - Signature/Date: _______________
+- **Approved By:** [Reviewer Name] - Signature/Date: _______________
 
 ### Date Approved
 **Date:** [YYYY-MM-DD]
