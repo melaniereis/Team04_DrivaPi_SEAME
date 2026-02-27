@@ -3,9 +3,6 @@
 CARLA (Car Learning to Act) is an open-source autonomous driving simulator built on Unreal Engine 4. This guide covers installation and setup on Ubuntu.
 
 ---
-
-## Option 1: Quick Install via Pre-built Package (Recommended)
-
 ### Step 1 — Install System Dependencies
 
 ```bash
