@@ -174,8 +174,12 @@ Failed: __
 ### Logs
 - [ ] UART console log: `[filename]`
   - Location: _______________
-- [ ] STM32 I2C log (optional): `[filename]`
+
+### Video Record
+- [ ] Test execution video: `[filename]`
+  - Duration: _______ seconds
   - Location: _______________
+  - Notes: _______________
 
 ---
 
