@@ -167,12 +167,6 @@ Failed: __
 - Devices affected: [0x60/0x40/Both]
 - Root cause analysis: [If known]
 
-### Performance Metrics Summary
-- I2C clock frequency observed: _______ kHz
-- Average transaction duration: _______ ms
-- Minimum transaction time: _______ ms
-- Maximum transaction time: _______ ms
-
 ---
 
 ## Evidence Artifacts
