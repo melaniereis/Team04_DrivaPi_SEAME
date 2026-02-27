@@ -80,26 +80,6 @@ python3 manual_control.py
 
 ---
 
-## Option 2: Install via APT (Debian Package)
-
-CARLA offers an APT repository for easy installation and updates.
-
-```bash
-# Add the CARLA APT repository
-sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 1AF1527DE64CB8D9
-sudo add-apt-repository "deb [arch=amd64] http://dist.carla.org/carla $(lsb_release -sc) main"
-
-# Install CARLA
-sudo apt-get update
-sudo apt-get install carla-simulator
-
-# The simulator will be installed to /opt/carla-simulator/
-cd /opt/carla-simulator
-./CarlaUE4.sh
-```
-
----
-
 ## Useful Launch Flags
 
 | Flag | Description |
