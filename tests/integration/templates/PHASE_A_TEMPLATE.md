@@ -100,13 +100,13 @@ PS3 Controller Connected
 ### Step 3: Test Analog Stick Input
 **Procedure:**
 1. **Left Analog Stick:**
-   - Move left analog stick to full left position
+   - Move left analog stick to full up position
    - Record decoded value in application
-   - Repeat for: right, up, down and center
+   - Repeat for: down and center
 2. **Right Analog Stick:**
    - Move right analog stick to full left position
    - Record decoded value in application
-   - Repeat for: right, up, down and center
+   - Repeat for: right and center
 
 **Expected Output:**
 - Left stick center: Y= 0
@@ -130,21 +130,20 @@ PS3 Controller Connected
 **Procedure:**
 1. Press each button sequentially: Cross, Circle, Triangle, Square
 2. Record decoded button press in application logs
-3. Verify CAN payload generated for each button
-4. Test L1, L2, R1, R2 shoulder buttons
+3. Test L1, L2, R1, R2 shoulder buttons
 
 **Button Test Results:**
 
-| Button | Decoded Value | CAN ID | CAN Payload | Status |
-|--------|---------------|--------|-------------|--------|
-| Cross (X) | ___ | ___ | ___ | PASS/FAIL |
-| Circle (O) | ___ | ___ | ___ | PASS/FAIL |
-| Triangle (Δ) | ___ | ___ | ___ | PASS/FAIL |
-| Square (□) | ___ | ___ | ___ | PASS/FAIL |
-| L1 | ___ | ___ | ___ | PASS/FAIL |
-| L2 | ___ | ___ | ___ | PASS/FAIL |
-| R1 | ___ | ___ | ___ | PASS/FAIL |
-| R2 | ___ | ___ | ___ | PASS/FAIL |
+| Button | Decoded Value | Status |
+|--------|---------------|--------|
+| Cross (X) | ___ | PASS/FAIL |
+| Circle (O) | ___ | PASS/FAIL |
+| Triangle (Δ) | ___ | PASS/FAIL |
+| Square (□) | ___ | PASS/FAIL |
+| L1 | ___ | PASS/FAIL |
+| L2 | ___ | PASS/FAIL |
+| R1 | ___ | PASS/FAIL |
+| R2 | ___ | PASS/FAIL |
 
 ---
 
@@ -219,14 +218,9 @@ All resources released
 
 ## Evidence Artifacts
 
-### Logs Captured
+### Logs Captured (if applicable)
 - [ ] Controller application log: `[filename]`
   - Location: _______________
-  - Size: _______ KB
-  
-- [ ] System log: `[filename]`
-  - Location: _______________
-  - Size: _______ KB
 
 ### Video Record
 - [ ] Test execution video: `[filename]`
@@ -267,7 +261,7 @@ All resources released
 ### Review & Approval
 - **Tested By:** [Tester Name] - Signature/Date: _______________
 - **Reviewed By:** [Reviewer Name] - Signature/Date: _______________
-- **Approved By:** [Team Lead Name] - Signature/Date: _______________
+- **Approved By:** [Reviewer Name] - Signature/Date: _______________
 
 ### Date Approved
 **Date:** [YYYY-MM-DD]
