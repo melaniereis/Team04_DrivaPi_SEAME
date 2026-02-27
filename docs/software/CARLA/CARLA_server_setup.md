@@ -34,7 +34,7 @@ cd ~/CARLA
 
 ```bash
 python3 -m venv .venv
-# don't forget to do the following on new terminals
+# Don't forget to do the following on new terminals
 source .venv/bin/activate
 ```
 
