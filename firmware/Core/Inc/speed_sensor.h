@@ -41,6 +41,4 @@ VOID SpeedSensor(ULONG initial_input);
 }
 #endif
 
-float ReadSpeedSensor(void);
-VOID SpeedSensor(ULONG initial_input);
 #endif

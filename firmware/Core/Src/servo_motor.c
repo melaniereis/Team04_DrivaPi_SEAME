@@ -11,15 +11,11 @@
 #include "servo_motor.h"
 
 /**
- * @brief
- *
- * @param hi2c
- * @param addr7
- * @param channel
- * @param angle_deg
- * @param min_pulse
- * @param max_pulse
- * @return int
+ * @brief Set the Servo Angle object
+ * 
+ * @param channel 
+ * @param angle_deg 
+ * @return int 
  */
 int SetServoAngle(uint8_t channel, uint16_t angle_deg)
 {
@@ -37,10 +33,10 @@ int SetServoAngle(uint8_t channel, uint16_t angle_deg)
 
 
 /**
- * @brief
- *
+ * @brief Servo motor control thread that processes steering commands from CAN queue
+ * 
  * @param initial_input
- * @return void
+ * @return VOID
  */
 void ServoMotor(ULONG initial_input)
 {

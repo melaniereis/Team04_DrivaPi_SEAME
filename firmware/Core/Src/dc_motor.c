@@ -8,15 +8,13 @@
   *
 */
 #include "dc_motor.h"
-#include "speed_sensor.h"
 
 /**
- * @brief 
+ * @brief Set PWM values for left and right DC motors based on pulse counts
  * 
- * @param left_counts 
- * @param right_counts 
+ * @param left_counts PWM pulse count for left motor (positive=forward, negative=reverse, 0=stop)
+ * @param right_counts PWM pulse count for right motor (positive=forward, negative=reverse, 0=stop)
  */
-
 void MotorSetPWM(int32_t left_counts, int32_t right_counts)
 {
 	const uint16_t max = (uint16_t)(PCA9685_COUNTS - 1u);
@@ -70,11 +68,11 @@ void MotorSetPWM(int32_t left_counts, int32_t right_counts)
 }
 
 /**
-* @brief
-*
-* @param initial_input
-* @return VOID
-*/
+ * @brief DC motor control thread that processes speed commands from CAN queue
+ * 
+ * @param initial_input 
+ * @return VOID 
+ */
 VOID DcMotor(ULONG initial_input)
 {
 	t_can_message 	msg;
