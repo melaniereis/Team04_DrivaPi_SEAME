@@ -41,6 +41,7 @@ extern "C" {
 #include "dc_motor_test.h"
 #include "motor_utils.h"
 #include "sensors.h"
+#include "speed_sensor.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
