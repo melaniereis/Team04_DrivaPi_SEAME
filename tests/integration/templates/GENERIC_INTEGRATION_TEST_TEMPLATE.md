@@ -27,7 +27,6 @@
 ### Hardware Required
 - [ ] [Hardware component 1]
 - [ ] [Hardware component 2]
-- [ ] [Hardware component 3]
 - [ ] [Additional hardware as needed]
 
 ### Software Required
