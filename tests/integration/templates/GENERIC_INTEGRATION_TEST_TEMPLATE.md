@@ -108,7 +108,7 @@
 
 **Measurements/Observations:**
 - [Measurement 1]: _______ [unit]
-- [Observation 1]: [Description]
+- [ Observation 1 ]: [ Description ]
 
 **Status:** [ ] PASS [ ] FAIL [ ] SKIPPED
 
