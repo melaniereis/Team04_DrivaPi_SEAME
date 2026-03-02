@@ -133,7 +133,7 @@
 |--------|-------|-----------|--------|
 | [Metric 1] | ___ | [threshold] | PASS/FAIL |
 | [Metric 2] | ___ | [threshold] | PASS/FAIL |
-| [Other Metric 3] | ___ | [threshold] | PASS/FAIL |
+| [Other Metric] | ___ | [threshold] | PASS/FAIL |
 
 ### Issues Encountered
 - [ ] No issues
