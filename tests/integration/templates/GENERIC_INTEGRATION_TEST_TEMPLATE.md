@@ -38,13 +38,11 @@
 ### Configuration Settings
 - **[Parameter 1]:** [Value/Range]
 - **[Parameter 2]:** [Value/Range]
-- **[Parameter 3]:** [Value/Range]
 - **[Additional parameters as needed]**
 
 ### Prerequisites Checklist
 - [ ] [Prerequisite condition 1]
 - [ ] [Prerequisite condition 2]
-- [ ] [Prerequisite condition 3]
 - [ ] [Additional prerequisites as needed]
 
 ---
@@ -52,7 +50,6 @@
 ## Pre-Test Checklist
 - [ ] [Pre-test verification item 1]
 - [ ] [Pre-test verification item 2]
-- [ ] [Pre-test verification item 3]
 - [ ] [Physical measurement]: _______ [unit] (expected: [value])
 - [ ] [Component status verification]
 - [ ] [Connection verification]
