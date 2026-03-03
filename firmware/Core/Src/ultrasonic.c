@@ -53,6 +53,7 @@ void UltrasonicEntry(ULONG initial_input)
 	float velocity_cm_s = 0;
 	float ttc_ms = 9999;
 	float current_speed = 0;
+	RNDGear_t current_gear = GEAR_NEUTRAL;
 	bool range_active = false;
 
 	while(1)
@@ -94,13 +95,19 @@ void UltrasonicEntry(ULONG initial_input)
 		tx_mutex_get(&g_speedDataMutex, TX_WAIT_FOREVER);
 		current_speed = g_vehicleSpeed;
 		tx_mutex_put(&g_speedDataMutex);
+
+
+		tx_mutex_get(&g_gearMutex, TX_WAIT_FOREVER);
+		current_gear = g_current_gear;
+		tx_mutex_put(&g_gearMutex);
+
 		if (range_cm <= BRAKE_THRESHOLD_CM)
 			range_active = true;
 		else
 			range_active = false;
 
 		// 4. PHYSICS & SAFETY
-		if (range_cm > 0 && range_cm < 80)
+		if (range_cm >= 0 && range_cm <= 80)
 		{
 			// Velocity
 			int16_t delta = dist_old - range_cm;
@@ -120,40 +127,68 @@ void UltrasonicEntry(ULONG initial_input)
 			snprintf(msg, sizeof(msg), "D:%d cm | TTC:%.0f ms\r\n", range_cm, ttc_ms);
 			HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), 10);
 
-			if (!range_active && (ttc_ms < TTC_THRESHOLD_MS || range_cm < BRAKE_THRESHOLD_CM))
+			if (current_gear != GEAR_REVERSE && (ttc_ms < TTC_THRESHOLD_MS || range_cm < BRAKE_THRESHOLD_CM))
 			{
 				tx_mutex_get(&g_emergencyMutex, TX_WAIT_FOREVER);
 				g_emergencyBrake = true;
 				tx_mutex_put(&g_emergencyMutex);
-				HAL_UART_Transmit(&huart1, (uint8_t*)"!!! KILLING MOTORS !!!\r\n", 24, 100);
+				HAL_UART_Transmit(&huart1, (uint8_t*)"! STOPPING !\r\n", 24, 100);
 
-				tx_mutex_get(&g_motorMutex, TX_WAIT_FOREVER);
-
-				if (ttc_ms < TTC_THRESHOLD_MS && ttc_ms >= 200)
-					MotorSetPWM(0, 0);
-				else if (ttc_ms < 200 && range_cm > BRAKE_THRESHOLD_CM && current_speed >= 0.2)
+				if (ttc_ms < TTC_THRESHOLD_MS && ttc_ms >= 200 && current_gear != GEAR_REVERSE)
 				{
-					for (int i = 1; i <= (50 * current_speed); i++)
+					tx_mutex_get(&g_motorMutex, TX_WAIT_FOREVER);
+					MotorSetPWM(0, 0);
+					tx_mutex_put(&g_motorMutex);
+				}
+				else if (ttc_ms < 200 && range_cm > BRAKE_THRESHOLD_CM && current_speed >= 0.2 && current_gear != GEAR_REVERSE)
+				{
+					for (int i = 1; i <= (BACKSPIN_THRESHOLD * current_speed); i++)
 					{
 						if (i % 2 == 0)
 						{
+							tx_mutex_get(&g_motorMutex, TX_WAIT_FOREVER);
 							MotorSetPWM(-4096, -4096);
-							HAL_UART_Transmit(&huart1, (uint8_t*)"!!!ABS!!!\r\n", 24, 100);
+							tx_mutex_put(&g_motorMutex);
+
+//							tx_mutex_get(&g_gearMutex, TX_WAIT_FOREVER);
+//							g_current_gear = GEAR_REVERSE;
+//							current_gear = g_current_gear;
+//							tx_mutex_put(&g_gearMutex);
+
+							HAL_UART_Transmit(&huart1, (uint8_t*)"! ABS !\r\n", 24, 100);
 						}
 						else if (i % 5 == 0)
 						{
+							tx_mutex_get(&g_motorMutex, TX_WAIT_FOREVER);
 							MotorSetPWM(0, 0);
+							tx_mutex_put(&g_motorMutex);
+
+//							tx_mutex_get(&g_gearMutex, TX_WAIT_FOREVER);
+//							g_current_gear = GEAR_NEUTRAL;
+//							current_gear = g_current_gear;
+//							tx_mutex_put(&g_gearMutex);
 						}
 					}
+					tx_mutex_get(&g_motorMutex, TX_WAIT_FOREVER);
 					MotorSetPWM(0, 0);
+					tx_mutex_put(&g_motorMutex);
 				}
-				else if (range_cm < BRAKE_THRESHOLD_CM)
+				else if (range_cm <= BRAKE_THRESHOLD_CM && current_gear)
 				{
+					tx_mutex_get(&g_motorMutex, TX_WAIT_FOREVER);
 					MotorSetPWM(0, 0);
+					tx_mutex_put(&g_motorMutex);
+
+//					tx_mutex_get(&g_gearMutex, TX_WAIT_FOREVER);
+//					g_current_gear = GEAR_NEUTRAL;
+//					current_gear = g_current_gear;
+//					tx_mutex_put(&g_gearMutex);
+
 					range_active = true;
 				}
+				else
+					HAL_UART_Transmit(&huart1, (uint8_t*)"sike!\r\n", 24, 100);
 
-				tx_mutex_put(&g_motorMutex);
 
 				// D. Final Stop
 				//MotorStop();
@@ -165,11 +200,18 @@ void UltrasonicEntry(ULONG initial_input)
 				tx_mutex_get(&g_emergencyMutex, TX_WAIT_FOREVER);
 				g_emergencyBrake = false;
 				tx_mutex_put(&g_emergencyMutex);
+
+//				tx_mutex_get(&g_gearMutex, TX_WAIT_FOREVER);
+//				g_current_gear = GEAR_NEUTRAL;
+//				current_gear = g_current_gear;
+//				tx_mutex_put(&g_gearMutex);
+
 				range_active = false;
 				HAL_UART_Transmit(&huart1, (uint8_t*)"brake free\r\n", 24, 100);
 			}
 			dist_old = range_cm;
 		}
+
 		tx_thread_sleep(1);
 	}
 }

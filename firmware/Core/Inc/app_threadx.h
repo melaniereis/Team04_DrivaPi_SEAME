@@ -150,6 +150,8 @@ extern TX_MUTEX             g_emergencyMutex;
 extern TX_MUTEX             g_canMutex;
 extern TX_MUTEX             g_motorMutex;
 extern TX_MUTEX             g_servoMutex;
+extern TX_MUTEX             g_gearMutex;
+extern RNDGear_t			g_current_gear;
 extern float				g_vehicleSpeed;
 /* USER CODE END 1 */
 

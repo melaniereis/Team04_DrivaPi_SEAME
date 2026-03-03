@@ -53,6 +53,8 @@ TX_MUTEX                g_emergencyMutex;
 TX_MUTEX                g_canMutex;
 TX_MUTEX                g_motorMutex;
 TX_MUTEX                g_servoMutex;
+TX_MUTEX             	g_gearMutex;
+RNDGear_t				g_current_gear;
 float                   g_vehicleSpeed;
 /* USER CODE END PV */
 
@@ -75,6 +77,7 @@ UINT App_ThreadX_Init(VOID *memory_ptr)
   /* USER CODE BEGIN App_ThreadX_Init */
   	g_emergencyBrake = false;
 	g_vehicleSpeed = 0;
+	g_current_gear = GEAR_NEUTRAL;
 
 	const char *msg = "\r\n=== DrivaPi ThreadX Init ===\r\n";
 	HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
@@ -94,6 +97,7 @@ UINT App_ThreadX_Init(VOID *memory_ptr)
 	tx_mutex_create(&g_canMutex, "CAN Mutex", TX_NO_INHERIT);
 	tx_mutex_create(&g_motorMutex, "Motor Mutex", TX_NO_INHERIT);
 	tx_mutex_create(&g_servoMutex, "Servo Mutex", TX_NO_INHERIT);
+	tx_mutex_create(&g_gearMutex, "Gear Mutex", TX_NO_INHERIT);
 
 	InitAllDevices();
 

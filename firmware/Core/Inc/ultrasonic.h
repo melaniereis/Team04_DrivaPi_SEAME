@@ -1,12 +1,5 @@
-/*
- * ultrasonic.h
- *
- *  Created on: Feb 13, 2026
- *      Author: hugofslopes
- */
-
-#ifndef INC_ULTRASONIC_H_
-#define INC_ULTRASONIC_H_
+#ifndef __ULTRASONIC_H
+#define __ULTRASONIC_H
 
 #include "app_threadx.h"
 
@@ -20,6 +13,7 @@
 #define BRAKE_THRESHOLD_CM  17   // Hard Stop
 #define TTC_THRESHOLD_MS    450 // Predictive Stop
 #define DT_SECONDS          0.057f
+#define BACKSPIN_THRESHOLD	70
 
 
-#endif /* INC_ULTRASONIC_H_ */
+#endif /* __ULTRASONIC_H */

@@ -13,7 +13,7 @@
 
 float g_current_speed = 0.0f;
 int16_t g_current_pwm = 0;
-RNDGear_t g_current_gear = GEAR_NEUTRAL;
+//RNDGear_t g_current_gear = GEAR_NEUTRAL;
 
 /**
  * @brief Determine R/N/D gear state based on speed and PWM direction.
@@ -98,8 +98,12 @@ VOID SpeedSensor(ULONG initial_input)
 		g_vehicleSpeed = current_speed;
 		g_current_speed = current_speed;
 		tx_mutex_put(&g_speedDataMutex);
-		RNDGear_t current_gear = DetermineRNDGear(current_speed, g_current_pwm);
-		g_current_gear = current_gear;
+
+		tx_mutex_get(&g_gearMutex, TX_WAIT_FOREVER);
+		g_current_gear = DetermineRNDGear(current_speed, g_current_pwm);
+		RNDGear_t current_gear = g_current_gear;
+		tx_mutex_put(&g_gearMutex);
+
 		if (current_gear != last_gear)
 		{
 			t_can_message can_msg;
