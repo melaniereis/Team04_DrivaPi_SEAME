@@ -1,0 +1,2 @@
+../Core/Src/speed_sensor.c:18:7:ReadSpeedSensor	40	static
+../Core/Src/speed_sensor.c:66:6:SpeedSensor	104	static
