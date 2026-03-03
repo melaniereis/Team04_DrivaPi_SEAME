@@ -22,14 +22,6 @@ void MotorSetPWM(int32_t left_counts, int32_t right_counts)
 	/* Left motor */
 	if (left_counts > 0)
 	{
-		tx_mutex_get(&g_emergencyMutex, TX_WAIT_FOREVER);
-		if(g_emergencyBrake)
-		{
-    		tx_mutex_put(&g_emergencyMutex);
-			return ;
-		}
-		tx_mutex_put(&g_emergencyMutex);
-
 		uint16_t pwm = ClampU16(left_counts);
 		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_A, 0, max);
 		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_L_B, 0, 0);
@@ -55,14 +47,6 @@ void MotorSetPWM(int32_t left_counts, int32_t right_counts)
 	/* Right motor */
 	if (right_counts > 0)
 	{
-		tx_mutex_get(&g_emergencyMutex, TX_WAIT_FOREVER);
-		if(g_emergencyBrake)
-		{
-    		tx_mutex_put(&g_emergencyMutex);
-			return ;
-		}
-		tx_mutex_put(&g_emergencyMutex);
-
 		uint16_t pwm = ClampU16(right_counts);
 		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_A, 0, 0);
 		PCA9685_SetPWM(PCA9685_ADDR_MOTOR, MOTOR_R_B, 0, max);
@@ -84,11 +68,11 @@ void MotorSetPWM(int32_t left_counts, int32_t right_counts)
 }
 
 /**
- * @brief DC motor control thread that processes speed commands from CAN queue
- * 
- * @param initial_input 
- * @return VOID 
- */
+* @brief DC motor thread entry that consumes speed commands from CAN.
+*
+* @param initial_input ThreadX initial input (unused).
+* @return VOID
+*/
 VOID DcMotor(ULONG initial_input)
 {
 	t_can_message 	msg;
@@ -101,19 +85,32 @@ VOID DcMotor(ULONG initial_input)
 
 		while (tx_queue_receive(&g_queueSpeedCmd, &msg, TX_NO_WAIT) == TX_SUCCESS)
 		{
-			if (msg.len >= 8)
+			int32_t left_count = 0;
+			int32_t right_count = 0;
+
+			memcpy(&left_count, msg.data, sizeof(int32_t));
+			tx_mutex_get(&g_emergencyMutex, TX_WAIT_FOREVER);
+			if(g_emergencyBrake && left_count > 0 )
 			{
-				int32_t left_count = 0;
-				int32_t right_count = 0;
-				memcpy(&left_count, msg.data, sizeof(int32_t));
-				memcpy(&right_count, msg.data + sizeof(int32_t), sizeof(int32_t));
-				MotorSetPWM(left_count, right_count);
-			} 
-			else if (msg.len >= 4)
+				tx_mutex_put(&g_emergencyMutex);
+				continue ;
+			}
+			else
 			{
-				int32_t counts = 0;
-				memcpy(&counts, msg.data, sizeof(int32_t));
-				MotorSetPWM(counts, counts);
+				tx_mutex_put(&g_emergencyMutex);
+				if (msg.len >= 8)
+				{
+					right_count = 0;
+					memcpy(&left_count, msg.data, sizeof(int32_t));
+					memcpy(&right_count, msg.data + sizeof(int32_t), sizeof(int32_t));
+					MotorSetPWM(left_count, right_count);
+				}
+				else if (msg.len >= 4)
+				{
+					int32_t counts = 0;
+					memcpy(&counts, msg.data, sizeof(int32_t));
+					MotorSetPWM(counts, counts);
+				}
 			}
 		}
 		tx_thread_sleep(10);

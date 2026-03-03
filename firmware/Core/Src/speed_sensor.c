@@ -16,11 +16,11 @@ int16_t g_current_pwm = 0;
 RNDGear_t g_current_gear = GEAR_NEUTRAL;
 
 /**
- * @brief 
- * 
- * @param speed 
- * @param pwm_value 
- * @return RNDGear_t 
+ * @brief Determine R/N/D gear state based on speed and PWM direction.
+ *
+ * @param speed Current wheel speed.
+ * @param pwm_value Signed PWM value.
+ * @return RNDGear_t Derived gear state.
  */
 RNDGear_t DetermineRNDGear(float speed, int16_t pwm_value)
 {
@@ -39,9 +39,9 @@ RNDGear_t DetermineRNDGear(float speed, int16_t pwm_value)
 }
 
 /**
-* @brief
+* @brief Read wheel speed from the encoder timer.
 *
-* @return float
+* @return float Speed in meters per second.
 */
 float ReadSpeedSensor(void)
 {
@@ -77,10 +77,10 @@ float ReadSpeedSensor(void)
 }
 
 /**
- * @brief 
- * 
- * @param initial_input 
- * @return VOID 
+ * @brief Thread entry that samples speed sensor and updates CAN events.
+ *
+ * @param initial_input ThreadX initial input (unused).
+ * @return VOID
  */
 VOID SpeedSensor(ULONG initial_input)
 {
@@ -91,7 +91,7 @@ VOID SpeedSensor(ULONG initial_input)
 
 	while (1)
 	{
-		tx_thread_sleep(100);
+		tx_thread_sleep(50);
 		float current_speed = ReadSpeedSensor();
 
 		tx_mutex_get(&g_speedDataMutex, TX_WAIT_FOREVER);

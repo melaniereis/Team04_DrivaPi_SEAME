@@ -11,7 +11,7 @@
 #include "app_threadx.h"
 
 /**
- * @brief 
+ * @brief Create and start all application threads.
  *
  */
 void ThreadInit(void)
@@ -26,6 +26,16 @@ void ThreadInit(void)
 		status = TX_THREAD_ERROR;
 	if (status == TX_THREAD_ERROR)
 		HAL_UART_Transmit(&huart1, (uint8_t *)err_msg, strlen(err_msg), HAL_MAX_DELAY);
+
+	// SRF08 ULTRASONIC SENSOR THREAD
+	if (tx_thread_create(&g_threads[ultrasonic_sensor_e].thread_ptr, "ultrasonicS_thread", UltrasonicEntry, 0, g_threads[ultrasonic_sensor_e].thread_Stack, THREAD_STACK_SIZE,
+	1, 1, TX_NO_TIME_SLICE, TX_AUTO_START) != TX_SUCCESS)
+		status = TX_THREAD_ERROR;
+	if (status == TX_THREAD_ERROR)
+	{
+		sprintf(err_msg, "FailUS\r\n");
+		HAL_UART_Transmit(&huart1, (uint8_t *)err_msg, strlen(err_msg), HAL_MAX_DELAY);
+	}
 
 	// DC MOTOR THREAD
 	if (tx_thread_create(&g_threads[dc_motor_e].thread_ptr, "motor_thread", DcMotor, 0, g_threads[dc_motor_e].thread_Stack, THREAD_STACK_SIZE,
@@ -57,16 +67,6 @@ void ThreadInit(void)
 		HAL_UART_Transmit(&huart1, (uint8_t *)err_msg, strlen(err_msg), HAL_MAX_DELAY);
 	}
 
-	// SRF08 ULTRASONIC SENSOR THREAD
-	if (tx_thread_create(&g_threads[ultrasonic_sensor_e].thread_ptr, "ultrasonicS_thread", UltrasonicEntry, 0, g_threads[ultrasonic_sensor_e].thread_Stack, THREAD_STACK_SIZE,
-	1, 1, TX_NO_TIME_SLICE, TX_AUTO_START) != TX_SUCCESS)
-		status = TX_THREAD_ERROR;
-	if (status == TX_THREAD_ERROR)
-	{
-		sprintf(err_msg, "FailUS\r\n");
-		HAL_UART_Transmit(&huart1, (uint8_t *)err_msg, strlen(err_msg), HAL_MAX_DELAY);
-	}
-
 	// CAN TX THREAD
 	if (tx_thread_create(&g_threads[can_tx_e].thread_ptr, "Can TX", CanTx, 0, g_threads[can_tx_e].thread_Stack, THREAD_STACK_SIZE,
 	7, 7, TX_NO_TIME_SLICE, TX_AUTO_START) != TX_SUCCESS)
@@ -87,23 +87,23 @@ void ThreadInit(void)
 		HAL_UART_Transmit(&huart1, (uint8_t *)err_msg, strlen(err_msg), HAL_MAX_DELAY);
 	}
 
-	// HTS221 SENSOR THREAD
-	if (tx_thread_create(&g_threads[sensor_hts221_e].thread_ptr, "HTS221", SensorHTS221Thread, 0, g_threads[sensor_hts221_e].thread_Stack, THREAD_STACK_SIZE,
-	8, 8, TX_NO_TIME_SLICE, TX_AUTO_START) != TX_SUCCESS)
-		status = TX_THREAD_ERROR;
-	if (status == TX_THREAD_ERROR)
-	{
-		sprintf(err_msg, "FailHTS221\r\n");
-		HAL_UART_Transmit(&huart1, (uint8_t *)err_msg, strlen(err_msg), HAL_MAX_DELAY);
-	}
-
-	// BATTERY SENSOR THREAD
-	if (tx_thread_create(&g_threads[sensor_battery_e].thread_ptr, "Battery", SensorBatteryThread, 0, g_threads[sensor_battery_e].thread_Stack, THREAD_STACK_SIZE,
-	9, 9, TX_NO_TIME_SLICE, TX_AUTO_START) != TX_SUCCESS)
-		status = TX_THREAD_ERROR;
-	if (status == TX_THREAD_ERROR)
-	{
-		sprintf(err_msg, "FailBattery\r\n");
-		HAL_UART_Transmit(&huart1, (uint8_t *)err_msg, strlen(err_msg), HAL_MAX_DELAY);
-	}
+//	// HTS221 SENSOR THREAD
+//	if (tx_thread_create(&g_threads[sensor_hts221_e].thread_ptr, "HTS221", SensorHTS221Thread, 0, g_threads[sensor_hts221_e].thread_Stack, THREAD_STACK_SIZE,
+//	15, 15, TX_NO_TIME_SLICE, TX_AUTO_START) != TX_SUCCESS)
+//		status = TX_THREAD_ERROR;
+//	if (status == TX_THREAD_ERROR)
+//	{
+//		sprintf(err_msg, "FailHTS221\r\n");
+//		HAL_UART_Transmit(&huart1, (uint8_t *)err_msg, strlen(err_msg), HAL_MAX_DELAY);
+//	}
+//
+//	// BATTERY SENSOR THREAD
+//	if (tx_thread_create(&g_threads[sensor_battery_e].thread_ptr, "Battery", SensorBatteryThread, 0, g_threads[sensor_battery_e].thread_Stack, THREAD_STACK_SIZE,
+//	15, 15, TX_NO_TIME_SLICE, TX_AUTO_START) != TX_SUCCESS)
+//		status = TX_THREAD_ERROR;
+//	if (status == TX_THREAD_ERROR)
+//	{
+//		sprintf(err_msg, "FailBattery\r\n");
+//		HAL_UART_Transmit(&huart1, (uint8_t *)err_msg, strlen(err_msg), HAL_MAX_DELAY);
+//	}
 }

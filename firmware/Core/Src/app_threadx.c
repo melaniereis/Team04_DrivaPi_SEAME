@@ -44,12 +44,12 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
 bool					g_emergencyBrake;
-thread_t				g_threads[8];
+thread_t				g_threads[9];
 TX_QUEUE                g_queueSpeedCmd;
 TX_QUEUE                g_queueSteerCmd;
 TX_EVENT_FLAGS_GROUP    g_eventFlags;
 TX_MUTEX                g_speedDataMutex;
-TX_MUTEX             	g_emergencyMutex;
+TX_MUTEX                g_emergencyMutex;
 float                   g_vehicleSpeed;
 /* USER CODE END PV */
 
@@ -70,7 +70,6 @@ UINT App_ThreadX_Init(VOID *memory_ptr)
 
   /* USER CODE END App_ThreadX_MEM_POOL */
   /* USER CODE BEGIN App_ThreadX_Init */
-
   	g_emergencyBrake = false;
 	g_vehicleSpeed = 0;
 
@@ -87,28 +86,7 @@ UINT App_ThreadX_Init(VOID *memory_ptr)
 
 	tx_event_flags_create(&g_eventFlags, "System Events");
 
-	msg = "Initializing PCA9685 devices...\r\n";
-	HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
-	PCA9685_InitAllDevices();
-
-	if (Battery_Init(&hi2c3) == HAL_OK)
-	{
-		msg = "Battery: Initialized successfully\r\n";
-		HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
-	}
-	else
-	{
-		msg = "Battery: Initialization failed!\r\n";
-		HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
-	}
-
-	if (HTS221_Init(&hi2c2) != HAL_OK)
-	{
-		msg = "HTS221: Initialization failed!\r\n";
-		HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
-	}
-
-	SensorsInit();
+	InitAllDevices();
 
 	msg = "Initializing threads...\r\n";
 	HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
@@ -141,4 +119,3 @@ void MX_ThreadX_Init(void)
 
 
 /* USER CODE END 1 */
-

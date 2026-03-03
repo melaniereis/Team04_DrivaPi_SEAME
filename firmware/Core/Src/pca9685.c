@@ -12,12 +12,13 @@
 uint8_t g_i2cDebug = 0;
 
 /**
+ * @brief Write a single PCA9685 register.
  *
- * @param hi2c
- * @param addr7
- * @param reg
- * @param val
- * @return
+ * @param hi2c I2C bus handle.
+ * @param addr7 7-bit device address.
+ * @param reg Register address.
+ * @param val Value to write.
+ * @return HAL status code.
  */
 static HAL_StatusTypeDef PCA9685_WriteReg(I2C_HandleTypeDef *hi2c, uint8_t addr7, uint8_t reg, uint8_t val)
 {
@@ -31,12 +32,13 @@ static HAL_StatusTypeDef PCA9685_WriteReg(I2C_HandleTypeDef *hi2c, uint8_t addr7
 }
 
 /**
+ * @brief Read a single PCA9685 register.
  *
- * @param hi2c
- * @param addr7
- * @param reg
- * @param val
- * @return
+ * @param hi2c I2C bus handle.
+ * @param addr7 7-bit device address.
+ * @param reg Register address.
+ * @param val Output value buffer.
+ * @return HAL status code.
  */
 static HAL_StatusTypeDef PCA9685_ReadReg(I2C_HandleTypeDef *hi2c, uint8_t addr7, uint8_t reg, uint8_t *val)
 {
@@ -51,11 +53,12 @@ static HAL_StatusTypeDef PCA9685_ReadReg(I2C_HandleTypeDef *hi2c, uint8_t addr7,
 }
 
 /**
+ * @brief Initialize a PCA9685 device with frequency settings.
  *
- * @param hi2c
- * @param addr7
- * @param name
- * @return
+ * @param hi2c I2C bus handle.
+ * @param addr7 7-bit device address.
+ * @param name Device label (unused).
+ * @return HAL status code.
  */
 HAL_StatusTypeDef PCA9685_InitDevice(I2C_HandleTypeDef *hi2c, uint8_t addr7, const char* name)
 {
@@ -66,8 +69,7 @@ HAL_StatusTypeDef PCA9685_InitDevice(I2C_HandleTypeDef *hi2c, uint8_t addr7, con
 	ret = PCA9685_WriteReg(hi2c, addr7, MODE1, 0x31);
 	if (ret != HAL_OK)
 		return ret;
-	}
-	// Set motor frequency Hz (0x05)
+
 	if (addr7 == 0x60)
 		ret = PCA9685_WriteReg(hi2c, addr7, PRESCALE, 0x05);
 	else
@@ -89,13 +91,13 @@ HAL_StatusTypeDef PCA9685_InitDevice(I2C_HandleTypeDef *hi2c, uint8_t addr7, con
 }
 
 /**
+ * @brief Set a PWM channel duty cycle.
  *
- * @param hi2c
- * @param addr
- * @param channel
- * @param on
- * @param off
- * @return
+ * @param addr 7-bit device address.
+ * @param channel PWM channel index.
+ * @param on On count.
+ * @param off Off count.
+ * @return HAL status code.
  */
 HAL_StatusTypeDef PCA9685_SetPWM(uint16_t addr, uint8_t channel, uint16_t on, uint16_t off) {
 	uint8_t data[4];
@@ -134,11 +136,11 @@ HAL_StatusTypeDef PCA9685_SetPWM(uint16_t addr, uint8_t channel, uint16_t on, ui
 }
 
 /**
+ * @brief Configure the PCA9685 PWM frequency.
  *
- * @param hi2c
- * @param addr7
- * @param freq
- * @return
+ * @param addr7 7-bit device address.
+ * @param freq Target PWM frequency in Hz.
+ * @return HAL status code.
  */
 HAL_StatusTypeDef PCA9685_SetFrequency(uint8_t addr7, double freq)
 {
@@ -182,9 +184,11 @@ HAL_StatusTypeDef PCA9685_SetFrequency(uint8_t addr7, double freq)
 	return HAL_OK;
 }
 
-/** @param hi2c
- * @param addr
- * @return
+/**
+ * @brief Put the PCA9685 into sleep mode.
+ *
+ * @param addr 8-bit device address.
+ * @return HAL status code.
  */
 HAL_StatusTypeDef PCA9685_Sleep(uint16_t addr)
 {
@@ -195,9 +199,10 @@ HAL_StatusTypeDef PCA9685_Sleep(uint16_t addr)
 }
 
 /**
- * Attempt to recover I2C bus by clearing errors
- * @param hi2c I2C handle
- * @return HAL_OK if recovery successful
+ * @brief Attempt to recover an I2C bus by clearing error states.
+ *
+ * @param hi2c I2C handle.
+ * @return HAL_OK if recovery succeeds.
  */
 static HAL_StatusTypeDef I2C_BusRecovery(I2C_HandleTypeDef *hi2c)
 {
@@ -217,10 +222,11 @@ static HAL_StatusTypeDef I2C_BusRecovery(I2C_HandleTypeDef *hi2c)
 }
 
 /**
- * Safe I2C device probe with recovery
- * @param hi2c I2C handle
- * @param dev_addr Device address (8-bit, left aligned)
- * @return HAL_OK if device found, HAL_ERROR otherwise
+ * @brief Probe an I2C device with a recovery attempt on failure.
+ *
+ * @param hi2c I2C handle.
+ * @param dev_addr Device address (8-bit, left aligned).
+ * @return HAL_OK if device responds, HAL_ERROR otherwise.
  */
 static HAL_StatusTypeDef I2C_SafeProbe(I2C_HandleTypeDef *hi2c, uint16_t dev_addr)
 {
@@ -237,6 +243,9 @@ static HAL_StatusTypeDef I2C_SafeProbe(I2C_HandleTypeDef *hi2c, uint16_t dev_add
 	return status;
 }
 
+/**
+ * @brief Scan I2C buses and initialize all detected PCA9685 devices.
+ */
 void PCA9685_InitAllDevices(void)
 {
 	I2C_HandleTypeDef* buses[] = { &hi2c2, &hi2c3 };

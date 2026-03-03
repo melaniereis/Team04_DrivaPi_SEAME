@@ -34,16 +34,19 @@ extern "C" {
 #include <stdio.h>
 #include <stdint.h>
 #include <math.h>
+#include <stdbool.h>
+#include <stdlib.h>
 #include "main.h"
 #include "pca9685.h"
 #include "dc_motor.h"
 #include "servo_motor.h"
 #include "dc_motor_test.h"
 #include "motor_utils.h"
-#include <stdbool.h>
 #include "sensors.h"
 #include "speed_sensor.h"
 
+#include "soft_i2c.h"
+#include "init_devices.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -57,15 +60,14 @@ typedef struct thread_s
 typedef enum threads_s
 {
 	supervisor_e,
-	emergency_brake_e,
 	dc_motor_e,
 	servo_motor_e,
 	speed_sensor_e,
-	ultrasonic_sensor_e,
 	can_tx_e,
 	can_rx_e,
 	sensor_hts221_e,
 	sensor_battery_e,
+	ultrasonic_sensor_e,
 }	t_e_threads;
 
 typedef struct can_message_s
@@ -93,10 +95,21 @@ typedef struct can_message_s
 #define CMD_SPEED           44u
 #define CMD_STEERING        45u
 
-/* CAN Message IDs */
 #define CAN_ID_BATTERY_DATA        0x200  /* Battery percentage + voltage (512) */
 #define CAN_ID_HTS221_DATA         0x400  /* HTS221 Temperature + Humidity (1024) */
 #define CAN_ID_RND_GEAR            0x300  /* RND gear state (768) */
+
+/* RND Gear States */
+typedef enum {
+    GEAR_NEUTRAL = 0,   /* 'N' - Neutral */
+    GEAR_REVERSE = 1,   /* 'R' - Reverse */
+    GEAR_DRIVE = 2      /* 'D' - Drive */
+} RNDGear_t;
+
+/* RND Detection Thresholds */
+#define RND_DEADZONE_POSITIVE  0.2f
+#define RND_DEADZONE_NEGATIVE  -0.2f
+/* USER CODE END PD */
 
 /* Main thread defines -------------------------------------------------------*/
 /* USER CODE BEGIN MTD */
@@ -124,13 +137,13 @@ VOID	SensorBatteryThread(ULONG initial_input);
 void	UltrasonicEntry(ULONG initial_input);
 void	EmergencyBrakeEntry(ULONG initial_input);
 void	ThreadInit(void);
+void	UltrasonicEntry(ULONG initial_input);
 int		CanSend(t_can_message* msg);
-
 /* USER CODE END EFP */
 
 /* USER CODE BEGIN 1 */
 extern bool					g_emergencyBrake;
-extern thread_t				g_threads[8];
+extern thread_t				g_threads[9];
 extern TX_QUEUE             g_queueSpeedCmd;
 extern TX_QUEUE             g_queueSteerCmd;
 extern TX_EVENT_FLAGS_GROUP	g_eventFlags;

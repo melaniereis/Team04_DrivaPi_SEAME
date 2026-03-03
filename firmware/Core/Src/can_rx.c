@@ -12,10 +12,10 @@
 #include "app_threadx.h"
 
 /**
-* @brief
+* @brief Try to fetch a CAN message from RX FIFO0.
 *
-* @param msg
-* @return uint8_t
+* @param msg Output message buffer to fill on success.
+* @return uint8_t 1 when a message is read, 0 otherwise.
 */
 uint8_t CanReceive(t_can_message *msg)
 {
@@ -36,9 +36,9 @@ uint8_t CanReceive(t_can_message *msg)
 }
 
 /**
-* @brief
+* @brief CAN RX thread entry that dispatches messages to queues.
 *
-* @param initial_input
+* @param initial_input ThreadX initial input (unused).
 * @return void
 */
 void CanRx(ULONG initial_input)
@@ -58,6 +58,6 @@ void CanRx(ULONG initial_input)
 				tx_event_flags_set(&g_eventFlags, FLAG_CAN_STEER_CMD, TX_OR);
 			}
 		}
-		tx_thread_sleep(5);
+		tx_thread_sleep(10);
 	}
 }

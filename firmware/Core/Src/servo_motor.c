@@ -11,11 +11,11 @@
 #include "servo_motor.h"
 
 /**
- * @brief Set the Servo Angle object
- * 
- * @param channel 
- * @param angle_deg 
- * @return int 
+ * @brief Set a servo angle using PCA9685 PWM output.
+ *
+ * @param channel PWM channel index.
+ * @param angle_deg Target angle in degrees.
+ * @return int 1 on success.
  */
 int SetServoAngle(uint8_t channel, uint16_t angle_deg)
 {
@@ -24,7 +24,26 @@ int SetServoAngle(uint8_t channel, uint16_t angle_deg)
 
 	uint16_t range = SERVO_MAX_PULSE - SERVO_MIN_PULSE;
 	uint16_t pulse = SERVO_MIN_PULSE + (range * angle_deg) / 180u;
-	if (PCA9685_SetPWM(PCA9685_ADDR_SERVO, channel, 0, pulse) == HAL_OK)
+	PCA9685_SetPWM(PCA9685_ADDR_SERVO, channel, 0, pulse);
+	return 1;
+}
+
+/**
+ * @brief Sweep a servo between two angles in steps.
+ *
+ * @param channel PWM channel index.
+ * @param start_angle Start angle in degrees.
+ * @param end_angle End angle in degrees.
+ * @param step_angle Step size in degrees.
+ * @return int 0 on completion.
+ */
+int ServoSweep(uint8_t channel, uint16_t start_angle, uint16_t end_angle,
+uint16_t step_angle)
+{
+	if (step_angle == 0)
+		step_angle = 1;
+
+	if (start_angle <= end_angle)
 	{
 		return 1;
 	}
@@ -33,10 +52,10 @@ int SetServoAngle(uint8_t channel, uint16_t angle_deg)
 
 
 /**
- * @brief Servo motor control thread that processes steering commands from CAN queue
- * 
- * @param initial_input
- * @return VOID
+ * @brief Servo motor thread entry that handles steering commands.
+ *
+ * @param initial_input ThreadX initial input (unused).
+ * @return void
  */
 void ServoMotor(ULONG initial_input)
 {

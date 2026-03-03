@@ -1,4 +1,0 @@
-../Core/Src/motor_utils.c:15:6:UartPrintf	272	static
-../Core/Src/motor_utils.c:29:6:UartPrint	16	static
-../Core/Src/motor_utils.c:38:6:SoftwareDelay	24	static,ignoring_inline_asm
-../Core/Src/motor_utils.c:51:17:ClampU16	16	static
