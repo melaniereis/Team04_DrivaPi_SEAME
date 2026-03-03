@@ -69,6 +69,14 @@ Typical outputs:
 
 ---
 
+## Using CARLA Simulator for Imitation Learning
+
+CARLA's built-in **Autopilot / Traffic Manager** acts as the expert driver, navigating road networks while respecting traffic rules. This means large amounts of labelled demonstration data can be generated automatically across different towns, weather conditions, and traffic densities — without needing a human to manually drive.
+
+Once the dataset is collected, training happens entirely offline. The recorded `(observation, action)` pairs are fed into the neural network. After training, the policy is deployed back into CARLA to evaluate its driving performance.
+
+---
+
 ## Advantages
 
 ### ✅ No Reward Engineering Required
@@ -107,8 +115,6 @@ but at deployment it will encounter states that result from its own (imperfect) 
 Small errors compound over time, leading the agent into situations that were never covered in the training data.
 The agent has no data on how to recover.
 
-> *Example: A slight steering error puts the car 10 cm closer to the lane boundary than any training example. The model has never seen this situation and may steer further off-course.*
-
 ### ❌ Requires Large, High-Quality Datasets
 The model can only be as good as the data it was trained on. Collecting diverse, high-quality demonstrations that cover rare 
 but critical scenarios (emergency braking, obstacle avoidance, adverse weather) is expensive and time-consuming.
@@ -143,10 +149,3 @@ even when braking is not necessary, simply because those two events co-occurred 
 | Handles Distributional Shift | Poorly (without augmentation) |
 | Data Requirements | Moderate–High |
 | Complexity | Low–Moderate |
-
----
-
-## References & Further Reading
-
-- Bojarski, M. et al. (2016). *End to End Learning for Self-Driving Cars.* NVIDIA.
-- Hussein, A. et al. (2017). *Imitation Learning: A Survey of Learning Methods.* ACM Computing Surveys.
