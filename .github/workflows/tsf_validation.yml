@@ -182,7 +182,7 @@ jobs:
           fi
 
       - name: Upload TSF artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: tsf-validation-artifacts
@@ -192,7 +192,7 @@ jobs:
           retention-days: 30
 
       - name: Upload TSF comment artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: tsf-comment
