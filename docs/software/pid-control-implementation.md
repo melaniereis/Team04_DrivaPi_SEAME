@@ -102,29 +102,15 @@ speed_mps = distance_m / dt;  // dt is time interval in seconds
 **Non-linearities to consider:**
 1. **Dead Zone**: Motor doesn't move below a minimum PWM (typically 20–30% of max)
 2. **Saturation**: PWM capped at 4095 (100%)
-3. **Inertia**: Speed doesn't change instantaneously; acceleration is gradual
-4. **Load Variation**: Vehicle weight distribution, friction, and road incline affect motor load
+3. **Inertia**: Speed doesn't change instantaneously, the acceleration is gradual
+4. **Load Variation**: Vehicle weight distribution and friction may affect motor load
 5. **Thermal Effects**: Motor efficiency changes with temperature
 
 ---
 
 ## 3. Tuning Methods
 
-### 3.1 Ziegler-Nichols Method (Experimental)
-
-**Procedure:**
-1. Set K_i = 0, K_d = 0; start with K_p = 0
-2. Slowly increase K_p until system begins sustained oscillation (critical gain K_c)
-3. Measure oscillation period (T_u)
-4. Apply formulas:
-   - **P-only**: K_p = 0.5 × K_c
-   - **PI**: K_p = 0.45 × K_c, K_i = (K_p × 1.2) / T_u
-   - **PID**: K_p = 0.6 × K_c, K_i = (K_p × 2) / T_u, K_d = K_p × T_u / 8
-
-**Advantages**: Systematic, repeatable
-**Disadvantages**: Can overshoot; requires oscillation experiment; risky on hardware
-
-### 3.2 Manual Tuning (Recommended for DrivaPi)
+### 3.1 Manual Tuning (Recommended for DrivaPi)
 
 **Step 1: Set Baseline (P only)**
 - Set K_i = 0, K_d = 0
@@ -151,7 +137,7 @@ K_i = K_p / 20 = 5  (slow integral action)
 K_d = K_p × 0.05 = 5  (mild derivative action)
 ```
 
-### 3.3 Empirical Tuning Loop
+### 3.2 Practical Tuning Checklist
 
 ```
 for each tuning iteration:
@@ -170,60 +156,76 @@ for each tuning iteration:
 
 ## 4. PID Architecture & Integration
 
-### 4.1 System Architecture
+### 4.1 DrivaPi Hardware Architecture
 
 ```
-┌─────────────────┐
-│  Target Speed   │
-│   (Setpoint)    │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────────────────────────┐
-│  PID Controller                     │
-│  ┌──────────┐  ┌──────────┐         │
-│  │ Error    │  │ Integral │  ┌────┐│
-│  │ × K_p    │  │ × K_i    │  │ +  ││
-│  └──────────┘  └──────────┘  └─┬──┘│
-│        └────────────┬──────────┘    │
-│                     │               │
-│         ┌──────────────────────┐    │
-│         │  Derivative × K_d    │    │
-│         └──────┬───────────────┘    │
-│                │                    │
-│                ▼                    │
-│         ┌──────────────┐            │
-│         │  Clamp to    │            │
-│         │ [0, 4095]    │            │
-│         └──────┬───────┘            │
-└────────────────┼────────────────────┘
+┌─────────────────────────────────┐
+│  STM32 Microcontroller          │
+│                                 │
+│  ┌──────────────────────────┐   │
+│  │  PID Controller          │   │
+│  │  (motor_control.c)       │   │
+│  └────────────┬─────────────┘   │
+│               │                 │
+│               ▼                 │
+│  ┌──────────────────────────┐   │
+│  │  I2C Master              │   │
+│  │  (to PCA9685)            │   │
+│  └────────────┬─────────────┘   │
+│               │                 │
+└───────────────┼─────────────────┘
+                │ I2C Bus
+                ▼
+    ┌──────────────────────────┐
+    │  PCA9685 PWM Driver      │
+    │  (16-channel PWM)        │
+    └────────────┬─────────────┘
+                 │ PWM signals (4 channels for 4 motors)
                  ▼
-         ┌─────────────────┐
-         │  PWM to Motor   │
-         │  (0–4095)       │
-         └────────┬────────┘
-                  ▼
-         ┌─────────────────┐
-         │  Motor Driver   │
-         │  (H-bridge)     │
-         └────────┬────────┘
-                  ▼
-         ┌─────────────────┐
-         │   DC Motor      │
-         └────────┬────────┘
-                  ▼
-         ┌─────────────────┐
-         │  Encoder        │
-         │  (Speed Meas.)  │
-         └────────┬────────┘
-                  │
-         ┌────────▼─────────┐
-         │ Speed Calculation│
-         │ (m/s)            │
-         └────────┬─────────┘
-                  │
-         (feedback to PID)
+    ┌──────────────────────────┐
+    │  Motor Driver H-bridge   │
+    │  (per motor)             │
+    └────────────┬─────────────┘
+                 │
+                 ▼
+    ┌──────────────────────────┐
+    │  JGB37-520 DC Motor      │
+    │  (with encoder)          │
+    └────────────┬─────────────┘
+                 │ Encoder output (LM393 comparator)
+                 ▼
+    ┌──────────────────────────┐
+    │  LM393 Comparator        │
+    │  (pulse conditioning)    │
+    └────────────┬─────────────┘
+                 │ Digital pulse via GPIO
+                 │
+┌────────────────┘
+│
+▼
+┌──────────────────────────────────┐
+│  STM32 Timer (TIM1)              │
+│  GPIO Input Capture              │
+│  (counts encoder pulses)         │
+└──────────────────────────────────┘
+         │
+         ▼ (feedback)
+    ┌────────────────┐
+    │ Speed Sensor   │
+    │ (speed_sensor.c)
+    │ Calculates m/s │
+    └────────────────┘
+         │
+         ▼ (feedback loop)
+    PID Controller (update at 100 ms)
 ```
+
+**Signal Flow:**
+1. **Command:** PID sets target speed → I2C sends PWM value to PCA9685
+2. **Control:** PCA9685 outputs PWM signal → Motor Driver → Motor spins
+3. **Feedback:** Motor encoder → LM393 → GPIO Timer input → Speed calculation → back to PID
+
+---
 
 ### 4.2 Integration Points
 
@@ -236,19 +238,20 @@ for each tuning iteration:
  * @brief PID controller state for one motor
  */
 typedef struct {
-    float target_speed;      // desired speed (m/s)
-    float current_speed;     // measured speed (m/s)
-    float error;             // e[n]
-    float error_prev;        // e[n-1] for derivative
-    float integral;          // sum of errors for integral term
+    float       target_speed;      // desired speed (m/s)
+    float       current_speed;     // measured speed (m/s) from speed_sensor.c
+    float       error;             // e[n]
+    float       error_prev;        // e[n-1] for derivative
+    float       integral;          // sum of errors for integral term
     
-    float kp, ki, kd;        // PID gains
-    float pwm_output;        // computed PWM (0.0–1.0)
-    uint16_t pwm_raw;        // raw PWM (0–4095)
+    float       kp, ki, kd;        // PID gains
+    float       pwm_output;        // computed PWM (0.0–1.0)
+    uint16_t    pwm_raw;        // raw PWM (0–4095) for PCA9685
+    uint8_t     pca9685_channel; // which PCA9685 channel (0–15)
 } MotorPIDState;
 
 /**
- * @brief Compute PID control output
+ * @brief Compute PID control output and send to PCA9685
  */
 void MotorPID_Update(MotorPIDState *state, float current_speed);
 
@@ -305,16 +308,30 @@ void MotorPID_Update(MotorPIDState *state, float current_speed)
     state->pwm_raw = (uint16_t)(state->pwm_output * 4095.0f);
     
     // Step 8: Apply dead zone minimum (motor won't move below this PWM)
-    if (state->pwm_raw > 0 && state->pwm_raw < PWM_MIN) {
+    if (state->pwm_raw > 0 && state->pwm_raw < PWM_MIN)
         state->pwm_raw = PWM_MIN;
-    }
     
-    // Step 9: Send PWM to motor driver
-    SetMotorPWM(state->pwm_raw);
+    // Step 9: Send PWM to PCA9685 via I2C
+    // Example: PCA9685_SetPWM(state->pca9685_channel, 0, state->pwm_raw);
+    PCA9685_SetPWM(state->pca9685_channel, 0, state->pwm_raw);
     
     // Step 10: Store current error for derivative calculation in next cycle
     state->error_prev = state->error;
     state->current_speed = current_speed;
+}
+```
+
+**Integration with Speed Sensor:**
+```c
+// In your main control loop (100 ms interval):
+extern float    g_vehicleSpeed;  // from speed_sensor.c
+extern          MotorPIDState motor_pid_states[4];  // for 4 motors
+
+void UpdateMotorControl(void)
+{
+    // Update each motor's PID controller with current speed feedback
+    for (int i = 0; i < 4; i++)
+        MotorPID_Update(&motor_pid_states[i], g_vehicleSpeed);
 }
 ```
 
@@ -343,88 +360,9 @@ void MotorPID_SetTargetSpeed(MotorPIDState *state, float target_mps)
     state->target_speed = target_mps;
 }
 ```
-
 ---
 
-## 5. Implementation Checklist
-
-### Phase 1: Research & Feasibility
-
-- [ ] Document PID theory (equations, discrete forms, DrivaPi context)
-- [ ] Measure encoder resolution and speed calculation accuracy
-- [ ] Test motor response to PWM step input (no control loop) to understand dynamics
-- [ ] Determine sampling rate (100 ms to match firmware `tx_thread_sleep(100)`)
-- [ ] Design anti-windup strategy for integral term
-- [ ] Plan test bench setup (isolated motor + encoder on test stand)
-- [ ] Document team approval of architecture
-
-### Phase 2: Implementation
-
-- [ ] Implement PID struct in firmware/Core/motor_control.c
-- [ ] Create speed measurement routine (encoder filtering, outlier rejection)
-- [ ] Implement test script: ramp target speed from 0% → 50% → 100%
-- [ ] Set up data logging (time, target, actual, error, PWM) for analysis
-- [ ] Perform Ziegler-Nichols or manual tuning on test bench
-- [ ] Record step response (rise time, overshoot, settling time)
-- [ ] Test on vehicle under load (ensure stability on road)
-- [ ] Document final PID gains in code and wiki
-
-### Phase 3: Validation
-
-- [ ] Test steady-state speed accuracy at multiple setpoints (25%, 50%, 75%, 100%)
-- [ ] Verify acceleration smoothness (no jerking or oscillation)
-- [ ] Measure max speed error under nominal load
-- [ ] Test robustness to disturbances (weight, incline, friction changes)
-- [ ] Validate on all 4 motors (left front, right front, left rear, right rear)
-
----
-
-## 6. Testing & Measurement
-
-### 6.1 Test Bench Setup
-
-```
-Motor + Gearbox → Encoder → Load (friction/wheel disc)
-                     │
-                     └─→ Counter (m/s measurement)
-```
-
-### 6.2 Data to Collect
-
-| Parameter | Tool | Purpose |
-|-----------|------|---------|
-| Target Speed | Command input | Reference |
-| Actual Speed | Encoder counter | Feedback |
-| PWM Output | GPIO measurement | Control signal |
-| Time | System clock | Correlation |
-| Temperature | Thermal camera / sensor | Drift analysis |
-
-### 6.3 Expected Results
-
-| Metric | Target | Notes |
-|--------|--------|-------|
-| Rise Time (10% → 90%) | < 500 ms | Acceptable motor response speed |
-| Overshoot | < 20% | Reasonable oscillation damping |
-| Settling Time | < 1.5 s | Stability achieved quickly |
-| Steady-State Error | < 5% | Speed tracking accuracy |
-| Oscillation Freq | 1–3 Hz | If any (prefer none) |
-
----
-
-## 7. Potential Issues & Solutions
-
-| Issue | Cause | Solution |
-|-------|-------|----------|
-| Oscillation / ringing | K_p too high, K_d too low | Reduce K_p; increase K_d |
-| Slow response | K_p too low | Increase K_p step-by-step |
-| Steady-state error persists | K_i too low | Increase K_i gradually |
-| Instability / divergence | K_d too high; encoder noise | Reduce K_d; add low-pass filter to speed measurement |
-| Jerky acceleration | Dead zone mismatch; PWM resolution | Calibrate dead zone; increase resolution |
-| Motor doesn't move | PWM below dead zone | Ensure PWM > minimum threshold |
-
----
-
-## 8. References & Further Reading
+## 5. References & Further Reading
 
 - **Classical Control**: Franklin, Powell, Emami-Naeini. *Feedback Control of Dynamic Systems* (7th ed.)
 - **PID Tuning**: Åström & Hägglund. *PID Controllers: Theory, Design, and Tuning (2nd ed.)*
