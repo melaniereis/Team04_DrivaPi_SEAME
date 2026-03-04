@@ -68,7 +68,7 @@ Where:
 | Gear Ratio | 10:1 | Reduces speed, increases torque |
 | Wheel Speed (est.) | ~74 RPM | At 10:1 reduction |
 | Max Current | ~200–300 mA | Short-term peak with load |
-| Encoder Resolution | 20–40 PPR | Per motor shaft (post-gearbox) |
+| Encoder Resolution | 30 PPR | Per motor shaft (post-gearbox) |
 
 ### 2.2 Speed Measurement
 
@@ -88,14 +88,14 @@ distance_m = rotations * WHEEL_PERIMETER_M;
 speed_mps = distance_m / dt;  // dt is time interval in seconds
 ```
 
-**Example Calculation:**
+**Example Calculation (per firmware constants):**
 - Sampling interval: 100 ms (0.1 s)
-- Encoder: 20 PPR (pulses per revolution)
-- Wheel perimeter: ~0.565 m (assuming ~180 mm wheel diameter)
-- If 12 encoder pulses counted in 100 ms:
-  - Rotations = 12 / 20 = 0.6 rotations
-  - Distance = 0.6 × 0.565 m ≈ 0.339 m
-  - Speed = 0.339 m / 0.1 s ≈ 3.39 m/s (≈12 km/h)
+- Encoder: 30 PPR (pulses per revolution)
+- Wheel perimeter: 0.212 m
+- If 15 encoder pulses counted in 100 ms:
+  - Rotations = 15 / 30 = 0.5 rotations
+  - Distance = 0.5 × 0.212 m = 0.106 m
+  - Speed = 0.106 m / 0.1 s = 1.06 m/s (≈3.8 km/h)
 
 ### 2.3 Motor Dynamics
 
@@ -265,7 +265,7 @@ void MotorPID_Reset(MotorPIDState *state);
 
 **File: `motor_control.c`**
 ```c
-#define PID_SAMPLE_TIME 0.01f  // 10 ms update rate
+#define PID_SAMPLE_TIME 0.1f   // 100 ms update rate (matches SpeedSensor thread)
 #define PWM_MIN 300u           // Minimum PWM (dead zone)
 #define PWM_MAX 4095u
 
@@ -360,7 +360,7 @@ impl MotorPID {
     }
 
     pub fn update(&mut self, current_speed: f64) -> u16 {
-        const SAMPLE_TIME: f64 = 0.01;  // 10 ms
+        const SAMPLE_TIME: f64 = 0.1;  // 100 ms (matches SpeedSensor thread)
         const PWM_MIN: f64 = 300.0;
         const PWM_MAX: f64 = 4095.0;
 
