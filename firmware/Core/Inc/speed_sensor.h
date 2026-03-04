@@ -17,6 +17,13 @@ extern "C" {
 
 #include "app_threadx.h"
 
+/* RND Gear States */
+typedef enum {
+  GEAR_NEUTRAL = 0,
+  GEAR_REVERSE = 1,
+  GEAR_DRIVE = 2
+} RNDGear_t;
+
 /* RND Detection Thresholds */
 #define RND_DEADZONE_POSITIVE  0.2f
 #define RND_DEADZONE_NEGATIVE  -0.2f
