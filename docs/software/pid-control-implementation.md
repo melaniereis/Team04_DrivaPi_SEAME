@@ -53,22 +53,6 @@ Where:
   - Sensitive to measurement noise
 - **Tuning**: Increase to reduce overshoot; too high causes stiffness and noise sensitivity
 
-### 1.4 Discrete-Time Implementation
-
-Embedded systems operate on discrete time steps. The continuous PID equations are discretized:
-
-$$u[n] = K_p \cdot e[n] + K_i \sum_{j=0}^{n} e[j] \cdot T_s + K_d \frac{e[n] - e[n-1]}{T_s}$$
-
-Where:
-- **n** = Current time step
-- **T_s** = Sampling period (typically 10–100 ms)
-
-#### Integral Term (Discrete)
-$$\text{integral} := \text{integral} + e[n] \cdot T_s$$
-
-#### Derivative Term (Discrete)
-$$\text{derivative} = \frac{e[n] - e[n-1]}{T_s}$$
-
 ---
 
 ## 2. DC Motor Characteristics for DrivaPi
@@ -77,29 +61,41 @@ $$\text{derivative} = \frac{e[n] - e[n-1]}{T_s}$$
 
 | Parameter | Value | Notes |
 |-----------|-------|-------|
-| Type | DC brushed motor | 3–6V nominal |
-| Voltage Range | 3–6V | Powered from battery |
-| RPM @ 6V | ~5000 RPM | Unloaded, no gearbox |
-| Gearbox Ratio | 58:1 (typical) | Reduces RPM, increases torque |
-| Output Speed | ~86 RPM | At gearbox output |
-| Max Current | ~200 mA | Short-term peak with load |
-| Encoder Resolution | Typically 20–40 PPR | Per motor shaft (pre-gearbox) |
+| Model | JGB37-520 DC | Geared DC motor |
+| Type | DC brushed motor with integral gearbox | Compact, high-torque |
+| Voltage | 12V | Powered from vehicle battery |
+| Idle Speed | ~740 RPM | No-load speed at 12V, motor output |
+| Gear Ratio | 10:1 | Reduces speed, increases torque |
+| Wheel Speed (est.) | ~74 RPM | At 10:1 reduction |
+| Max Current | ~200–300 mA | Short-term peak with load |
+| Encoder Resolution | 20–40 PPR | Per motor shaft (post-gearbox) |
 
 ### 2.2 Speed Measurement
 
-**Encoder-Based Speed Calculation:**
-```
-raw_count = encoder_pulses_per_interrupt
-speed_rpm = (raw_count / PPR) * (interrupt_frequency) * 60
+**Implementation:** Speed is calculated in the firmware (`firmware/Core/Src/speed_sensor.c`) using encoder pulses from a hardware timer.
+
+**Encoder-Based Speed Calculation (meters per second):**
+```c
+delta_pulses = current_encoder_count - last_encoder_count;
+// Handle timer overflow
+if (delta_pulses > TIMER_PERIOD / 2)
+    delta_pulses -= (TIMER_PERIOD + 1);
+else if (delta_pulses < -TIMER_PERIOD / 2)
+    delta_pulses += (TIMER_PERIOD + 1);
+
+rotations = delta_pulses / PULSES_PER_REV;
+distance_m = rotations * WHEEL_PERIMETER_M;
+speed_mps = distance_m / dt;  // dt is time interval in seconds
 ```
 
-Example:
-- Interrupt frequency: 1 kHz (1 ms interval)
-- Encoder: 20 PPR
-- Gearbox: 58:1
-- If 10 pulses counted in 1 ms:
-  - Motor shaft speed ≈ 600 RPM
-  - Wheel speed ≈ 600 / 58 ≈ 10.3 RPM
+**Example Calculation:**
+- Sampling interval: 100 ms (0.1 s)
+- Encoder: 20 PPR (pulses per revolution)
+- Wheel perimeter: ~0.565 m (assuming ~180 mm wheel diameter)
+- If 12 encoder pulses counted in 100 ms:
+  - Rotations = 12 / 20 = 0.6 rotations
+  - Distance = 0.6 × 0.565 m ≈ 0.339 m
+  - Speed = 0.339 m / 0.1 s ≈ 3.39 m/s (≈12 km/h)
 
 ### 2.3 Motor Dynamics
 
@@ -223,7 +219,7 @@ for each tuning iteration:
                   │
          ┌────────▼─────────┐
          │ Speed Calculation│
-         │ (RPM)            │
+         │ (m/s)            │
          └────────┬─────────┘
                   │
          (feedback to PID)
@@ -240,8 +236,8 @@ for each tuning iteration:
  * @brief PID controller state for one motor
  */
 typedef struct {
-    float target_speed;      // desired speed (RPM)
-    float current_speed;     // measured speed (RPM)
+    float target_speed;      // desired speed (m/s)
+    float current_speed;     // measured speed (m/s)
     float error;             // e[n]
     float error_prev;        // e[n-1] for derivative
     float integral;          // sum of errors for integral term
@@ -428,7 +424,7 @@ impl MotorPID {
 - [ ] Document PID theory (equations, discrete forms, DrivaPi context)
 - [ ] Measure encoder resolution and speed calculation accuracy
 - [ ] Test motor response to PWM step input (no control loop) to understand dynamics
-- [ ] Determine sampling rate (10 ms recommended for motor control)
+- [ ] Determine sampling rate (100 ms to match firmware `tx_thread_sleep(100)`)
 - [ ] Design anti-windup strategy for integral term
 - [ ] Plan test bench setup (isolated motor + encoder on test stand)
 - [ ] Document team approval of architecture
@@ -462,7 +458,7 @@ impl MotorPID {
 ```
 Motor + Gearbox → Encoder → Load (friction/wheel disc)
                      │
-                     └─→ Counter (RPM measurement)
+                     └─→ Counter (m/s measurement)
 ```
 
 ### 6.2 Data to Collect
