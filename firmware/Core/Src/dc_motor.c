@@ -8,6 +8,7 @@
   *
 */
 #include "dc_motor.h"
+#include "speed_sensor.h"
 
 /**
  * @brief Set PWM values for left and right DC motors based on pulse counts
