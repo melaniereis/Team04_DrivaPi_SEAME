@@ -64,7 +64,7 @@ Several strategies have been used in autonomous driving:
 |---|---|
 | **Human override** | A human safety driver monitors and can take control, then labels the observed states post-hoc |
 | **Safety driver labelling** | The human labels what they would have done at each timestep in the learner's trajectory |
-| **Privileged planner** | A classical planner (e.g., A\*, RRT) acts as the "expert oracle" and provides labels automatically |
+| **Privileged planner** | A classical planner (e.g., A\*, Rapidly-exploring Random Tree (RRT)) acts as the "expert oracle" and provides labels automatically |
 | **Mixed autonomy** | The agent drives but a shadow human provides parallel labels without actually controlling the vehicle |
 
 ---
@@ -84,7 +84,7 @@ e.g., positions of all vehicles) can act as the expert oracle.
 The learner, which only has access to sensor data (camera, LiDAR), is iteratively trained
 to match the privileged planner's actions from the learner's own experienced states.
 
-> *This setup is used in CARLA-based IL research and systems like CILRS and Transfuser.*
+> *This setup is used in CARLA-based Imitation Learning (IL) research and systems like Conditional Imitation Learning with ResNet and Speed prediction (CILRS) and Transfuser.*
 
 ### Corrective Labelling Pipelines
 Real-world automotive companies use DAgger-inspired pipelines where logs

@@ -45,21 +45,21 @@ and outputs control commands directly, without any explicit planning module.
 |---|---|
 | **Behavioural Cloning (BC)** | The simplest form, pure supervised learning on expert demonstrations. |
 | **Inverse Reinforcement Learning (IRL)** | Infers a reward function from expert behaviour, then uses RL to optimise it. |
-| **Generative Adversarial Imitation Learning (GAIL)** | Uses a GAN-like setup to match the expert's state-action distribution. |
-| **DAgger** | Iteratively queries the expert to correct the learner's mistakes (see dedicated file). |
+| **Generative Adversarial Imitation Learning (GAIL)** | Uses a Generative Adversarial Network (GAN)-like setup to match the expert's state-action distribution. |
+| **Dataset Aggregation (DAgger)** | Iteratively queries the expert to correct the learner's mistakes (see dedicated file). |
 
 ---
 
 ## Application in Autonomous Driving
 
 Imitation learning gained significant real-world traction through projects like **NVIDIA's End-to-End Learning for 
-Self-Driving Cars (2016)**, where a CNN was trained solely on human driving data to output steering angles. More recent 
+Self-Driving Cars (2016)**, where a Convolutional Neural Network (CNN) was trained solely on human driving data to output steering angles. More recent 
 systems use IL as a warm-start or pre-training stage before fine-tuning with reinforcement learning.
 
 Typical inputs used in autonomous driving IL pipelines:
-- RGB cameras (front, surround)
-- LiDAR point clouds
-- GPS / IMU measurements
+- Red, Green, Blue (RGB) cameras (front, surround)
+- Light Detection and Ranging (LiDAR) point clouds
+- Global Positioning System (GPS) / Inertial Measurement Unit (IMU) measurements
 - High-definition maps
 
 Typical outputs:

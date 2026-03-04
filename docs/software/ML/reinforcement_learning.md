@@ -53,7 +53,7 @@ A value close to 1 makes the agent think long-term, while a value close to 0 mak
 |---|---|---|
 | **PPO** (Proximal Policy Optimisation) | Policy Gradient | Stable, widely used, on-policy |
 | **SAC** (Soft Actor-Critic) | Actor-Critic | Sample efficient, off-policy, entropy regularised |
-| **TD3** (Twin Delayed DDPG) | Actor-Critic | Robust to function approximation errors |
+| **TD3** (Twin Delayed Deep Deterministic Policy Gradient (DDPG)) | Actor-Critic | Robust to function approximation errors |
 | **DQN** (Deep Q-Network) | Value-Based | Works with discrete action spaces |
 | **DDPG** (Deep Deterministic Policy Gradient) | Actor-Critic | Continuous action spaces |
 | **Dreamer / World Models** | Model-Based | Learns a world model, plans in latent space |
@@ -114,7 +114,7 @@ Autonomous driving is inherently sequential, each action affects future states.
 RL is specifically designed to optimise long-horizon sequential decisions, making it a natural fit.
 
 ### ✅ Can Learn from Simulated Environments at Scale
-RL agents can train in high-fidelity simulators (CARLA, SUMO, MetaDrive, nuPlan) at speeds far beyond real-time,
+RL agents can train in high-fidelity simulators (CARLA, Simulation of Urban MObility (SUMO), MetaDrive, nuPlan) at speeds far beyond real-time,
 accumulating millions of kilometres of virtual driving experience without any safety risk.
 
 ### ✅ Robust to Distributional Shift During Training
