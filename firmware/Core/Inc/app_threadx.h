@@ -99,16 +99,6 @@ typedef struct can_message_s
 #define CAN_ID_HTS221_DATA         0x400  /* HTS221 Temperature + Humidity (1024) */
 #define CAN_ID_RND_GEAR            0x300  /* RND gear state (768) */
 
-/* RND Gear States */
-typedef enum {
-    GEAR_NEUTRAL = 0,   /* 'N' - Neutral */
-    GEAR_REVERSE = 1,   /* 'R' - Reverse */
-    GEAR_DRIVE = 2      /* 'D' - Drive */
-} RNDGear_t;
-
-/* RND Detection Thresholds */
-#define RND_DEADZONE_POSITIVE  0.2f
-#define RND_DEADZONE_NEGATIVE  -0.2f
 /* USER CODE END PD */
 
 /* Main thread defines -------------------------------------------------------*/
@@ -159,3 +149,4 @@ extern float				g_vehicleSpeed;
 }
 #endif
 #endif /* __APP_THREADX_H */
+
