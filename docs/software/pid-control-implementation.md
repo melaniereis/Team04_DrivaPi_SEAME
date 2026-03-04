@@ -2,7 +2,13 @@
 
 ## Overview
 
-This document outlines the design, theory, and implementation strategy for PID (proportional-integral-derivative) control loops to regulate DC motor speed on the DrivaPi project. The implementation ensures smooth acceleration, accurate speed tracking and stable steady-state behavior.
+This document outlines the design, theory, and implementation strategy for PID (proportional-integral-derivative) control loops to regulate DC motor speed on the DrivaPi vehicle. 
+
+**Current Implementation (Remote Control):** The PID controller maintains stable, smooth motor speed when the remote control sends target speed commands via CAN messages to the STM32.
+
+**Future Implementation (Autonomous Driving):** The same CAN messaging infrastructure and PID control architecture will be reused when autonomous driving is implemented. At that time, instead of the remote, AI image processing will analyze camera input and send target speed commands via CAN to the STM32. The PID loop implementation remains unchanged—only the source of the CAN messages switches from remote to AI processor.
+
+The implementation ensures smooth acceleration, accurate speed tracking, and stable steady-state behavior for both remote-controlled and autonomous operation.
 
 ---
 
@@ -68,11 +74,11 @@ Where:
 | Gear Ratio | 10:1 | Reduces speed, increases torque |
 | Wheel Speed (est.) | ~74 RPM | At 10:1 reduction |
 | Max Current | ~200–300 mA | Short-term peak with load |
-| Encoder Resolution | 30 PPR | Per motor shaft (post-gearbox) |
+| Encoder Resolution | 30 PPR | Separate wheel encoder (not integrated in motor) |
 
 ### 2.2 Speed Measurement
 
-**Implementation:** Speed is calculated in the firmware (`firmware/Core/Src/speed_sensor.c`) using encoder pulses from a hardware timer.
+**Implementation:** Speed is calculated in the firmware (`firmware/Core/Src/speed_sensor.c`) using encoder pulses from a separate wheel encoder, conditioned by an LM393 comparator, and counted by the STM32 hardware timer.
 
 **Encoder-Based Speed Calculation (meters per second):**
 ```c
@@ -159,21 +165,27 @@ for each tuning iteration:
 ### 4.1 DrivaPi Hardware Architecture
 
 ```
-┌─────────────────────────────────┐
-│  STM32 Microcontroller          │
-│                                 │
-│  ┌──────────────────────────┐   │
-│  │  PID Controller          │   │
-│  │  (motor_control.c)       │   │
-│  └────────────┬─────────────┘   │
-│               │                 │
-│               ▼                 │
-│  ┌──────────────────────────┐   │
-│  │  I2C Master              │   │
-│  │  (to PCA9685)            │   │
-│  └────────────┬─────────────┘   │
-│               │                 │
-└───────────────┼─────────────────┘
+┌─────────────────────────────────────┐
+│  STM32 Microcontroller              │
+│                                     │
+│  ┌────────────────────────────┐    │
+│  │  CAN Receiver              │    │
+│  │  (from remote control)     │    │
+│  └────────────┬───────────────┘    │
+│               │                    │
+│               ▼ (target speed)     │
+│  ┌────────────────────────────┐    │
+│  │  PID Controller            │    │
+│  │  (motor_control.c)         │    │
+│  └────────────┬───────────────┘    │
+│               │                    │
+│               ▼                    │
+│  ┌────────────────────────────┐    │
+│  │  I2C Master                │    │
+│  │  (to PCA9685)              │    │
+│  └────────────┬───────────────┘    │
+│               │                    │
+└───────────────┼────────────────────┘
                 │ I2C Bus
                 ▼
     ┌──────────────────────────┐
@@ -190,9 +202,16 @@ for each tuning iteration:
                  ▼
     ┌──────────────────────────┐
     │  JGB37-520 DC Motor      │
-    │  (with encoder)          │
+    │  (no encoder integrated) │
     └────────────┬─────────────┘
-                 │ Encoder output (LM393 comparator)
+                 │
+                 ▼ (mechanical output)
+    ┌──────────────────────────┐
+    │  Wheel with Encoder      │
+    │  (optical/magnetic)      │
+    │  Produces pulse signal   │
+    └────────────┬─────────────┘
+                 │
                  ▼
     ┌──────────────────────────┐
     │  LM393 Comparator        │
@@ -221,9 +240,11 @@ for each tuning iteration:
 ```
 
 **Signal Flow:**
-1. **Command:** PID sets target speed → I2C sends PWM value to PCA9685
-2. **Control:** PCA9685 outputs PWM signal → Motor Driver → Motor spins
-3. **Feedback:** Motor encoder → LM393 → GPIO Timer input → Speed calculation → back to PID
+1. **Command:** Remote → CAN message → STM32 receives target speed
+2. **Control:** PID calculates error and PWM term → I2C sends PWM value to PCA9685
+3. **Motor:** PCA9685 outputs PWM signal → Motor Driver → Motor spins → Wheel rotates
+4. **Feedback:** Wheel encoder → LM393 conditions pulse → STM32 timer counts → Speed calculation (m/s) → back to PID
+5. **Loop:** PID continuously adjusts PWM to maintain target speed sent by remote
 
 ---
 
@@ -321,17 +342,23 @@ void MotorPID_Update(MotorPIDState *state, float current_speed)
 }
 ```
 
-**Integration with Speed Sensor:**
+**Integration with Speed Sensor and CAN:**
 ```c
-// In your main control loop (100 ms interval):
-extern float    g_vehicleSpeed;  // from speed_sensor.c
+// In your main control loop (100 ms interval, matches SpeedSensor thread):
+extern float    g_vehicleSpeed;         // from speed_sensor.c (measured m/s)
+extern float    g_target_speed;         // from CAN message (remote command m/s)
 extern          MotorPIDState motor_pid_states[4];  // for 4 motors
 
 void UpdateMotorControl(void)
 {
+    // CAN receiver has already populated g_target_speed from remote command
+    
     // Update each motor's PID controller with current speed feedback
-    for (int i = 0; i < 4; i++)
+    // and target speed from remote
+    for (int i = 0; i < 4; i++) {
+        motor_pid_states[i].target_speed = g_target_speed;
         MotorPID_Update(&motor_pid_states[i], g_vehicleSpeed);
+    }
 }
 ```
 
