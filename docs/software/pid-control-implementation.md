@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the design, theory, and implementation strategy for PID (proportional-integral-derivative) control loops to regulate DC motor speed on the DrivaPi platform. The implementation ensures smooth acceleration, accurate speed tracking, and stable steady-state behavior.
+This document outlines the design, theory, and implementation strategy for PID (proportional-integral-derivative) control loops to regulate DC motor speed on the DrivaPi project. The implementation ensures smooth acceleration, accurate speed tracking and stable steady-state behavior.
 
 ---
 
