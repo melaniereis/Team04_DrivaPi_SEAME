@@ -263,53 +263,64 @@ void MotorPID_SetGains(MotorPIDState *state, float kp, float ki, float kd);
 void MotorPID_Reset(MotorPIDState *state);
 ```
 
-**File: `motor_control.c`**
+**File: `motor_control.c` – PID Update Function**
 ```c
 #define PID_SAMPLE_TIME 0.1f   // 100 ms update rate (matches SpeedSensor thread)
-#define PWM_MIN 300u           // Minimum PWM (dead zone)
-#define PWM_MAX 4095u
+#define PWM_MIN 300u           // Minimum PWM to overcome dead zone
+#define PWM_MAX 4095u          // Maximum PWM value
 
 void MotorPID_Update(MotorPIDState *state, float current_speed)
 {
-    // Calculate error
+    // Step 1: Calculate error (difference between target and current speed)
     state->error = state->target_speed - current_speed;
     
-    // Proportional term
+    // Step 2: Proportional term (immediate response)
     float p_term = state->kp * state->error;
     
-    // Integral term (with anti-windup)
+    // Step 3: Integral term (eliminates steady-state error)
     state->integral += state->error * PID_SAMPLE_TIME;
-    if (state->integral > 100.0f) state->integral = 100.0f;
-    if (state->integral < -100.0f) state->integral = -100.0f;
+    
+    // Anti-windup: prevent integral from growing too large
+    if (state->integral > 100.0f) 
+        state->integral = 100.0f;
+    if (state->integral < -100.0f) 
+        state->integral = -100.0f;
+    
     float i_term = state->ki * state->integral;
     
-    // Derivative term
+    // Step 4: Derivative term (reduces overshoot)
     float derivative = (state->error - state->error_prev) / PID_SAMPLE_TIME;
     float d_term = state->kd * derivative;
     
-    // Sum all terms
+    // Step 5: Sum all three terms
     state->pwm_output = p_term + i_term + d_term;
     
-    // Clamp to valid range [0.0, 1.0]
-    if (state->pwm_output > 1.0f) state->pwm_output = 1.0f;
-    if (state->pwm_output < 0.0f) state->pwm_output = 0.0f;
+    // Step 6: Clamp output to valid PWM range [0.0, 1.0]
+    if (state->pwm_output > 1.0f) 
+        state->pwm_output = 1.0f;
+    if (state->pwm_output < 0.0f) 
+        state->pwm_output = 0.0f;
     
-    // Convert to raw PWM (0–4095)
+    // Step 7: Convert normalized PWM (0.0–1.0) to raw value (0–4095)
     state->pwm_raw = (uint16_t)(state->pwm_output * 4095.0f);
     
-    // Apply dead zone minimum
+    // Step 8: Apply dead zone minimum (motor won't move below this PWM)
     if (state->pwm_raw > 0 && state->pwm_raw < PWM_MIN) {
         state->pwm_raw = PWM_MIN;
     }
     
-    // Apply to motor driver
+    // Step 9: Send PWM to motor driver
     SetMotorPWM(state->pwm_raw);
     
-    // Store for next iteration
+    // Step 10: Store current error for derivative calculation in next cycle
     state->error_prev = state->error;
     state->current_speed = current_speed;
 }
+```
 
+**Quick Reference – Helper Functions:**
+```c
+// Initialize gains for the PID controller
 void MotorPID_SetGains(MotorPIDState *state, float kp, float ki, float kd)
 {
     state->kp = kp;
@@ -317,6 +328,7 @@ void MotorPID_SetGains(MotorPIDState *state, float kp, float ki, float kd)
     state->kd = kd;
 }
 
+// Reset integrator when starting a new motion command
 void MotorPID_Reset(MotorPIDState *state)
 {
     state->error = 0.0f;
@@ -324,94 +336,11 @@ void MotorPID_Reset(MotorPIDState *state)
     state->integral = 0.0f;
     state->pwm_output = 0.0f;
 }
-```
 
-#### Rust Controller (`rust/controller/`)
-
-**Structure for PID control in Rust:**
-```rust
-pub struct MotorPID {
-    target_speed: f64,
-    current_speed: f64,
-    error: f64,
-    error_prev: f64,
-    integral: f64,
-    
-    kp: f64,
-    ki: f64,
-    kd: f64,
-    
-    pwm_output: f64,
-}
-
-impl MotorPID {
-    pub fn new(kp: f64, ki: f64, kd: f64) -> Self {
-        Self {
-            target_speed: 0.0,
-            current_speed: 0.0,
-            error: 0.0,
-            error_prev: 0.0,
-            integral: 0.0,
-            kp,
-            ki,
-            kd,
-            pwm_output: 0.0,
-        }
-    }
-
-    pub fn update(&mut self, current_speed: f64) -> u16 {
-        const SAMPLE_TIME: f64 = 0.1;  // 100 ms (matches SpeedSensor thread)
-        const PWM_MIN: f64 = 300.0;
-        const PWM_MAX: f64 = 4095.0;
-
-        self.error = self.target_speed - current_speed;
-
-        // P term
-        let p_term = self.kp * self.error;
-
-        // I term (with anti-windup)
-        self.integral += self.error * SAMPLE_TIME;
-        self.integral = self.integral.clamp(-100.0, 100.0);
-        let i_term = self.ki * self.integral;
-
-        // D term
-        let derivative = (self.error - self.error_prev) / SAMPLE_TIME;
-        let d_term = self.kd * derivative;
-
-        // Total output
-        self.pwm_output = p_term + i_term + d_term;
-        self.pwm_output = self.pwm_output.clamp(0.0, 1.0);
-
-        // Convert to raw PWM
-        let mut pwm_raw = (self.pwm_output * 4095.0) as u16;
-        
-        // Apply dead zone
-        if pwm_raw > 0 && pwm_raw < PWM_MIN as u16 {
-            pwm_raw = PWM_MIN as u16;
-        }
-
-        self.error_prev = self.error;
-        self.current_speed = current_speed;
-        
-        pwm_raw
-    }
-
-    pub fn set_target_speed(&mut self, speed: f64) {
-        self.target_speed = speed;
-    }
-
-    pub fn set_gains(&mut self, kp: f64, ki: f64, kd: f64) {
-        self.kp = kp;
-        self.ki = ki;
-        self.kd = kd;
-    }
-
-    pub fn reset(&mut self) {
-        self.error = 0.0;
-        self.error_prev = 0.0;
-        self.integral = 0.0;
-        self.pwm_output = 0.0;
-    }
+// Set target speed for the controller
+void MotorPID_SetTargetSpeed(MotorPIDState *state, float target_mps)
+{
+    state->target_speed = target_mps;
 }
 ```
 
@@ -432,7 +361,6 @@ impl MotorPID {
 ### Phase 2: Implementation
 
 - [ ] Implement PID struct in firmware/Core/motor_control.c
-- [ ] Implement PID struct in rust/controller/
 - [ ] Create speed measurement routine (encoder filtering, outlier rejection)
 - [ ] Implement test script: ramp target speed from 0% → 50% → 100%
 - [ ] Set up data logging (time, target, actual, error, PWM) for analysis
@@ -502,20 +430,3 @@ Motor + Gearbox → Encoder → Load (friction/wheel disc)
 - **PID Tuning**: Åström & Hägglund. *PID Controllers: Theory, Design, and Tuning (2nd ed.)*
 - **Discrete-Time Control**: Digital Control Systems by Phillips & Nagle
 - **Motor Control**: Texas Instruments *Motor Control Basics* application notes
-
----
-
-## 9. Future Enhancements
-
-1. **Adaptive Tuning**: Adjust K_p, K_i, K_d based on load or speed range
-2. **Anti-Windup Refinement**: Improved clamping strategies
-3. **Feedforward Control**: Add motor model to predict required PWM upfront
-4. **State Estimation**: Use Kalman filter for more robust speed estimation
-5. **Multi-Motor Coordination**: Synchronized speed control across all 4 motors
-
----
-
-**Document Version**: 1.0  
-**Last Updated**: March 2026  
-**Owner**: Hardware & Control Team  
-**Status**: In Development
