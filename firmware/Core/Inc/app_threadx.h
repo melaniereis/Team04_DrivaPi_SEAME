@@ -43,7 +43,7 @@ extern "C" {
 #include "dc_motor_test.h"
 #include "motor_utils.h"
 #include "sensors.h"
-#include "speed_sensor.h"
+//#include "speed_sensor.h"
 
 #include "soft_i2c.h"
 #include "init_devices.h"
@@ -159,5 +159,6 @@ extern float				g_vehicleSpeed;
 }
 #endif
 #endif /* __APP_THREADX_H */
+
 
 
