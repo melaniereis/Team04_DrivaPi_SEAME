@@ -16,7 +16,7 @@ and the deployment distribution.
 In standard Behavioural Cloning (BC), the model is trained on observations collected while the
 **expert** was in control. However, at test time, the **learner** is in control and will inevitably make small mistakes
 that lead it to states the expert never visited. Because the learner has no training data for these novel states,
-errors cascade — a phenomenon called **compounding errors** or **distributional shift**.
+errors cascade, a phenomenon called **compounding errors** or **distributional shift**.
 
 ---
 

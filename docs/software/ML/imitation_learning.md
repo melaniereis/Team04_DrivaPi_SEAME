@@ -43,7 +43,7 @@ and outputs control commands directly, without any explicit planning module.
 
 | Variant | Description |
 |---|---|
-| **Behavioural Cloning (BC)** | The simplest form — pure supervised learning on expert demonstrations. |
+| **Behavioural Cloning (BC)** | The simplest form, pure supervised learning on expert demonstrations. |
 | **Inverse Reinforcement Learning (IRL)** | Infers a reward function from expert behaviour, then uses RL to optimise it. |
 | **Generative Adversarial Imitation Learning (GAIL)** | Uses a GAN-like setup to match the expert's state-action distribution. |
 | **DAgger** | Iteratively queries the expert to correct the learner's mistakes (see dedicated file). |
@@ -71,7 +71,7 @@ Typical outputs:
 
 ## Using CARLA Simulator for Imitation Learning
 
-CARLA's built-in **Autopilot / Traffic Manager** acts as the expert driver, navigating road networks while respecting traffic rules. This means large amounts of labelled demonstration data can be generated automatically across different towns, weather conditions, and traffic densities — without needing a human to manually drive.
+CARLA's built-in **Autopilot / Traffic Manager** acts as the expert driver, navigating road networks while respecting traffic rules. This means large amounts of labelled demonstration data can be generated automatically across different towns, weather conditions, and traffic densities, without needing a human to manually drive.
 
 Once the dataset is collected, training happens entirely offline. The recorded `(observation, action)` pairs are fed into the neural network. After training, the policy is deployed back into CARLA to evaluate its driving performance.
 

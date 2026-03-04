@@ -74,7 +74,7 @@ RL has been applied across a wide spectrum of autonomous driving sub-tasks:
 Simple RL tasks where the agent learns to maintain lane position and follow speed limits using camera and speed sensor input.
 
 ### Highway Driving & Merging
-Agents learn complex multi-vehicle interactions — when to accelerate to merge, how to follow safely, how to change lanes.
+Agents learn complex multi-vehicle interactions, when to accelerate to merge, how to follow safely, how to change lanes.
 
 ### Intersection Navigation
 RL agents can learn to navigate uncontrolled intersections by reasoning about other vehicles' trajectories and right-of-way.
@@ -110,7 +110,7 @@ safer, or more optimal than anything a human demonstrator would provide.
 RL has achieved superhuman performance in many domains (games, robotics, etc.).
 
 ### ✅ Naturally Handles Sequential Decision-Making
-Autonomous driving is inherently sequential — each action affects future states.
+Autonomous driving is inherently sequential, each action affects future states.
 RL is specifically designed to optimise long-horizon sequential decisions, making it a natural fit.
 
 ### ✅ Can Learn from Simulated Environments at Scale
