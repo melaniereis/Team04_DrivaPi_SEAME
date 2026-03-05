@@ -6,6 +6,7 @@
 #define PID_SAMPLE_TIME 0.1f   // 100 ms update rate (matches SpeedSensor thread)
 #define PWM_MIN 		300u   // Minimum absolute PWM to overcome dead zone
 #define PWM_MAX			4095u  // Maximum absolute PWM value
+#define PID_INTEGRAL_LIMIT 100.0f // Anti-windup clamp for integral state (error * seconds)
 
 /**
  * @struct MotorPIDState

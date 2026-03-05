@@ -12,11 +12,12 @@ void MotorPIDUpdate(MotorPIDState *state, float current_speed)
     // Step 3: Integral term (eliminates steady-state error)
     state->integral += state->error * PID_SAMPLE_TIME;
     
-    // Anti-windup: prevent integral from growing too large
-    if (state->integral > 100.0f) 
-        state->integral = 100.0f;
-    if (state->integral < -100.0f) 
-        state->integral = -100.0f;
+    // Anti-windup: limit integral state to keep recovery fast after saturation.
+    // Tune PID_INTEGRAL_LIMIT together with gain_i (larger gain_i generally needs a smaller limit).
+    if (state->integral > PID_INTEGRAL_LIMIT)
+        state->integral = PID_INTEGRAL_LIMIT;
+    if (state->integral < -PID_INTEGRAL_LIMIT)
+        state->integral = -PID_INTEGRAL_LIMIT;
     
     float i_term = state->gain_i * state->integral;
     

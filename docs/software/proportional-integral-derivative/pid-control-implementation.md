@@ -147,6 +147,19 @@ for each tuning iteration:
   If overshoot is excessive: increase gain_d or reduce gain_p
 ```
 
+### 3.3 Anti-Windup Limit
+
+The implementation uses a named integral clamp constant:
+- `PID_INTEGRAL_LIMIT` in `motor_control.h`
+
+Rationale:
+- Prevents integral windup when output is saturated at the PWM limit
+- Makes tuning explicit (no hidden magic number)
+
+Tuning guideline:
+- If recovery after large commands is slow, reduce `PID_INTEGRAL_LIMIT`
+- If steady-state error is not removed, increase `PID_INTEGRAL_LIMIT` or `gain_i`
+
 ---
 
 ## 4. PID Architecture & Integration
