@@ -54,7 +54,6 @@ void UltrasonicEntry(ULONG initial_input)
 	float ttc_ms = 9999;
 	float current_speed = 0;
 	RNDGear_t current_gear = GEAR_NEUTRAL;
-	bool range_active = false;
 
 	while(1)
 	{
@@ -100,11 +99,6 @@ void UltrasonicEntry(ULONG initial_input)
 		tx_mutex_get(&g_gearMutex, TX_WAIT_FOREVER);
 		current_gear = g_current_gear;
 		tx_mutex_put(&g_gearMutex);
-
-		if (range_cm <= BRAKE_THRESHOLD_CM)
-			range_active = true;
-		else
-			range_active = false;
 
 		// 4. PHYSICS & SAFETY
 		if (range_cm >= 0 && range_cm <= 80)
@@ -183,8 +177,6 @@ void UltrasonicEntry(ULONG initial_input)
 //					g_current_gear = GEAR_NEUTRAL;
 //					current_gear = g_current_gear;
 //					tx_mutex_put(&g_gearMutex);
-
-					range_active = true;
 				}
 				else
 					HAL_UART_Transmit(&huart1, (uint8_t*)"sike!\r\n", 24, 100);
@@ -205,8 +197,6 @@ void UltrasonicEntry(ULONG initial_input)
 //				g_current_gear = GEAR_NEUTRAL;
 //				current_gear = g_current_gear;
 //				tx_mutex_put(&g_gearMutex);
-
-				range_active = false;
 				HAL_UART_Transmit(&huart1, (uint8_t*)"brake free\r\n", 24, 100);
 			}
 			dist_old = range_cm;

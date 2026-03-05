@@ -14,7 +14,7 @@
  * @param max_pulse
  * @return int
  */
-int ServoSweep(uint8_t channel, uint16_t start_angle, uint16_t end_angle,
+int ServoSweepTest(uint8_t channel, uint16_t start_angle, uint16_t end_angle,
 uint16_t step_angle)
 {
 	if (step_angle == 0)
