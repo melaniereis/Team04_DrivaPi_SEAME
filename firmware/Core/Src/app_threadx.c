@@ -56,6 +56,8 @@ TX_MUTEX                g_servoMutex;
 TX_MUTEX             	g_gearMutex;
 RNDGear_t				g_current_gear;
 float                   g_vehicleSpeed;
+float 					g_current_speed;
+int16_t 				g_current_pwm;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -78,6 +80,8 @@ UINT App_ThreadX_Init(VOID *memory_ptr)
   	g_emergencyBrake = false;
 	g_vehicleSpeed = 0;
 	g_current_gear = GEAR_NEUTRAL;
+	g_current_speed = 0.0f;
+	g_current_pwm = 0;
 
 	const char *msg = "\r\n=== DrivaPi ThreadX Init ===\r\n";
 	HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);

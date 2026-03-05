@@ -9,11 +9,6 @@
   */
 
 #include "speed_sensor.h"
-#include <string.h>
-
-float g_current_speed = 0.0f;
-int16_t g_current_pwm = 0;
-//RNDGear_t g_current_gear = GEAR_NEUTRAL;
 
 /**
  * @brief Determine R/N/D gear state based on speed and PWM direction.
