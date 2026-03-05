@@ -1,5 +1,5 @@
-#ifndef __MOTOR_CONTROL_H
-#define __MOTOR_CONTROL_H
+#ifndef MOTOR_CONTROL_H
+#define MOTOR_CONTROL_H
 
 #include <app_threadx.h>
 

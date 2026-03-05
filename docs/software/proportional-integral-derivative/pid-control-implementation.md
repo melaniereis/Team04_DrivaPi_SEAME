@@ -17,7 +17,7 @@ The fundamental PID control law:
 $$u(t) = K_p \cdot e(t) + K_i \int_0^t e(\tau) d\tau + K_d \frac{de(t)}{dt}$$
 
 Where:
-- **u(t)** = PWM output (0–4095)
+- **u(t)** = normalized control command in range [-1, 1], mapped to bidirectional PWM (−4095…+4095)
 - **e(t)** = Speed error = target_speed − current_speed
 - **K_p, K_i, K_d** = Proportional, Integral, Derivative gains
 
