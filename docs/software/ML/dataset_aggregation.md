@@ -138,7 +138,7 @@ more robust behaviour and better error-recovery capabilities.
 
 ### ✅ Interoperable with Modern Architectures
 DAgger is a training procedure, not an architecture. It can be applied to
-any model (CNNs, Transformers, LSTMs) and any modality (camera, LiDAR, multi-modal fusion),
+any model (Convolutional Neural Networks (CNNs), Transformers, Long Short-Term Memory (LSTMs)) and any modality (camera, LiDAR, multi-modal fusion),
 making it highly flexible.
 
 ---
