@@ -20,7 +20,7 @@
 ---
 
 ## Summary
-Sprint 8 represented the final iteration of the project, with the team focused on consolidating hardware stability, advancing Qt-based infotainment features, and formally validating core functional requirements through integration and system testing. Whilst the team delivered the majority of planned work, the sprint was marked by significant organisational challenges — including poor inter-team communication and an overambitious scope — which prevented full completion of the emergency braking system, STM32–Qt communication, and all planned physical hardware tests.
+Sprint 8 represented the final iteration of the project, with the team focused on consolidating hardware stability, advancing Qt-based infotainment features, and formally validating core functional requirements through integration and system testing. Whilst the team delivered the majority of planned work, the sprint surfaced several areas for improvement — including opportunities to strengthen inter-team communication and refine scope management — which contributed to some items, such as the emergency braking system, STM32–Qt communication, and selected physical hardware tests, carrying forward to Sprint 9.
 
 ## Key achievements
 - **Hardware infrastructure:** Maintained stable hardware platform throughout the sprint, ensuring core vehicle components remained operational for testing.
@@ -31,8 +31,8 @@ Sprint 8 represented the final iteration of the project, with the team focused o
 ## Decisions
 - Carry forward incomplete emergency braking logic to Sprint 9 with dedicated ownership and a clear implementation deadline.
 - Prioritise STM32–Qt communication resolution as a Sprint 9 blocker, given its impact on multiple dependent features.
-- Reduce sprint scope in future iterations to ensure a sustainable and achievable workload per team member.
-- Improve inter-team communication cadence to prevent parallel work from diverging silently.
+- Refine sprint scope in future iterations to ensure a sustainable and achievable workload per team member.
+- Strengthen inter-team communication cadence to keep parallel workstreams aligned.
 
 ## Measurements & validation
 | Metric | Value | Status |
@@ -46,12 +46,12 @@ Sprint 8 represented the final iteration of the project, with the team focused o
 ## Challenges & solutions
 | Challenge | Severity | Resolution |
 |---|---|---|
-| **Emergency braking not failure** | High | Deferred to Sprint 9 with dedicated ownership and clear acceptance criteria |
-| **STM32–Qt communication failure** | High | Root cause analysis to be conducted at Sprint 9 kickoff; assigned as top priority |
-| **Incomplete Qt features** | Medium | Remaining features scoped into Sprint 9 backlog with reduced overall scope |
-| **Physical tests not fully executed** | Medium | Test sessions to be rescheduled in Sprint 9 with dedicated hardware time |
-| **Lack of inter-team communication** | High | Team retrospective surfaced this issue; daily syncs to be reinforced going forward |
-| **Overwhelming sprint scope** | High | Sprint 9 scope reduced to reflect team capacity and account for carryover work |
+| **Emergency braking not implemented** | High | Deferred to Sprint 9 with dedicated ownership and clear acceptance criteria |
+| **STM32–Qt communication not yet functional** | High | Root cause analysis to be conducted at Sprint 9 kickoff; assigned as top priority |
+| **Qt features partially complete** | Medium | Remaining features scoped into Sprint 9 backlog with refined overall scope |
+| **Physical tests partially executed** | Medium | Test sessions to be rescheduled in Sprint 9 with dedicated hardware time |
+| **Inter-team communication cadence** | High | Retrospective surfaced the opportunity; daily syncs to be reinforced going forward |
+| **Sprint scope exceeded team capacity** | High | Sprint 9 scope calibrated to reflect team capacity and account for carryover work |
 
 ## Next steps (Sprint 9 priorities)
 1. **Emergency braking logic:** Complete and validate STM32 emergency braking implementation with full TSF traceability.
@@ -60,7 +60,7 @@ Sprint 8 represented the final iteration of the project, with the team focused o
 4. **Physical testing:** Execute all physical hardware tests in a dedicated, scheduled session.
 5. **ADAS stack initiation:** Begin establishing the Camera/HAILO/CARLA stack for ADAS functionality.
 6. **TSF traceability enforcement:** Enforce strict TSF traceability through real-code testing across all safety-critical components.
-7. **Communication improvement:** Reinforce daily syncs and inter-role communication to prevent silent divergence of parallel workstreams.
+7. **Communication improvement:** Strengthen daily syncs and inter-role communication to keep parallel workstreams aligned.
 
 ## Team highlights
 - **Bernardo:** Hardware integration, physical testing execution, and STM32 firmware work.
@@ -71,26 +71,26 @@ Sprint 8 represented the final iteration of the project, with the team focused o
 
 ## Team feedback (retrospective)
 
-### What went well
-- **Bernardo:** Delivery was average; the core objectives were partially met.
-- **Gaspar:** Could have been better — the fundamentals were there but execution fell short of expectations.
-- **Hugo:** It was good overall — the team delivered what was planned for the most part.
-- **Melanie:** Average — goals were broadly addressed, though the workload was excessive.
-- **Miguel:** Average — the sprint achieved a reasonable baseline of its intended outcomes.
+### Highlights
+- **Bernardo:** The team partially met its core objectives and made meaningful progress across several areas.
+- **Gaspar:** There is clear room to grow — the foundations were in place and the team showed commitment throughout.
+- **Hugo:** The sprint went well overall; the team broadly delivered what had been planned.
+- **Melanie:** Goals were broadly addressed, and the team maintained a strong collaborative effort despite a demanding workload.
+- **Miguel:** The sprint achieved a solid baseline, with the team meeting its most critical commitments.
 
-### What went poorly
-- **Bernardo:** The sprint felt chaotic, with insufficient structure during execution.
-- **Gaspar:** Lack of communication; agrees with Hugo's assessment that execution did not match the quality of planning.
-- **Hugo:** Good planning, poor execution — the disconnect between plan and delivery was the core issue.
-- **Melanie:** Overwhelming — the scope was too large for the available capacity.
-- **Miguel:** Chaotic — coordination between workstreams was insufficient.
+### Areas for improvement
+- **Bernardo:** The team would benefit from more structured day-to-day coordination to maintain clarity across workstreams.
+- **Gaspar:** Closer alignment between team members during execution would help bridge the gap between planning and delivery.
+- **Hugo:** The planning was strong; focusing on execution discipline in the next sprint will help close the gap between intent and outcome.
+- **Melanie:** Calibrating the sprint scope more carefully to available capacity would help maintain a sustainable pace.
+- **Miguel:** Improved coordination across workstreams would help the team operate more cohesively and efficiently.
 
 ---
 
 ## Outcome
-Sprint 8 goal **partially achieved**: the team maintained hardware stability and advanced telemetry and Qt features, but fell short of completing the emergency braking system, STM32–Qt communication, and all planned physical tests. The sprint exposed a structural challenge — an ambitious scope combined with inadequate inter-team communication — which resulted in a chaotic and at times overwhelming experience for the team.
+Sprint 8 goal **partially achieved**: the team maintained hardware stability and advanced telemetry and Qt features, whilst carrying forward selected items — including the emergency braking system, STM32–Qt communication, and remaining physical tests — into Sprint 9. The retrospective surfaced valuable insights around scope calibration and communication cadence, both of which the team is actively addressing.
 
-The retrospective produced clear, actionable insights: reduce sprint scope to match capacity, enforce daily communication rituals, and assign explicit ownership to high-priority items carried over from Sprint 8.
+The team demonstrated strong planning discipline and commitment throughout the sprint. Sprint 9 will build on this foundation by refining execution practices, improving cross-role alignment, and assigning clear ownership to carryover work.
 
 **Foundation for Sprint 9:** The team enters Sprint 9 with a focused and realistic backlog centred on completing the vehicle's safety-critical features, validating functional requirements end-to-end, and initiating the ADAS stack.
 
