@@ -4,14 +4,6 @@
 
 This document outlines the design, theory, and implementation strategy for PID (proportional-integral-derivative) control loops to regulate DC motor speed on the DrivaPi vehicle. 
 
-**Current Implementation (Remote Control):** The PID controller maintains stable, smooth motor speed when the remote control sends target speed commands via CAN messages to the STM32.
-
-**Future Implementation (Autonomous Driving):** The same CAN messaging infrastructure and PID control architecture will be reused when autonomous driving is implemented. At that time, instead of the remote, AI image processing will analyze camera input and send target speed commands via CAN to the STM32. The PID loop implementation remains unchanged—only the source of the CAN messages switches from remote to AI processor.
-
-The implementation ensures smooth acceleration, accurate speed tracking, and stable steady-state behavior for both remote-controlled and autonomous operation.
-
----
-
 ## 1. PID Theory
 
 ### 1.1 Core Concept
@@ -119,28 +111,28 @@ speed_mps = distance_m / dt;  // dt is time interval in seconds
 ### 3.1 Manual Tuning (Recommended for DrivaPi)
 
 **Step 1: Set Baseline (P only)**
-- Set K_i = 0, K_d = 0
-- Choose modest K_p (e.g., 50–100)
+- Set gain_i = 0, gain_d = 0
+- Choose modest gain_p (e.g., 50–100)
 - Test step response: Set target speed suddenly, observe response
 - Goal: Fast response, acceptable overshoot (~20%)
 
 **Step 2: Add Integral (PI control)**
-- Set K_i small (e.g., K_p / 10)
+- Set gain_i small (e.g., gain_p / 10)
 - Test steady-state error removal
-- Increase K_i until error is eliminated without oscillation
-- If oscillation occurs, reduce K_i
+- Increase gain_i until error is eliminated without oscillation
+- If oscillation occurs, reduce gain_i
 
 **Step 3: Add Derivative (PID)**
-- Set K_d small (e.g., K_p × 0.01)
-- Increase K_d to reduce overshoot and oscillation
-- Watch for noise amplification; if unstable, reduce K_d
+- Set gain_d small (e.g., gain_p × 0.01)
+- Increase gain_d to reduce overshoot and oscillation
+- Watch for noise amplification; if unstable, reduce gain_d
 - Aim for critically damped response (fast, no oscillation)
 
 **Empirical Starting Point:**
 ```
-K_p = 100  (adjust based on motor response speed)
-K_i = K_p / 20 = 5  (slow integral action)
-K_d = K_p × 0.05 = 5  (mild derivative action)
+gain_p = 100  (adjust based on motor response speed)
+gain_i = gain_p / 20 = 5  (slow integral action)
+gain_d = gain_p × 0.05 = 5  (mild derivative action)
 ```
 
 ### 3.2 Practical Tuning Checklist
@@ -152,10 +144,10 @@ for each tuning iteration:
   3. Measure overshoot (how much speed exceeds target)
   4. Measure settling time (time to stabilize)
   
-  If oscillating: reduce K_p or K_i; increase K_d
-  If too slow: increase K_p
-  If steady-state error persists: increase K_i
-  If overshoot is excessive: increase K_d or reduce K_p
+  If oscillating: reduce gain_p or gain_i; increase gain_d
+  If too slow: increase gain_p
+  If steady-state error persists: increase gain_i
+  If overshoot is excessive: increase gain_d or reduce gain_p
 ```
 
 ---
@@ -165,12 +157,11 @@ for each tuning iteration:
 ### 4.1 DrivaPi Hardware Architecture
 
 ```
-┌─────────────────────────────────────┐
-│  STM32 Microcontroller              │
-│                                     │
+┌────────────────────────────────────┐
+│  STM32 Microcontroller             │
+│                                    │
 │  ┌────────────────────────────┐    │
 │  │  CAN Receiver              │    │
-│  │  (from remote control)     │    │
 │  └────────────┬───────────────┘    │
 │               │                    │
 │               ▼ (target speed)     │
@@ -190,9 +181,8 @@ for each tuning iteration:
                 ▼
     ┌──────────────────────────┐
     │  PCA9685 PWM Driver      │
-    │  (16-channel PWM)        │
     └────────────┬─────────────┘
-                 │ PWM signals (4 channels for 4 motors)
+                 │ PWM signals 
                  ▼
     ┌──────────────────────────┐
     │  Motor Driver H-bridge   │
@@ -202,17 +192,9 @@ for each tuning iteration:
                  ▼
     ┌──────────────────────────┐
     │  JGB37-520 DC Motor      │
-    │  (no encoder integrated) │
     └────────────┬─────────────┘
                  │
                  ▼ (mechanical output)
-    ┌──────────────────────────┐
-    │  Wheel with Encoder      │
-    │  (optical/magnetic)      │
-    │  Produces pulse signal   │
-    └────────────┬─────────────┘
-                 │
-                 ▼
     ┌──────────────────────────┐
     │  LM393 Comparator        │
     │  (pulse conditioning)    │
@@ -236,11 +218,11 @@ for each tuning iteration:
     └────────────────┘
          │
          ▼ (feedback loop)
-    PID Controller (update at 100 ms)
+    PID Controller
 ```
 
 **Signal Flow:**
-1. **Command:** Remote → CAN message → STM32 receives target speed
+1. **Command:** Raspberry Pi 5 → CAN message → STM32 receives target speed
 2. **Control:** PID calculates error and PWM term → I2C sends PWM value to PCA9685
 3. **Motor:** PCA9685 outputs PWM signal → Motor Driver → Motor spins → Wheel rotates
 4. **Feedback:** Wheel encoder → LM393 conditions pulse → STM32 timer counts → Speed calculation (m/s) → back to PID
@@ -250,145 +232,45 @@ for each tuning iteration:
 
 ### 4.2 Integration Points
 
-#### C Firmware (`firmware/Core/`)
-
 **File: `motor_control.h`**
-```c
-/**
- * @struct MotorPIDState
- * @brief PID controller state for one motor
- */
-typedef struct {
-    float       target_speed;      // desired speed (m/s)
-    float       current_speed;     // measured speed (m/s) from speed_sensor.c
-    float       error;             // e[n]
-    float       error_prev;        // e[n-1] for derivative
-    float       integral;          // sum of errors for integral term
-    
-    float       kp, ki, kd;        // PID gains
-    float       pwm_output;        // computed PWM (0.0–1.0)
-    uint16_t    pwm_raw;        // raw PWM (0–4095) for PCA9685
-    uint8_t     pca9685_channel; // which PCA9685 channel (0–15)
-} MotorPIDState;
+Defines the `MotorPIDState` struct and the `MotorPIDUpdate()` function prototype. Initialize a global `g_motorPidState` instance with target speed, measured speed, and tuned PID gains (gain_p, gain_i, gain_d).
 
-/**
- * @brief Compute PID control output and send to PCA9685
- */
-void MotorPID_Update(MotorPIDState *state, float current_speed);
+**File: `motor_control.c`**
+Implements the PID control loop:
+- `MotorPIDUpdate()` – Core PID calculation; call periodically (100 ms) from the main control thread
+- `UpdateMotorControl()` – Main entry point; updates target speed from CAN and calls `MotorPIDUpdate()` with measured speed feedback
 
-/**
- * @brief Set PID gains
- */
-void MotorPID_SetGains(MotorPIDState *state, float kp, float ki, float kd);
+Call `UpdateMotorControl()` in your main control loop (e.g., from a 100 ms timer or periodic task) to continuously regulate motor speed.
 
-/**
- * @brief Reset integrator
- */
-void MotorPID_Reset(MotorPIDState *state);
-```
-
-**File: `motor_control.c` – PID Update Function**
-```c
-#define PID_SAMPLE_TIME 0.1f   // 100 ms update rate (matches SpeedSensor thread)
-#define PWM_MIN 300u           // Minimum PWM to overcome dead zone
-#define PWM_MAX 4095u          // Maximum PWM value
-
-void MotorPID_Update(MotorPIDState *state, float current_speed)
-{
-    // Step 1: Calculate error (difference between target and current speed)
-    state->error = state->target_speed - current_speed;
-    
-    // Step 2: Proportional term (immediate response)
-    float p_term = state->kp * state->error;
-    
-    // Step 3: Integral term (eliminates steady-state error)
-    state->integral += state->error * PID_SAMPLE_TIME;
-    
-    // Anti-windup: prevent integral from growing too large
-    if (state->integral > 100.0f) 
-        state->integral = 100.0f;
-    if (state->integral < -100.0f) 
-        state->integral = -100.0f;
-    
-    float i_term = state->ki * state->integral;
-    
-    // Step 4: Derivative term (reduces overshoot)
-    float derivative = (state->error - state->error_prev) / PID_SAMPLE_TIME;
-    float d_term = state->kd * derivative;
-    
-    // Step 5: Sum all three terms
-    state->pwm_output = p_term + i_term + d_term;
-    
-    // Step 6: Clamp output to valid PWM range [0.0, 1.0]
-    if (state->pwm_output > 1.0f) 
-        state->pwm_output = 1.0f;
-    if (state->pwm_output < 0.0f) 
-        state->pwm_output = 0.0f;
-    
-    // Step 7: Convert normalized PWM (0.0–1.0) to raw value (0–4095)
-    state->pwm_raw = (uint16_t)(state->pwm_output * 4095.0f);
-    
-    // Step 8: Apply dead zone minimum (motor won't move below this PWM)
-    if (state->pwm_raw > 0 && state->pwm_raw < PWM_MIN)
-        state->pwm_raw = PWM_MIN;
-    
-    // Step 9: Send PWM to PCA9685 via I2C
-    // Example: PCA9685_SetPWM(state->pca9685_channel, 0, state->pwm_raw);
-    PCA9685_SetPWM(state->pca9685_channel, 0, state->pwm_raw);
-    
-    // Step 10: Store current error for derivative calculation in next cycle
-    state->error_prev = state->error;
-    state->current_speed = current_speed;
-}
-```
-
-**Integration with Speed Sensor and CAN:**
-```c
-// In your main control loop (100 ms interval, matches SpeedSensor thread):
-extern float    g_vehicleSpeed;         // from speed_sensor.c (measured m/s)
-extern float    g_target_speed;         // from CAN message (remote command m/s)
-extern          MotorPIDState motor_pid_states[4];  // for 4 motors
-
-void UpdateMotorControl(void)
-{
-    // CAN receiver has already populated g_target_speed from remote command
-    
-    // Update each motor's PID controller with current speed feedback
-    // and target speed from remote
-    for (int i = 0; i < 4; i++) {
-        motor_pid_states[i].target_speed = g_target_speed;
-        MotorPID_Update(&motor_pid_states[i], g_vehicleSpeed);
-    }
-}
-```
-
-**Quick Reference – Helper Functions:**
-```c
-// Initialize gains for the PID controller
-void MotorPID_SetGains(MotorPIDState *state, float kp, float ki, float kd)
-{
-    state->kp = kp;
-    state->ki = ki;
-    state->kd = kd;
-}
-
-// Reset integrator when starting a new motion command
-void MotorPID_Reset(MotorPIDState *state)
-{
-    state->error = 0.0f;
-    state->error_prev = 0.0f;
-    state->integral = 0.0f;
-    state->pwm_output = 0.0f;
-}
-
-// Set target speed for the controller
-void MotorPID_SetTargetSpeed(MotorPIDState *state, float target_mps)
-{
-    state->target_speed = target_mps;
-}
-```
 ---
 
+### 4.3 Current State and Future Implementation
+
+#### Current State (As of March 2026)
+
+The STM32 currently receives PWM command values directly from the remote control via CAN messages (range: **-4095 to +4095**) and sends them directly to the motor driver. No speed feedback or PID control is implemented yet.
+
+```
+Remote Control → CAN (PWM: -4095 to +4095) → STM32 → Motor Driver → Motor
+```
+
+#### Future Implementation (PID Control - Phase 2)
+
+To implement closed-loop speed control, the system will transition from receiving PWM commands to receiving **target speed commands** via CAN. At that time, the PID controller will:
+- Accept target speed values (m/s) from the remote control
+- Read encoder-based speed feedback from `speed_sensor.c`
+- Calculate the required PWM signal using the PID algorithm
+- Automatically drive the motor to match the target speed with smooth, stable behavior
+
+**Key Changes Required for PID Implementation:**
+1. CAN message format: change from transmitting PWM (-4095 to +4095) to transmitting target speed (m/s)
+2. STM32 control logic: replace direct PWM forwarding with `UpdateMotorControl()` function
+3. Add speed feedback via encoder and `speed_sensor.c`
+4. Tune PID gains (gain_p, gain_i, gain_d) for smooth response
+
+This phased approach allows validation of the motor and encoder hardware before adding closed-loop control complexity.
+
+---
 ## 5. References & Further Reading
 
 - **Classical Control**: Franklin, Powell, Emami-Naeini. *Feedback Control of Dynamic Systems* (7th ed.)
