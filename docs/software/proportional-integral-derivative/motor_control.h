@@ -1,11 +1,11 @@
-#ifndef MOTOR_CONTROL_H
-#define MOTOR_CONTROL_H
+#ifndef __MOTOR_CONTROL_H
+#define __MOTOR_CONTROL_H
 
 #include <app_threadx.h>
 
 #define PID_SAMPLE_TIME 0.1f   // 100 ms update rate (matches SpeedSensor thread)
-#define PWM_MIN 300u           // Minimum PWM to overcome dead zone
-#define PWM_MAX 4095u          // Maximum PWM value
+#define PWM_MIN 		300u   // Minimum absolute PWM to overcome dead zone
+#define PWM_MAX			4095u  // Maximum absolute PWM value
 
 /**
  * @struct MotorPIDState
@@ -19,14 +19,22 @@ typedef struct {
 	float       integral;          // sum of errors for integral term
 	
 	float       gain_p, gain_i, gain_d;        // PID gains
-	float       pwm_output;        // computed PWM (0.0–1.0)
-	uint16_t    pwm_raw;			// raw PWM (0–4095) for PCA9685
-	uint8_t     pca9685_channel;	// PCA9685 channel for motor control
+	float       pwm_output;        // computed normalized PWM (-1.0 to 1.0)
+	int16_t     pwm_raw;			// signed PWM counts for MotorSetPWM (-4095 to 4095)
 } MotorPIDState;
+
+extern float         g_vehicleSpeed;   // from speed_sensor.c (measured m/s)
+extern float         g_targetSpeed;    // from CAN message (remote command m/s)
+extern MotorPIDState g_motorPidState;  // motor PID controller state
 
 /**
  * @brief Compute PID control output and send to PCA9685
  */
 void MotorPIDUpdate(MotorPIDState *state, float current_speed);
+
+/**
+ * @brief Update motor control loop using current target and measured speed
+ */
+void UpdateMotorControl(void);
 
 #endif

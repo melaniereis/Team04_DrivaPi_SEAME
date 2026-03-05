@@ -1,4 +1,5 @@
 #include "motor_control.h"
+#include "dc_motor.h"
 
 void MotorPIDUpdate(MotorPIDState *state, float current_speed)
 {
@@ -26,33 +27,28 @@ void MotorPIDUpdate(MotorPIDState *state, float current_speed)
     // Step 5: Sum all three terms
     state->pwm_output = p_term + i_term + d_term;
     
-    // Step 6: Clamp output to valid PWM range [0.0, 1.0]
+    // Step 6: Clamp output to valid normalized range [-1.0, 1.0]
     if (state->pwm_output > 1.0f) 
         state->pwm_output = 1.0f;
-    if (state->pwm_output < 0.0f) 
-        state->pwm_output = 0.0f;
+    if (state->pwm_output < -1.0f) 
+        state->pwm_output = -1.0f;
     
-    // Step 7: Convert normalized PWM (0.0–1.0) to raw value (0–4095)
-    state->pwm_raw = (uint16_t)(state->pwm_output * 4095.0f);
+    // Step 7: Convert normalized PWM (-1.0 to 1.0) to raw signed value (-4095 to 4095)
+    state->pwm_raw = (int16_t)(state->pwm_output * (float)PWM_MAX);
     
-    // Step 8: Apply dead zone minimum (motor won't move below this PWM)
-    if (state->pwm_raw > 0 && state->pwm_raw < PWM_MIN)
-        state->pwm_raw = PWM_MIN;
+    // Step 8: Apply dead zone minimum on absolute PWM magnitude
+    if ((state->pwm_raw > 0) && (state->pwm_raw < (int16_t)PWM_MIN))
+        state->pwm_raw = (int16_t)PWM_MIN;
+    else if ((state->pwm_raw < 0) && (state->pwm_raw > -(int16_t)PWM_MIN))
+        state->pwm_raw = -(int16_t)PWM_MIN;
     
-    // Step 9: Send PWM to PCA9685 via I2C
-    // Example: PCA9685_SetPWM(state->pca9685_channel, 0, state->pwm_raw);
-    PCA9685_SetPWM(state->pca9685_channel, 0, state->pwm_raw);
+    // Step 9: Send signed PWM counts to motor driver (left_counts, right_counts)
+    MotorSetPWM((int32_t)state->pwm_raw, (int32_t)state->pwm_raw);
     
     // Step 10: Store current error for derivative calculation in next cycle
     state->error_prev = state->error;
     state->current_speed = current_speed;
 }
-
-
-// In your main control loop (100 ms interval, matches SpeedSensor thread):
-extern float       g_vehicleSpeed;     // from speed_sensor.c (measured m/s)
-extern float       g_targetSpeed;      // from CAN message (remote command m/s)
-extern MotorPIDState g_motorPidState;   // motor PID controller state
 
 void UpdateMotorControl(void)
 {

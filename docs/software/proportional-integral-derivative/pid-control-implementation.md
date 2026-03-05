@@ -2,13 +2,13 @@
 
 ## Overview
 
-This document outlines the design, theory, and implementation strategy for PID (proportional-integral-derivative) control loops to regulate DC motor speed on the DrivaPi vehicle. 
+This document outlines the design and implementation of PID (Proportional-Integral-Derivative) control loops to regulate DC motor speed on the DrivaPi vehicle. A PID controller automatically adjusts motor PWM (Pulse-Width Modulation) signals to maintain a target speed by continuously comparing actual speed to desired speed. 
 
 ## 1. PID Theory
 
 ### 1.1 Core Concept
 
-A PID controller continuously adjusts a control signal (motor PWM) based on the error between a desired setpoint (target speed) and actual measured output (current speed).
+A PID controller continuously adjusts PWM signals sent to the motor based on the error between target speed and actual measured speed.
 
 ### 1.2 PID Equation
 
@@ -17,11 +17,9 @@ The fundamental PID control law:
 $$u(t) = K_p \cdot e(t) + K_i \int_0^t e(\tau) d\tau + K_d \frac{de(t)}{dt}$$
 
 Where:
-- **u(t)** = Control output (PWM duty cycle, 0–4095)
-- **e(t)** = Error = target_speed − actual_speed
-- **K_p** = Proportional gain
-- **K_i** = Integral gain
-- **K_d** = Derivative gain
+- **u(t)** = PWM output (0–4095)
+- **e(t)** = Speed error = target_speed − current_speed
+- **K_p, K_i, K_d** = Proportional, Integral, Derivative gains
 
 ### 1.3 PID Terms Explained
 
@@ -66,13 +64,13 @@ Where:
 | Gear Ratio | 10:1 | Reduces speed, increases torque |
 | Wheel Speed (est.) | ~74 RPM | At 10:1 reduction |
 | Max Current | ~200–300 mA | Short-term peak with load |
-| Encoder Resolution | 30 PPR | Separate wheel encoder (not integrated in motor) |
+| Encoder Resolution | 30 PPR | 30 pulses per revolution |
 
 ### 2.2 Speed Measurement
 
-**Implementation:** Speed is calculated in the firmware (`firmware/Core/Src/speed_sensor.c`) using encoder pulses from a separate wheel encoder, conditioned by an LM393 comparator, and counted by the STM32 hardware timer.
+Speed is calculated using encoder pulses counted by the STM32 (microcontroller) and converted to m/s. The encoder sends pulses via an LM393 comparator to condition the signal.
 
-**Encoder-Based Speed Calculation (meters per second):**
+**Encoder-Based Speed Calculation:**
 ```c
 delta_pulses = current_encoder_count - last_encoder_count;
 // Handle timer overflow
@@ -86,27 +84,26 @@ distance_m = rotations * WHEEL_PERIMETER_M;
 speed_mps = distance_m / dt;  // dt is time interval in seconds
 ```
 
-**Example Calculation (per firmware constants):**
-- Sampling interval: 100 ms (0.1 s)
-- Encoder: 30 PPR (pulses per revolution)
+**Example Calculation:**
+- Sampling interval: 100 ms
+- Encoder: 30 PPR
 - Wheel perimeter: 0.212 m
-- If 15 encoder pulses counted in 100 ms:
-  - Rotations = 15 / 30 = 0.5 rotations
-  - Distance = 0.5 × 0.212 m = 0.106 m
-  - Speed = 0.106 m / 0.1 s = 1.06 m/s (≈3.8 km/h)
+- If 15 pulses in 100 ms → Speed = 1.06 m/s (≈3.8 km/h)
 
 ### 2.3 Motor Dynamics
 
 **Non-linearities to consider:**
-1. **Dead Zone**: Motor doesn't move below a minimum PWM (typically 20–30% of max)
+1. **Dead Zone**: Minimum PWM needed to start motor motion (typically 20–30%)
 2. **Saturation**: PWM capped at 4095 (100%)
-3. **Inertia**: Speed doesn't change instantaneously, the acceleration is gradual
-4. **Load Variation**: Vehicle weight distribution and friction may affect motor load
-5. **Thermal Effects**: Motor efficiency changes with temperature
+3. **Inertia**: Acceleration is gradual, not instantaneous
+4. **Load Variation**: Friction and weight affect motor response
+5. **Temperature**: Motor efficiency changes with heat
 
 ---
 
 ## 3. Tuning Methods
+
+**Note:** In equations, K_p, K_i, K_d refer to the actual gains implemented in code as `gain_p`, `gain_i`, `gain_d`.
 
 ### 3.1 Manual Tuning (Recommended for DrivaPi)
 
@@ -222,11 +219,11 @@ for each tuning iteration:
 ```
 
 **Signal Flow:**
-1. **Command:** Raspberry Pi 5 → CAN message → STM32 receives target speed
-2. **Control:** PID calculates error and PWM term → I2C sends PWM value to PCA9685
-3. **Motor:** PCA9685 outputs PWM signal → Motor Driver → Motor spins → Wheel rotates
-4. **Feedback:** Wheel encoder → LM393 conditions pulse → STM32 timer counts → Speed calculation (m/s) → back to PID
-5. **Loop:** PID continuously adjusts PWM to maintain target speed sent by remote
+1. **Command:** Raspberry Pi 5 sends target speed via CAN (Controller Area Network) to STM32
+2. **Control:** PID calculates PWM output → I2C (two-wire protocol) sends PWM to PCA9685 driver
+3. **Motor:** PCA9685 outputs PWM → H-bridge driver → DC motor spins → Wheel rotates
+4. **Feedback:** Wheel encoder pulses → LM393 conditions signal → STM32 timer counts → Speed calculation → back to PID
+5. **Loop:** PID continuously adjusts PWM to match target speed
 
 ---
 
@@ -244,36 +241,24 @@ Call `UpdateMotorControl()` in your main control loop (e.g., from a 100 ms timer
 
 ---
 
-### 4.3 Current State and Future Implementation
+### 4.3 Current State vs. Future Implementation
 
-#### Current State (As of March 2026)
+#### Current State (March 2026)
 
-The STM32 currently receives PWM command values directly from the remote control via CAN messages (range: **-4095 to +4095**) and sends them directly to the motor driver. No speed feedback or PID control is implemented yet.
-
-```
-Remote Control → CAN (PWM: -4095 to +4095) → STM32 → Motor Driver → Motor
-```
+The STM32 receives PWM values (-4095 to +4095) via CAN and sends them directly to the motor driver. No speed feedback or PID control.
 
 #### Future Implementation (PID Control - Phase 2)
 
-To implement closed-loop speed control, the system will transition from receiving PWM commands to receiving **target speed commands** via CAN. At that time, the PID controller will:
-- Accept target speed values (m/s) from the remote control
-- Read encoder-based speed feedback from `speed_sensor.c`
-- Calculate the required PWM signal using the PID algorithm
-- Automatically drive the motor to match the target speed with smooth, stable behavior
+Transition from receiving PWM to receiving target speed commands. The PID controller will:
+- Accept target speed (m/s) from remote via CAN
+- Read encoder speed feedback
+- Calculate required PWM using PID algorithm
+- Automatically maintain target speed
 
-**Key Changes Required for PID Implementation:**
-1. CAN message format: change from transmitting PWM (-4095 to +4095) to transmitting target speed (m/s)
-2. STM32 control logic: replace direct PWM forwarding with `UpdateMotorControl()` function
-3. Add speed feedback via encoder and `speed_sensor.c`
-4. Tune PID gains (gain_p, gain_i, gain_d) for smooth response
-
-This phased approach allows validation of the motor and encoder hardware before adding closed-loop control complexity.
+**Key Changes:**
+1. CAN message format: PWM → target speed (m/s)
+2. STM32: Direct PWM forwarding → `UpdateMotorControl()` function
+3. Add speed feedback from `speed_sensor.c`
+4. Tune PID gains (gain_p, gain_i, gain_d)
 
 ---
-## 5. References & Further Reading
-
-- **Classical Control**: Franklin, Powell, Emami-Naeini. *Feedback Control of Dynamic Systems* (7th ed.)
-- **PID Tuning**: Åström & Hägglund. *PID Controllers: Theory, Design, and Tuning (2nd ed.)*
-- **Discrete-Time Control**: Digital Control Systems by Phillips & Nagle
-- **Motor Control**: Texas Instruments *Motor Control Basics* application notes
