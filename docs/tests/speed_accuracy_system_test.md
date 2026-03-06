@@ -1,6 +1,6 @@
 # Speed Accuracy System Test
 
-**Related Issue:** [#396 — System Test Validation](https://github.com/SEAME-pt/Team04_DrivaPi/issues/396)
+**Related Issue:** [#396 - System Test Validation](https://github.com/SEAME-pt/Team04_DrivaPi/issues/396)
 
 **Objective:** Verify that the speed shown on the HMI display matches the real physical speed of the vehicle.
 
@@ -18,9 +18,9 @@
 
 ### Distance Evidence
 
-<img width="500" alt="Distance measurement - start point" src="REPLACE_WITH_GITHUB_ASSET_URL_1"/>
+<img width="500" src="https://github.com/user-attachments/assets/c4a21099-5b7a-41a6-84a3-7ff679a8e3bc"/>
 
-<img width="500" alt="Distance measurement - end point" src="REPLACE_WITH_GITHUB_ASSET_URL_2"/>
+<img width="500" src="https://github.com/user-attachments/assets/326b94ff-2980-4830-a904-5e94d16ddd03"/>
 
 ---
 
