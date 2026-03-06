@@ -14,7 +14,7 @@
 |---|---|
 | Fixed distance | 2 m |
 | Measurement tool | Stopwatch (precision: 0.1 s) |
-| Number of speed samples | 10 |
+| Speed samples | 10 readings received from **KUKSA** data broker **during** the 2 m run |
 
 ### Distance Evidence
 
@@ -26,7 +26,7 @@
 
 ## Raw Measurements
 
-### Display Speed Samples
+### Display Speed Samples (received from KUKSA during the 2 m run)
 
 | Sample Group | Speed (m/s) | Count |
 |---|---|---|
