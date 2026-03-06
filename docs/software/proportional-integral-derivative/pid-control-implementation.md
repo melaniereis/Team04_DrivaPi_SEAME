@@ -149,12 +149,20 @@ for each tuning iteration:
 
 ### 3.3 Anti-Windup Limit
 
+**What is Integral Windup?**
+
+Integral windup occurs when the integral term accumulates a large value because the control output is saturated (e.g., PWM at maximum 4095). During saturation, the motor cannot respond further, but the integral keeps growing as error persists. When the error finally decreases, the accumulated integral takes time to "unwind," causing overshoot and delayed response.
+
+**Example:** If target speed is 2 m/s but motor is saturated at max PWM, the integral accumulates while speed slowly increases. Once speed approaches target, the large integral drives excessive PWM, causing overshoot past the target.
+
+**Solution:** Clamp the integral term to prevent excessive accumulation during saturation.
+
 The implementation uses a named integral clamp constant:
 - `PID_INTEGRAL_LIMIT` in `motor_control.h`
 
 Rationale:
 - Prevents integral windup when output is saturated at the PWM limit
-- Makes tuning explicit (no hidden magic number)
+- Makes tuning explicit
 
 Tuning guideline:
 - If recovery after large commands is slow, reduce `PID_INTEGRAL_LIMIT`
@@ -250,7 +258,7 @@ Implements the PID control loop:
 - `MotorPIDUpdate()` – Core PID calculation; call periodically (100 ms) from the main control thread
 - `UpdateMotorControl()` – Main entry point; updates target speed from CAN and calls `MotorPIDUpdate()` with measured speed feedback
 
-Call `UpdateMotorControl()` in your main control loop (e.g., from a 100 ms timer or periodic task) to continuously regulate motor speed.
+`UpdateMotorControl()` should be called on the main control loop (e.g., from a 100 ms timer or periodic task) to continuously regulate motor speed.
 
 ---
 
