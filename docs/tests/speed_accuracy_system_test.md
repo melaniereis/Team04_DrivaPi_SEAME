@@ -50,8 +50,8 @@ $$v_{physical} = \frac{d}{t} = \frac{2}{1.9} \approx 1.0526 \ \text{m/s}$$
 |---|---|
 | Average display speed | 1.02608 m/s |
 | Physical speed (stopwatch) | 1.0526 m/s |
-| Absolute deviation | $|v_{physical} - \bar{v}_{display}| = |1.0526 - 1.02608| = 0.02652 \ \text{m/s}$ |
-| **Relative deviation** | $\delta = \dfrac{|v_{physical} - \bar{v}_{display}|}{v_{physical}} \times 100 = \dfrac{0.02652}{1.0526} \times 100 \approx \textbf{2.52\%}$ |
+| Absolute deviation | $\lvert v\_{\text{physical}} - \bar{v}\_{\text{display}}\rvert = \lvert 1.0526 - 1.02608\rvert = 0.02652 \ \text{m/s}$ |
+| **Relative deviation** | $\delta = \dfrac{v_{\text{physical}} - \bar{v}\_{\text{display}}}{v\_{\text{physical}}} \times 100 = \dfrac{0.02652}{1.0526} \times 100 \approx \textbf{2.52\%}$ |
 | Tolerance threshold | < 5 % |
 | **Status** | ✅ **PASS** |
 
