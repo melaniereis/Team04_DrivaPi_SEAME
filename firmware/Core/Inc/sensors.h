@@ -49,8 +49,6 @@ typedef struct
     uint16_t	T1_degC;
 } HTS221_Calibration_t;
 
-
-
 /* Exported constants --------------------------------------------------------*/
 /* HTS221 I2C Address */
 #define HTS221_I2C_ADDRESS     0x5F
@@ -110,7 +108,6 @@ extern Battery_Data_t		g_battery_data;
 extern I2C_HandleTypeDef	hi2c2;
 
 /* Global sensor data */
-
 
 HAL_StatusTypeDef	HTS221_Init(I2C_HandleTypeDef *hi2c);
 HAL_StatusTypeDef	HTS221_ReadBoth(I2C_HandleTypeDef *hi2c, float *temperature, float *humidity);

@@ -11,7 +11,7 @@
 /**
  * @brief Initialize all onboard I2C devices and sensors.
  */
-void InitAllDevices()
+void InitAllDevices(void)
 {
 	const char *msg = "Initializing PCA9685 devices...\r\n";
 	HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);

@@ -160,6 +160,3 @@ extern int16_t 				g_current_pwm;
 }
 #endif
 #endif /* __APP_THREADX_H */
-
-
-

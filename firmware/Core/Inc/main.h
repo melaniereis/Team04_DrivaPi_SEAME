@@ -198,5 +198,3 @@ extern FDCAN_TxHeaderTypeDef TxHeader;
 #endif
 
 #endif /* __MAIN_H */
-
-

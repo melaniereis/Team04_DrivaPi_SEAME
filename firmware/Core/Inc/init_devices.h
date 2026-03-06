@@ -5,11 +5,11 @@
  *      Author: hugofslopes
  */
 
-#ifndef INC_INIT_DEVICES_H_
-#define INC_INIT_DEVICES_H_
+#ifndef __INC_INIT_DEVICES_H
+#define __INC_INIT_DEVICES_H
 
 #include "app_threadx.h"
 
 void InitAllDevices();
 
-#endif /* INC_INIT_DEVICES_H_ */
+#endif /* __INC_INIT_DEVICES_H */

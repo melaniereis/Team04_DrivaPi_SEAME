@@ -32,29 +32,6 @@ int SetServoAngle(uint8_t channel, uint16_t angle_deg)
 }
 
 /**
- * @brief Sweep a servo between two angles in steps.
- *
- * @param channel PWM channel index.
- * @param start_angle Start angle in degrees.
- * @param end_angle End angle in degrees.
- * @param step_angle Step size in degrees.
- * @return int 0 on completion.
- */
-int ServoSweep(uint8_t channel, uint16_t start_angle, uint16_t end_angle,
-uint16_t step_angle)
-{
-	if (step_angle == 0)
-		step_angle = 1;
-
-	if (start_angle <= end_angle)
-	{
-		return 1;
-	}
-	return 0;
-}
-
-
-/**
  * @brief Servo motor thread entry that handles steering commands.
  *
  * @param initial_input ThreadX initial input (unused).

@@ -1,5 +1,5 @@
-#ifndef INC_SOFT_I2C_H_
-#define INC_SOFT_I2C_H_
+#ifndef __INC_SOFT_I2C_H
+#define __INC_SOFT_I2C_H
 
 #include "main.h"
 
@@ -14,4 +14,4 @@ void 	Soft_I2C_Stop(void);
 uint8_t Soft_I2C_WriteByte(uint8_t byte);
 uint8_t Soft_I2C_ReadByte(uint8_t ack);
 
-#endif /* INC_SOFT_I2C_H_ */
+#endif /* __INC_SOFT_I2C_H */
