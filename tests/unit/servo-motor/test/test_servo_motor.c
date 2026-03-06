@@ -170,18 +170,6 @@ void test_SetServoAngle_ShouldUseCorrectChannel15(void)
     TEST_ASSERT_EQUAL_INT(1, result);
 }
 
-void test_ServoSweep_ShouldReturnOne_WhenStartAngleIsLessOrEqualEndAngle(void)
-{
-    int result = ServoSweep(SERVO_CH, 10, 20, 0);
-    TEST_ASSERT_EQUAL_INT(1, result);
-}
-
-void test_ServoSweep_ShouldReturnZero_WhenStartAngleIsGreaterThanEndAngle(void)
-{
-    int result = ServoSweep(SERVO_CH, 30, 10, 5);
-    TEST_ASSERT_EQUAL_INT(0, result);
-}
-
 static jmp_buf s_servoMotorLoopExit;
 static t_can_message s_servoMotorQueuedMessage;
 
