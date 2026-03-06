@@ -59,3 +59,21 @@ void UpdateMotorControl(void)
     g_motorPidState.target_speed = g_targetSpeed;
     MotorPIDUpdate(&g_motorPidState, g_vehicleSpeed);
 }
+
+void MotorPIDInit(MotorPIDState *state, float kp, float ki, float kd)
+{
+    state->gain_p = kp;
+    state->gain_i = ki;
+    state->gain_d = kd;
+
+    state->target_speed = 0.0f;
+    state->current_speed = 0.0f;
+
+    state->error = 0.0f;
+    state->error_prev = 0.0f;
+
+    state->integral = 0.0f;
+
+    state->pwm_output = 0.0f;
+    state->pwm_raw = 0;
+}

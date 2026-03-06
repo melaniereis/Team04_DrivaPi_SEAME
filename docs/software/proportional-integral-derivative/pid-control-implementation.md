@@ -251,14 +251,27 @@ Tuning guideline:
 ### 4.2 Integration Points
 
 **File: `motor_control.h`**
-Defines the `MotorPIDState` struct and the `MotorPIDUpdate()` function prototype. Initialize a global `g_motorPidState` instance with target speed, measured speed, and tuned PID gains (gain_p, gain_i, gain_d).
+Defines the `MotorPIDState` struct and the control API prototypes:
+- `MotorPIDInit()` – Initializes PID gains and internal controller state
+- `MotorPIDUpdate()` – Runs one PID iteration using current speed feedback
+- `UpdateMotorControl()` – Updates the main control loop using target + measured speed
+
+Initialize a global `g_motorPidState` instance with tuned gains before starting periodic control updates.
 
 **File: `motor_control.c`**
 Implements the PID control loop:
+- `MotorPIDInit()` – Sets `gain_p`, `gain_i`, `gain_d` and clears previous error/integral memory
 - `MotorPIDUpdate()` – Core PID calculation; call periodically (100 ms) from the main control thread
 - `UpdateMotorControl()` – Main entry point; updates target speed from CAN and calls `MotorPIDUpdate()` with measured speed feedback
 
 `UpdateMotorControl()` should be called on the main control loop (e.g., from a 100 ms timer or periodic task) to continuously regulate motor speed.
+
+Example initialization sequence:
+
+```c
+MotorPIDInit(&g_motorPidState, 0.5f, 0.1f, 0.01f);
+g_motorPidState.target_speed = 0.0f;
+```
 
 ---
 

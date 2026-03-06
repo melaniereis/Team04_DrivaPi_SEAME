@@ -40,4 +40,13 @@ void MotorPIDUpdate(MotorPIDState *state, float current_speed);
  */
 void UpdateMotorControl(void);
 
+/**
+ * @brief Initialize PID controller gains and internal state
+ * @param state PID state structure to initialize
+ * @param kp Proportional gain
+ * @param ki Integral gain
+ * @param kd Derivative gain
+ */
+void MotorPIDInit(MotorPIDState *state, float kp, float ki, float kd);
+
 #endif
