@@ -35,17 +35,12 @@
 | Group C | 1.03173 | × 2 |
 
 **Average display speed:**
-```
-(1.0176 × 6) + (1.04587 × 2) + (1.03173 × 2) = 10.2608
-10.2608 / 10 = 1.02608 m/s
-```
+
+$$\bar{v}_{display} = \frac{(1.0176 \times 6) + (1.04587 \times 2) + (1.03173 \times 2)}{10} = \frac{10.2608}{10} = 1.02608 \ \text{m/s}$$
 
 ### Physical Speed (Stopwatch)
 
-```
-Time measured = 1.9 s
-Physical speed = Distance / Time = 2 / 1.9 ≈ 1.0526 m/s
-```
+$$v_{physical} = \frac{d}{t} = \frac{2}{1.9} \approx 1.0526 \ \text{m/s}$$
 
 ---
 
@@ -55,17 +50,17 @@ Physical speed = Distance / Time = 2 / 1.9 ≈ 1.0526 m/s
 |---|---|
 | Average display speed | 1.02608 m/s |
 | Physical speed (stopwatch) | 1.0526 m/s |
-| Absolute deviation | 0.02655 m/s |
-| **Relative deviation** | **≈ 2.52 %** |
+| Absolute deviation | $|v_{physical} - \bar{v}_{display}| = |1.0526 - 1.02608| = 0.02652 \ \text{m/s}$ |
+| **Relative deviation** | $\delta = \dfrac{|v_{physical} - \bar{v}_{display}|}{v_{physical}} \times 100 = \dfrac{0.02652}{1.0526} \times 100 \approx \textbf{2.52\%}$ |
 | Tolerance threshold | < 5 % |
 | **Status** | ✅ **PASS** |
 
 ### Cross-check
 
 Calculating expected time from average display speed:
-```
-Time = Distance / Speed = 2 / 1.02608 ≈ 1.949 s
-```
+
+$$t_{expected} = \frac{d}{\bar{v}_{display}} = \frac{2}{1.02608} \approx 1.949 \ \text{s}$$
+
 This is very close to the measured 1.9 s, confirming consistency between display and physical measurements.
 
 ---
