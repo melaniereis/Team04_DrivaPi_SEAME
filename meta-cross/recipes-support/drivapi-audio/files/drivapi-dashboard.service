@@ -1,0 +1,20 @@
+[Unit]
+Description=DrivaPi Dashboard (Qt)
+After=graphical.target pipewire-system.service
+Wants=graphical.target pipewire-system.service pipewire-pulse-system.service wireplumber-system.service
+
+[Service]
+Type=simple
+Environment=WAYLAND_DISPLAY=wayland-0
+Environment=QT_QPA_PLATFORM=wayland-egl
+Environment=PULSE_SERVER=unix:/run/pipewire/pulse/native
+
+# Avoid boot race: only start if pulse socket exists (fast retry via Restart=)
+ExecStartPre=/bin/sh -c 'test -S /run/pipewire/pulse/native'
+
+ExecStart=/usr/bin/myqtapp
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=graphical.target
