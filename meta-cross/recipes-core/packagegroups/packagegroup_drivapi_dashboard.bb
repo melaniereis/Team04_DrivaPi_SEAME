@@ -5,7 +5,7 @@ LICENSE = "MIT"
 ALLOW_EMPTY:${PN} = "1"
 
 RDEPENDS:${PN} = "\
-    drivapi-audio \
+    drivapi_audio \
     qt_app \
     qtmultimedia \
     qtmultimedia-plugins \
