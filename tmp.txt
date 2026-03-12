@@ -1,0 +1,11 @@
+gaspar reviewd prs, made an individual brainstorming session to facilitate current cross compilation setup, also brainstormed with hugo about pid and its implementation.
+
+mel corrected errors on qt metalayers, corrected naming conventions and started learning how to implement battery level measurement with ina on stm32, she also learned how to solder wires and started solving some leaks on the qt dashboard.
+
+afonso continued with the lane detection mainly focusing on testing a lot of ml models, including ultra fast lane detection and some variants of yolo.
+
+hugo made a 3d model for our car new structure to ensure all the components fit.
+
+miguel helped mel with learning hardware, stm32 etc.. and continued with lane detection with afonso.
+
+bernardo started a qt organization/overhaul, reviewd some prs and organized the project dashboard
