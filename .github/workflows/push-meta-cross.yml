@@ -22,8 +22,8 @@ jobs:
 
       - name: Setup Git
         run: |
-          git config --global user.name "meta-cross-bot"
-          git config --global user.email "bot@banana.com"
+          git config --global user.name "meta-layer bot"
+          git config --global user.email "bot@drivapi.com"
 
       - name: Split meta-cross folder
         run: |
@@ -31,5 +31,5 @@ jobs:
 
       - name: Push to meta-cross repo
         run: |
-          git remote add meta-cross-origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/Zahhask45/meta-drivapi.git
+          git remote add meta-cross-origin https://x-access-token:${{ secrets.META_DRIVAPI_PUSH_TOKEN }}@github.com/Zahhask45/meta-drivapi.git
           git push meta-cross-origin meta-cross-only:main --force
